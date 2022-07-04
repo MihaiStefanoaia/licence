@@ -1,0 +1,145 @@
+Architecture for an 8 bit game console
+
+======================================================================
+NOTES
+======================================================================
+
+Notation H|L refers to concatenation, H being high and L being low; for example: 1|2 = 12, 0xAB|0xCD = 0xABCD
+
+======================================================================
+FEATURES
+======================================================================
+
+8 bit value bus
+16 bit address bus
+2 "controller" inputs
+a 256x192 screen buffer that outputs to a 1024x768 vga monitor
+
+======================================================================
+REGISTERS
+======================================================================
+
+8 bit general purpose registers:
+
+rga - general purpose register a
+rgb - general purpose register b
+rgc - general purpose register c
+rgd - general purpose register d
+
+
+16 bit usable registers - accessible by replacing the 'x' with 'h' or 'l' for accessing the low:
+
+rmx - memory access
+rsx - stack top pointer
+rbx - stack base pointer
+rpx - 16 bit program counter
+
+Reserved registers:
+
+rgi - 24 bit instruction register
+
+rgf - flags register
+
+    0 flag
+    carry/overflow
+    negative/borrow
+    intrerrupt enable
+
+external flags:
+    3x ready flags
+    fatal error (division by 0 / multiple memory accesses in a single instruction/operand size mismatch)
+
+
+======================================================================
+INSTRUCTION SET
+======================================================================
+
+instruction name    | opcode    | description
+                    |           |
+nop                 | 0x0       | no operation
+mov                 | 0x1       | move a value from the right operand into the left operand
+spc                 | 0x2       | special instructions - used port interaction
+jfg                 | 0x3       | conditional jump with flags. jumps to the inputted memory location if "( rgf OR inp ) == 0xF", where "inp" is a 4bit value. use like jxx <label/memory address>
+inc                 | 0x4       | increment the selected operand
+dec                 | 0x5       | decrement the selected operand
+not                 | 0x6       | bitwise not on the selected operand
+rot                 | 0x7       | bitwise rotate the selected operand
+and                 | 0x8       | bitwise and. saves result into the left operand
+or                  | 0x9       | bitwise or. saves result into the left operand
+adc                 | 0xA       | add with carry. saves result into the left operand 
+sbb                 | 0xB       | subtract with borrow. saves result into the left operand
+mul                 | 0xC       | multiply rga by rgb. saves result into rga and rgb using rgb as the high byte and rga as the low byte
+div                 | 0xD       | divide rga by rgb. saves result into rga, and remainder into rgb
+mov16               | 0xE       | move a value from the right operand into the left operand, both operands being one of the 4 16bit registers
+add16               | 0xF       | add a specific 16 bit register by an 8bit immediate
+
+
+------ details in instructions.xslx ------ 
+
+======================================================================
+ALU SPECS
+======================================================================
+
+
+
+======================================================================
+INSTRUCTION FORMAT
+======================================================================
+
+basic instruction formatting:
+
+<4 bit opcode><2 bit info on left operand><2 bit info on right operand><8 bit info on left operand><8 bit info on right operand>
+
+encoding of the 2bit info:
+    0b00 - none | situational, invalid for binary operations
+    0b01 - register | requires 4bit info on it's respective byte
+    0b10 - memory access
+    0b11 - 8 bit constant | only valid as the second operand
+
+encoding of the detailed 4bit info:
+
+    0x4 - rga
+    0x5 - rgb
+    0x6 - rgc
+    0x7 - rgd
+
+    0x8 - rmh
+    0x9 - rml
+    0xA - rsh
+    0xB - rsl
+    0xC - rbh
+    0xD - rbl
+
+mov16 instruction formatting:
+<4 bit opcode><2 bit info on left operand><2 bit info on right operand>
+
+add16 instruction formatting:
+<4 bit opcode><2 bit info on left operand><2 unused bits><8bit immediate>
+
+encoding of the 2bit info:
+    0b00 - rmx
+    0b01 - rsx
+    0b10 - rbx
+    0b11 - rpx
+
+
+
+======================================================================
+ROM LAYOUT
+======================================================================
+
+
+
+
+
+======================================================================
+MEMORY LAYOUT
+======================================================================
+
+0x0000..0xC0FF    - screen buffer //might be moved to a different chip and used by a separate GPU
+<everything else> - instruction and heap memory
+
+
+Note that all memory can be accessed and modified, but obviously it is dangerous.
+
+All memory allocation should be done via the compiler, and notify the programmer if any free pointers used get in any of the reserved areas.
