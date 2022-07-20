@@ -1,4 +1,4 @@
-Architecture for an 8 bit game console
+Architecture for an 8 bit general purpose cpu
 
 ======================================================================
 NOTES
@@ -34,20 +34,22 @@ rsx - stack top pointer
 rbx - stack base pointer
 rpx - 16 bit program counter
 
-Reserved registers:
+Reserved (non usable) registers:
 
 rgi - 24 bit instruction register
 
-rgf - flags register
+rgf - flags register (bitwise, low to high)
 
     0 flag
-    carry/overflow
+    carry
     negative/borrow
-    intrerrupt enable
+    BCD adjust
 
-external flags:
-    3x ready flags
-    fatal error (division by 0 / multiple memory accesses in a single instruction/operand size mismatch)
+int - interrupt mask register (bitwise, low to high)
+
+    external sources 0-5
+    unused
+    global interrupt disable
 
 
 ======================================================================
@@ -73,31 +75,46 @@ div                 | 0xD       | divide rga by rgb. saves result into rga, and 
 mov16               | 0xE       | move a value from the right operand into the left operand, both operands being one of the 4 16bit registers
 add16               | 0xF       | add a specific 16 bit register by an 8bit immediate
 
+C/Verilog explanations:
+for any op[7:0],op1[7:0],op2[7:0]
+
+nop     | nothing
+mov     | op1 = op2
+spc     | depends, see below
+jfg     | if(inp | rgf) goto <location>
+inc     | op++
+dec     | op--
+not     | op = ~op
+rot     | op = {op[0],op[7:1]}
+and     | op1 &= op2
+or      | op1 |= op2
+adc     | op1 += op2
+sbb     | op1 -= op2
 
 ------ details in instructions.xslx ------ 
-
-======================================================================
-ALU SPECS
-======================================================================
-
-
 
 ======================================================================
 INSTRUCTION FORMAT
 ======================================================================
 
-basic instruction formatting:
+instruction formatting for opcodes 0x1, 0x7 -> 0xB:
 
-<4 bit opcode><2 bit info on left operand><2 bit info on right operand><8 bit info on left operand><8 bit info on right operand>
+byte 0: <4 bit opcode><2 bit info on left operand><2 bit info on right operand>
+byte 1: <4 bit info on left operand><4 bit info on right operand>
+byte 2: <situational 8 bit immediate>
+
+instruction formatting for opcodes 0x4 -> 0x6:
+byte 0: <4bit opcode><4bit info on the operand>
 
 encoding of the 2bit info:
-    0b00 - none | situational, invalid for binary operations
+    0b00 - none | reserved
     0b01 - register | requires 4bit info on it's respective byte
-    0b10 - memory access
-    0b11 - 8 bit constant | only valid as the second operand
+    0b10 - memory access | requires 4 bit info on which 16bit register to use to access memory. valid as left operand only in the mov operation
+    0b11 - 8 bit immediate | only valid as the second operand in a binary operation
 
 encoding of the detailed 4bit info:
 
+if register:
     0x4 - rga
     0x5 - rgb
     0x6 - rgc
@@ -110,11 +127,20 @@ encoding of the detailed 4bit info:
     0xC - rbh
     0xD - rbl
 
+if memory access:
+    0x0 - rmx
+    0x1 - rsx
+    0x2 - rbx
+
+instruction formatting for opcodes 0xC, 0xD:
+byte 0: <4bit opcode><4 unused bits>
+
 mov16 instruction formatting:
-<4 bit opcode><2 bit info on left operand><2 bit info on right operand>
+byte 0: <4 bit opcode><2 bit info on left operand><2 bit info on right operand>
 
 add16 instruction formatting:
-<4 bit opcode><2 bit info on left operand><2 unused bits><8bit immediate>
+byte 0: <4 bit opcode><2 bit info on left operand><2 unused bits>
+byte 1: <8bit immediate>
 
 encoding of the 2bit info:
     0b00 - rmx
