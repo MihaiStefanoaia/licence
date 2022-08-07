@@ -91,19 +91,33 @@ or      | op1 |= op2
 adc     | op1 += op2
 sbb     | op1 -= op2
 
+spc instructions meaning:
+    0x0 : read port 0
+    0x1 : write to port 0
+    0x2 : read port 1
+    0x3 : write to port 1
+    ...
+    0xA : read port 5
+    0xB : write to port 5
+
+    0xC,0xD : reserved for future use
+    
+    0xE : unset the high bits from the interrupt mask
+    0xF : set the high bits from the interrupt mask
+
 ------ details in instructions.xslx ------ 
 
 ======================================================================
 INSTRUCTION FORMAT
 ======================================================================
 
-instruction formatting for opcodes 0x1, 0x7 -> 0xB:
+instruction formatting for opcodes 0x1, 0x7 - 0xB:
 
 byte 0: <4 bit opcode><2 bit info on left operand><2 bit info on right operand>
 byte 1: <4 bit info on left operand><4 bit info on right operand>
 byte 2: <situational 8 bit immediate>
 
-instruction formatting for opcodes 0x4 -> 0x6:
+instruction formatting for opcodes 0x4 - 0x6:
 byte 0: <4bit opcode><4bit info on the operand>
 
 encoding of the 2bit info:
@@ -131,6 +145,7 @@ if memory access:
     0x0 - rmx
     0x1 - rsx
     0x2 - rbx
+    0x3 - rcx
 
 instruction formatting for opcodes 0xC, 0xD:
 byte 0: <4bit opcode><4 unused bits>
@@ -149,21 +164,32 @@ encoding of the 2bit info:
     0b11 - rpx
 
 
+spc instruction format:
+
+spc 0x0 - 0xB:
+byte 0: <spc instruction code>
+byte 1: <8bit read/write mask immediate>
+
+
 
 ======================================================================
 ROM LAYOUT
 ======================================================================
 
+0x0000 - 0x007F : startup sector - the cpu starts executing indiscriminately from address 0
+0x0080 - 0x00EF : reserved for future use
+0x00F0 - 0x00FF : interrupt table (2 bytes / interrupt source)
+everything else : instruction, heap, stack memory
 
-
+the CPU needs some sort of bootloader to put everything from rom into memory
 
 
 ======================================================================
 MEMORY LAYOUT
 ======================================================================
 
-0x0000..0xC0FF    - screen buffer //might be moved to a different chip and used by a separate GPU
-<everything else> - instruction and heap memory
+same as ROM.
+stack starts at 0xFFFF and grows down.
 
 
 Note that all memory can be accessed and modified, but obviously it is dangerous.
