@@ -140,6 +140,8 @@ if register:
     0xB - rsl
     0xC - rbh
     0xD - rbl
+    0xE - rph
+    0xF - rpl
 
 if memory access:
     0x0 - rmx

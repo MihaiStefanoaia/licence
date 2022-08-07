@@ -1,0 +1,4 @@
+nop
+nop
+mov rga 12
+mov rgd rga

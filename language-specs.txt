@@ -1,0 +1,10 @@
+valid instructions: nop,mov,spc,jfg,....
+
+valid 8bit registers: rga,rgb,rgc,rgd,....
+
+valid 16bit registers: rmx,rsx,rbx,rpx
+
+memory access: <16bit register> (in an 8bit instruction)
+    using a 16bit register in an 8bit instruction refers to using the memory location pointed to by the register  
+    for example: "mov rmx rga" refers to moving the contents of rga into the memory location pointed by rmx
+label regex: _.*
