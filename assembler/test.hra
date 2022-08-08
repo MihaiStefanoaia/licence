@@ -2,3 +2,8 @@ nop
 nop
 mov rga 12
 mov rgd rga
+mov rmh 0
+mov rml 255
+mov @rmx rgd
+and rga rgb
+adc rgd rgc

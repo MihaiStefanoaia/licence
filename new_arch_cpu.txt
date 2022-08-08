@@ -111,7 +111,7 @@ spc instructions meaning:
 INSTRUCTION FORMAT
 ======================================================================
 
-instruction formatting for opcodes 0x1, 0x7 - 0xB:
+instruction formatting for opcodes 0x1, 0x8 - 0xB:
 
 byte 0: <4 bit opcode><2 bit info on left operand><2 bit info on right operand>
 byte 1: <4 bit info on left operand><4 bit info on right operand>

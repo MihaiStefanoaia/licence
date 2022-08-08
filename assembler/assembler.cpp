@@ -17,7 +17,7 @@ int main(int argc, char** argv){
     std::string outputFilename("a.bin");
     std::list<std::string> errors;
     
-    //handling arguments and input
+    //handling cli input
     for(int i = 0; i < argc; i++){
         if(std::regex_match(argv[i], std::regex("--([a-z0-9]+-)*[a-z0-9]*"))){   //verbose
             if(strstr(argv[i],"--output")){
@@ -40,12 +40,13 @@ int main(int argc, char** argv){
                 errors.push_back(err);
             }
         } else if(std::regex_match(argv[i], std::regex("-[a-z]*"))){            //flags
+            bool outputSet = false;
             for(int j = 1; j < strlen(argv[i]); j++){
                 if(argv[i][j] == 'o'){
 
                     if(std::regex_match(argv[i+1],validOutput)){
                         outputFilename = argv[i+1];
-                        i++;
+                        outputSet = true;
                     } else {
                         std::string err("fatal error: ");
                         err += "invalid filename: ";
@@ -61,6 +62,8 @@ int main(int argc, char** argv){
                     errors.push_back(err);
                 }
             }
+            if(outputSet)
+                i++;
         } else {                                                                //input filename
             inputFilename = argv[i];
         }
@@ -81,7 +84,7 @@ int main(int argc, char** argv){
     if(finishExecution)
         return 0;
 
-    errors.empty();
+    errors.clear();
 
     //arguments are good, start assembly
     std::string codeLine;
@@ -98,6 +101,7 @@ int main(int argc, char** argv){
     std::vector<std::string> opcodes        {"nop","mov","spc","jfg","inc","dec","not","rot","and","or","adc","sbb","mul","div","mov16","add16"};
     std::vector<std::string> registers8     {"rga","rgb","rgc","rgd","rmh","rml","rsh","rsl","rbh","rbl","rph","rpl"};
     std::vector<std::string> registers16    {"rmx","rsx","rbx","rcx"};
+    std::vector<std::string> memoryAccess   {"@rmx","@rsx","@rbx","@rcx"};
     
     short int location = 0;
     int line = 0;
@@ -105,9 +109,8 @@ int main(int argc, char** argv){
 
     while(std::getline(inputFile, codeLine,'\n') && !finishExecution){
         std::cout<< codeLine<<'\n';
-        
-        int instruction = 0;
-        unsigned char* instructionVector = (unsigned char*)&instruction;
+
+        unsigned char instructionVector[3] = {0};
         int instructionSize;
         std::vector<std::string> components;
         std::stringstream tmp(codeLine);
@@ -128,101 +131,147 @@ int main(int argc, char** argv){
                 err += "\" is used multiple times";
                 errors.push_back(err);
             }
-        } else if(components[0] == "nop"){
-            instructionSize = 1;
-            instructionVector[0] = 0;
+        } else {                                                //opcode
+            for(int op = 0; op < opcodes.size(); op++){
+                if(components[0] == opcodes[op]){   //nop
+                    if(op == 0){
+                        instructionSize = 1;
+                        instructionVector[0] = 0;
 
-        } else if(components[0] == "mov"){
-            if(components.size() < 3){
-                std::string err("error: inappropriate amount of arguments for mov instruction at line ");
-                err += line;
-                errors.push_back(err);
-                finishExecution = true;
-            }
+                    } else if(op == 1 || (op >= 8 && op <= 11)){ //mov,jfg,and,or,adc,sbb
+                        if(components.size() != 3){
+                            std::string err("error: inappropriate amount of arguments for");
+                            err += opcodes[op];
+                            err += "instruction at line ";
+                            err += line;
+                            errors.push_back(err);
+                            finishExecution = true;
+                        }
 
 
-            int memoryAccesses = 0;
-            instructionSize = 2;
-            instructionVector[0] |= 1;
+                        int memoryAccesses = 0;
+                        instructionSize = 2;
+                        instructionVector[0] |= op;
 
-            bool found = false; //evaluate left operand
+                        bool found = false; //evaluate left operand
 
-            for(int i = 0; i < registers8.size(); i++){
-                if(components[1] == registers8[i]){
-                    instructionVector[0] |= 1 << 4;
-                    instructionVector[1] |= i+4;
-                    found = true;
-                }
-            }
-            if(!found){
-                for(int i = 0; i < registers16.size(); i++){
-                    if(components[1] == registers16[i]){
-                        instructionVector[0] |= 2 << 4;
-                        instructionVector[1] |= i;
-                        memoryAccesses++;
-                        found = true;
+                        for(int i = 0; i < registers8.size(); i++){
+                            if(components[1] == registers8[i]){
+                                instructionVector[0] |= 1 << 4;
+                                instructionVector[1] |= i+4;
+                                found = true;
+                            }
+                        }
+                        if(!found){
+                            for(int i = 0; i < memoryAccess.size(); i++){
+                                if(components[1] == memoryAccess[i]){
+                                    instructionVector[0] |= 2 << 4;
+                                    instructionVector[1] |= i;
+                                    memoryAccesses++;
+                                    found = true;
+                                }
+                            }
+                        }
+                        if(!found){
+                            std::string err("error: invalid left operand at line ");
+                            err += line;
+                            errors.push_back(err);
+                            finishExecution = true;
+                        }
+
+                        found = false; //evaluate right operand
+
+                        for(int i = 0; i < registers8.size(); i++){
+                            if(components[2] == registers8[i]){
+                                instructionVector[0] |= 1 << 6;
+                                instructionVector[1] |= i+4 << 4;
+                                found = true;
+                            }
+                        }
+                        if(!found){
+                            for(int i = 0; i < memoryAccess.size(); i++){
+                                if(components[2] == memoryAccess[i]){
+                                    instructionVector[0] |= 2 << 6;
+                                    instructionVector[1] |= i << 4;
+                                    memoryAccesses++;
+                                    found = true;
+                                }
+                            }
+                        }
+                        if(!found){
+                            if(std::regex_match(components[2],std::regex("(-?[1-9][0-9]*)|0"))){ //check for immediate
+                                int imm = atoi(components[2].c_str());
+                                std::cout<<imm<<'\n';
+                                if(imm > 255 | imm < -128){
+                                    std::string err("warning: immediate is out of bounds (");
+                                    err += imm;
+                                    err += " is not in [0,255] or [-128,127]) at line "; 
+                                    err += line;
+                                    errors.push_back(err);
+                                }
+                                instructionSize = 3;
+                                instructionVector[0] |= 3 << 6;
+                                instructionVector[2]  = imm % 256;
+                                found = true;
+                            }
+                        }
+                        if(!found){
+                            std::string err("error: invalid right operand at line ");
+                            err += line;
+                            errors.push_back(err);
+                            finishExecution = true;
+                        }
+                        if(memoryAccesses == 2){
+                            std::string err("error: too many memory accesses at line ");
+                            err += line;
+                            errors.push_back(err);
+                            finishExecution = true;
+                        }
+                    } else if (op >= 4 || op <= 6)  //inc, dec, not
+                    {
+                        if(components.size() != 3){
+                            std::string err("error: inappropriate amount of arguments for");
+                            err += opcodes[op];
+                            err += "instruction at line ";
+                            err += line;
+                            errors.push_back(err);
+                            finishExecution = true;
+                        }
+
+
+                        int memoryAccesses = 0;
+                        instructionSize = 2;
+                        instructionVector[0] |= op;
+
+                        bool found = false; //evaluate left operand
+
+                        for(int i = 0; i < registers8.size(); i++){
+                            if(components[1] == registers8[i]){
+                                instructionVector[0] |= 1 << 4;
+                                instructionVector[1] |= i+4;
+                                found = true;
+                            }
+                        }
+                        if(!found){
+                            for(int i = 0; i < memoryAccess.size(); i++){
+                                if(components[1] == memoryAccess[i]){
+                                    instructionVector[0] |= 2 << 4;
+                                    instructionVector[1] |= i;
+                                    memoryAccesses++;
+                                    found = true;
+                                }
+                            }
+                        }
+                        if(!found){
+                            std::string err("error: invalid left operand at line ");
+                            err += line;
+                            errors.push_back(err);
+                            finishExecution = true;
+                        }
                     }
+                    
                 }
             }
-            if(!found){
-                std::string err("error: invalid left operand at line ");
-                err += line;
-                errors.push_back(err);
-                finishExecution = true;
-            }
-
-            found = false; //evaluate right operand
-
-            for(int i = 0; i < registers8.size(); i++){
-                if(components[2] == registers8[i]){
-                    instructionVector[0] |= 1 << 6;
-                    instructionVector[1] |= i+4 << 4;
-                    found = true;
-                }
-            }
-            if(!found){
-                for(int i = 0; i < registers16.size(); i++){
-                    if(components[2] == registers16[i]){
-                        instructionVector[0] |= 2 << 6;
-                        instructionVector[1] |= i << 4;
-                        memoryAccesses++;
-                        found = true;
-                    }
-                }
-            }
-            if(!found){
-                if(std::regex_match(components[2],std::regex("(-?[1-9][0-9]*)|0"))){ //check for immediate
-                    int imm = atoi(components[2].c_str());
-                    std::cout<<imm<<'\n';
-                    if(imm > 255 | imm < -128){
-                        std::string err("warning: immediate is out of bounds (");
-                        err += imm;
-                        err += " is not in [0,255] or [-128,127]) at line "; 
-                        err += line;
-                        errors.push_back(err);
-                    }
-                    instructionSize = 3;
-                    instructionVector[0] |= 3 << 6;
-                    instructionVector[2]  = imm % 256;
-                    found = true;
-                }
-            }
-            if(!found){
-                std::string err("error: invalid right operand at line ");
-                err += line;
-                errors.push_back(err);
-                finishExecution = true;
-            }
-            if(memoryAccesses == 2){
-                std::string err("error: too many memory accesses at line ");
-                err += line;
-                errors.push_back(err);
-                finishExecution = true;
-            }
-        } else if(components[0] == ""){
-
-        } else if(components[0] == ""){
-
         }
         if(!finishExecution){
             outputBuffer.write(reinterpret_cast<const char*>(instructionVector),instructionSize);
