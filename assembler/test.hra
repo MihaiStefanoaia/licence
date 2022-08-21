@@ -7,3 +7,4 @@ mov rml 255
 mov @rmx rgd
 and rga rgb
 adc rgd rgc
+rot rgc 6

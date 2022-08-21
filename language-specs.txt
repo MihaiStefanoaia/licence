@@ -8,3 +8,46 @@ memory access: <16bit register> (in an 8bit instruction)
     using a 16bit register in an 8bit instruction refers to using the memory location pointed to by the register  
     for example: "mov rmx rga" refers to moving the contents of rga into the memory location pointed by rmx
 label regex: _.*
+
+
+special instructions and what they mean:
+
+jumps:
+jmp _label | jfg 15 _label
+jeq _label | jfg 15 _label
+jlt _label | jfg 15 _label
+jle _label | jfg 15 _label 
+
+interrupt modification:
+ins mask | spc 14 mask //int |= mask
+inr mask | spc 15 mask //int &= ~mask
+
+port reading/writing:
+rdp a mask | spc 2a mask
+wrp a mask | spc 2a+1 mask
+
+where:
+    a in 0..5
+    mask in 0..255
+
+macros:
+
+push x:
+    mov   @rsx x
+    add16 rsx -1
+
+pop x:
+    mov   x @rsx
+    add16 rsx 1
+
+call _label:
+    mov16 rmx rpx
+    add16 rmx 13
+    push rmh
+    push rml
+    jmp _label;
+
+ret:
+    pop rml
+    pop rmh
+    mov16 rpx rmx

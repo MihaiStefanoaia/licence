@@ -11,9 +11,9 @@ FEATURES
 ======================================================================
 
 8 bit value bus
-16 bit address bus
-2 "controller" inputs
-a 256x192 screen buffer that outputs to a 1024x768 vga monitor
+16 bit address bounds
+6 general purpose RW ports
+6 interrupt sources
 
 ======================================================================
 REGISTERS
@@ -27,7 +27,7 @@ rgc - general purpose register c
 rgd - general purpose register d
 
 
-16 bit usable registers - accessible by replacing the 'x' with 'h' or 'l' for accessing the low:
+16 bit usable registers - accessible by replacing the 'x' with 'h' or 'l' for accessing the high or low byte respectively:
 
 rmx - memory access
 rsx - stack top pointer
@@ -118,7 +118,12 @@ byte 1: <4 bit info on left operand><4 bit info on right operand>
 byte 2: <situational 8 bit immediate>
 
 instruction formatting for opcodes 0x4 - 0x6:
-byte 0: <4bit opcode><4bit info on the operand>
+byte 0: <4 bit opcode><4 bit info on the operand>
+
+instruction formatting for opcde 0x7:
+byte 0: <4 bit opcode><4 bit info on the operand>
+byte 1: <8 bit immediate>
+
 
 encoding of the 2bit info:
     0b00 - none | reserved
@@ -147,7 +152,7 @@ if memory access:
     0x0 - rmx
     0x1 - rsx
     0x2 - rbx
-    0x3 - rcx
+    0x3 - rpx
 
 instruction formatting for opcodes 0xC, 0xD:
 byte 0: <4bit opcode><4 unused bits>
