@@ -8,6 +8,17 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
+/*
+inline void itoa(int _Number, char* _Buffer, int _Radix){ //a quick workaround if itoa() is not defined
+    sprintf(_Buffer,"%d",_Number);
+}
+*/
+
+
+struct jump{
+    short int location;
+    std::string label;
+};
 
 int main(int argc, char** argv){
     
@@ -337,7 +348,7 @@ int main(int argc, char** argv){
                             errors.push_back(err);
                             finishExecution = true;
                         }
-                    } else if(op == 12 || op == 13){
+                    } else if(op == 12 || op == 13){ //mul, div
                         if(components.size() != 1){
                             std::string err("error: inappropriate amount of arguments for ");
                             err += opcodes[op];
@@ -349,7 +360,7 @@ int main(int argc, char** argv){
                         }
                         instructionSize = 1;
                         instructionVector[0] |= op;
-                    } else if(op == 14){
+                    } else if(op == 14){ //mov16
                         if(components.size() != 3){
                             std::string err("error: inappropriate amount of arguments for ");
                             err += opcodes[op];
@@ -380,7 +391,7 @@ int main(int argc, char** argv){
                             finishExecution = true;
                         }
 
-                        bool found = false;
+                        found = false;
 
                         for(int i = 0; i < registers16.size(); i++){
                             if(components[1] == registers16[i]){
@@ -398,7 +409,7 @@ int main(int argc, char** argv){
                         }
 
 
-                    } else if(op == 15){
+                    } else if(op == 15){ //add16
                         if(components.size() != 3){
                             std::string err("error: inappropriate amount of arguments for ");
                             err += opcodes[op];

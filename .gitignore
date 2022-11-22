@@ -1,3 +1,6 @@
 *.exe
 *.bin
 experimentation/*
+simulator/.idea/*
+simulator/cmake-build-debug/*
+CMakeLists.txt

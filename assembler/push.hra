@@ -1,0 +1,2 @@
+mov @rsx rga
+add16 rsx -1

@@ -42,12 +42,20 @@ pop x:
 
 call _label:
     mov16 rmx rpx
-    add16 rmx 13
+    add16 rmx 20
     push rmh
     push rml
-    jmp _label;
+
+    push rbh
+    push rbl
+    mov16 rbx rsx
+    
+    jmp _label
 
 ret:
+    pop rbl
+    pop rbh
+    mov16 rsx rbx
     pop rml
     pop rmh
     mov16 rpx rmx
