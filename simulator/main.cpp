@@ -8,19 +8,14 @@
 int main(int argc, char** argv){
     sim::evaluation_list ev_list;
     std::string input;
-    auto* a_bit = new sim::objs::bit(false);
-    auto* b_bit = new sim::objs::bit(false);
-    auto* c_bit = new sim::objs::bit(false);
-    auto* a = new sim::objs::wire(a_bit);
-    auto* b = new sim::objs::wire(b_bit);
-    auto* c = new sim::objs::wire(c_bit);
-    sim::objs::wire* out_1;
-    sim::objs::wire* out;
+    auto* a = new sim::objs::bit(false);
+    auto* b = new sim::objs::bit(false);
+    auto* c = new sim::objs::bit(false);
+    sim::objs::bit* out_1;
+    sim::objs::bit* out;
     sim::objs::and_module and_mod(a, b, out_1);
     sim::objs::and_module and_out(c, out_1, out);
-    std::cout << a_bit->get_expected_level() << '\n'
-              << b_bit->get_expected_level() << '\n'
-              << a->get_expected_level() << '\n'
+    std::cout << a->get_expected_level() << '\n'
               << b->get_expected_level() << '\n'
               << and_mod.get_expected_level() << '\n'
               << out_1->get_expected_level() << '\n';
@@ -34,22 +29,28 @@ int main(int argc, char** argv){
     ev_list.add_on_expected_level(out);
 
     while(input != "exit"){
+        system("clear");
+        std::cout << "a      : "<< ((a->get_content()) ? "true" : "false") << '\n';
+        std::cout << "b      : "<< ((b->get_content()) ? "true" : "false") << '\n';
+        std::cout << "c      : "<< ((c->get_content()) ? "true" : "false") << '\n';
+        std::cout << "a&b    : " << ((out_1->get_content()) ? "true" : "false") << '\n';
+        std::cout << "(a&b)&c: " << ((out->get_content()) ? "true" : "false") << '\n';
         std::cout<<">>>";
         char buf[100];
         std::cin.getline(buf,100);
         input = buf;
         if(input == std::string ("set a")){
-            a_bit->set_content(true);
+            a->set_content(true);
         } else if(input == std::string ("set b")){
-            b_bit->set_content(true);
+            b->set_content(true);
         } else if(input == std::string ("set c")){
-            c_bit->set_content(true);
+            c->set_content(true);
         } else if(input == std::string ("unset a")){
-            a_bit->set_content(false);
+            a->set_content(false);
         } else if(input == std::string ("unset b")){
-            b_bit->set_content(false);
+            b->set_content(false);
         } else if(input == std::string ("unset c")){
-            c_bit->set_content(false);
+            c->set_content(false);
         } else if(input == std::string("exit")){
             std::cout<<"exiting\n";
             break;
@@ -59,12 +60,6 @@ int main(int argc, char** argv){
         }
 
         ev_list.eval();
-
-        std::cout<<"a : "<< ((a_bit->get_content()) ? "true" : "false") << '\n';
-        std::cout<<"b : "<< ((b_bit->get_content()) ? "true" : "false") << '\n';
-        std::cout<<"c : "<< ((c_bit->get_content()) ? "true" : "false") << '\n';
-        std::cout << "o1: " << ((out_1->get_content()) ? "true" : "false") << '\n';
-        std::cout << "o2: " << ((out->get_content()) ? "true" : "false") << '\n';
     }
 
     return 0;

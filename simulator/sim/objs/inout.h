@@ -6,19 +6,18 @@
 #define SIMULATOR_INOUT_H
 
 #include "module.h"
-#include "wire.h"
+#include "bit.h"
 
 namespace sim {
     namespace objs {
 
         class inout : public module{
         private:
-            wire* in_a;
-            wire* in_b;
-            wire* out;
-            bit* reg;
+            bit* in_a;
+            bit* in_b;
+            bit* out;
         public:
-            inout(wire*,wire*,wire*&);
+            inout(bit*,bit*,bit*&);
             ~inout();
             void eval() override;
         };
