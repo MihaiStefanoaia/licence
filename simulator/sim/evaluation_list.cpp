@@ -39,12 +39,6 @@ namespace sim {
     }
 
     void evaluation_list::add_on_expected_level(evaluable* e) {
-        if (e == nullptr) {
-            throw std::invalid_argument("Cannot add nullptr to evaluation list");
-        }
-        int level = e->get_expected_level();
-        if((*lst)[level] == nullptr)
-            (*lst)[level] = new std::list<evaluable*>();
-        (*lst)[level]->push_back(e);
+        this->add_on_level(e->get_expected_level(),e);
     }
 } // sim

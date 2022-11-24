@@ -5,21 +5,20 @@
 #ifndef SIMULATOR_MUX2X1_H
 #define SIMULATOR_MUX2X1_H
 
-#include "wire.h"
 #include "module.h"
+#include "bit.h"
 
 namespace sim {
     namespace objs {
 
         class mux2x1 : module{
         private:
-            wire* a;
-            wire* b;
-            wire* sel;
-            bit* reg;
-            wire* out;
+            bit* a;
+            bit* b;
+            bit* sel;
+            bit* out;
         public:
-            mux2x1(wire*,wire*,wire*,wire**);
+            mux2x1(bit*,bit*,bit*,bit*&);
             ~mux2x1();
             void eval() override;
         };

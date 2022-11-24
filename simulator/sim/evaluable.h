@@ -13,6 +13,7 @@ namespace sim {
         int expected_level = 0;
     public:
         evaluable() = default;
+        ~evaluable() = default;
         virtual void eval(){if(this->flag){this->flag = false;}}
         void flag_for_eval(){ this->flag = true;}
         bool is_flagged() const{return this->flag;}
