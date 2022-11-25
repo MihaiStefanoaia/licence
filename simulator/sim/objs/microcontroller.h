@@ -7,6 +7,8 @@
 
 #include "bit.h"
 #include "module.h"
+#include "cpu.h"
+#include "memory.h"
 
 namespace sim {
     namespace objs {
@@ -25,12 +27,11 @@ namespace sim {
             bit* P3_o[8];
             bit* P4_o[8];
             bit* P5_o[8];
-            bit* mem[16];
-            bit* mem_rw;
-            bit* mem_ready;
             bit* int_sources[6];
             bit* CLK;
             bit* RST;
+            cpu* cpu_module;
+            memory* mem;
         };
 
     } // sim

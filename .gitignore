@@ -1,6 +1,7 @@
 *.out
 *.exe
 *.bin
+.vscode/*
 experimentation/*
 simulator/.idea/*
 simulator/cmake-build-debug/*

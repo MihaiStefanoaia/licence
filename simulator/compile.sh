@@ -1,1 +1,1 @@
-g++ main.cpp sim/*.cpp sim/objs/*.cpp -o sim.exe
+g++ main.cpp sim/*.cpp sim/objs/*.cpp -o sim.exe -O2

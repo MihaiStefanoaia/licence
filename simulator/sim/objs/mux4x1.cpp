@@ -18,14 +18,14 @@ namespace sim {
                                 (c->get_content() && (!sel0->get_content() &&  sel1->get_content())) ||
                                 (d->get_content() && ( sel0->get_content() &&  sel1->get_content())));
             int max_level = 0;
-            max_level = std::max(a->get_expected_level(),max_level);
-            max_level = std::max(b->get_expected_level(),max_level);
-            max_level = std::max(c->get_expected_level(),max_level);
-            max_level = std::max(d->get_expected_level(),max_level);
+            max_level = std::max(a   ->get_expected_level(),max_level);
+            max_level = std::max(b   ->get_expected_level(),max_level);
+            max_level = std::max(c   ->get_expected_level(),max_level);
+            max_level = std::max(d   ->get_expected_level(),max_level);
             max_level = std::max(sel0->get_expected_level(),max_level);
             max_level = std::max(sel1->get_expected_level(),max_level);
-            this->out->set_expected_level(max_level);
-            this->set_expected_level(max_level);
+            this->out->set_expected_level(max_level + 1);
+            this->set_expected_level(max_level + 1);
             out = this->out;
 
             a   ->add_trigger(this,triggering::BOTH);
