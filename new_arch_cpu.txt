@@ -12,8 +12,8 @@ FEATURES
 
 8 bit value bus
 16 bit address bounds
-6 general purpose RW ports
-6 interrupt sources
+4 general purpose RW ports
+4 interrupt sources
 
 ======================================================================
 REGISTERS
@@ -47,8 +47,8 @@ rgf - flags register (bitwise, low to high)
 
 int - interrupt mask register (bitwise, low to high)
 
-    external sources 0-5
-    unused
+    external sources 0-4
+    unused x3
     global interrupt disable
 
 
@@ -97,10 +97,10 @@ spc instructions meaning:
     0x2 : read port 1
     0x3 : write to port 1
     ...
-    0xA : read port 5
-    0xB : write to port 5
+    0x6 : read port 3
+    0x7 : write to port 3
 
-    0xC,0xD : reserved for future use
+    0x8-0xD : reserved for future use
     
     0xE : unset the high bits from the interrupt mask
     0xF : set the high bits from the interrupt mask
@@ -154,7 +154,7 @@ if memory access:
     0x2 - rbx
     0x3 - rpx
 
-instruction formatting for opcodes 0xC, 0xD:
+instruction formatting for opcodes 0xC, 0xD (mul, div):
 byte 0: <4bit opcode><4 unused bits>
 
 mov16 instruction formatting:
@@ -173,7 +173,7 @@ encoding of the 2bit info:
 
 spc instruction format:
 
-spc 0x0 - 0xB:
+spc 0x0 - 0x7:
 byte 0: <spc instruction code>
 byte 1: <8bit read/write mask immediate>
 

@@ -12,15 +12,13 @@
 
 namespace sim {
     namespace objs {
-
         class cpu : protected module{
+        protected:
             //inputs
             bit* P0_i[8];
             bit* P1_i[8];
             bit* P2_i[8];
             bit* P3_i[8];
-            bit* P4_i[8];
-            bit* P5_i[8];
             bit* mem_addr_i[16];
             bit* mem_val_i[8];
             bit* mem_ready;
@@ -33,8 +31,6 @@ namespace sim {
             bit* P1_o[8];
             bit* P2_o[8];
             bit* P3_o[8];
-            bit* P4_o[8];
-            bit* P5_o[8];
             bit* mem_addr_o[16];
             bit* mem_val_o[8];
             bit* mem_enable;
@@ -62,15 +58,26 @@ namespace sim {
             u_int8_t& rpl = ((u_int8_t*)(&rpx))[0];
             u_int8_t& rph = ((u_int8_t*)(&rpx))[1];
             u_int8_t mem_reg;
+            u_int8_t rgf;
 
             enum{
                 INIT,
-                FETCH
+                WAITING,
+                FETCH_0,
+                FETCH_1,
+                FETCH_2,
+                DECODE_0,
+                DECODE_1,
+                EXECUTE,
+                ARTIFICIAL_DELAY, // for calculations to take more time
+                ERROR
             };
             u_int32_t state = INIT;
+            u_int32_t next  = state;
+            u_int8_t delay;
         public:
             void a(){
-                state = FETCH;
+                state = FETCH_0;
             }
 
         };
