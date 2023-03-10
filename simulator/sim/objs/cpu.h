@@ -5,14 +5,13 @@
 #ifndef SIMULATOR_CPU_H
 #define SIMULATOR_CPU_H
 #include "../evaluable.h"
-#include "module.h"
 #include "bit.h"
 #include <sys/types.h>
 
 
 namespace sim {
     namespace objs {
-        class cpu : protected module{
+        class cpu : protected evaluable{
         protected:
             //inputs
             bit* P0_i[8];

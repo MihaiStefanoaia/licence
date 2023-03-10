@@ -5,13 +5,12 @@
 #ifndef SIMULATOR_OR_MODULE_H
 #define SIMULATOR_OR_MODULE_H
 
-#include "module.h"
 #include "bit.h"
 
 namespace sim {
     namespace objs {
 
-        class or_module : public module{
+        class or_module : public evaluable{
         private:
             bit* a;
             bit* b;

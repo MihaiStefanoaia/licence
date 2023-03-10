@@ -6,11 +6,10 @@
 #define SIMULATOR_AND_MODULE_H
 
 #include "bit.h"
-#include "module.h"
 
 namespace sim {
     namespace objs {
-        class and_module : public module{
+        class and_module : public evaluable{
         private:
             bit* a;
             bit* b;

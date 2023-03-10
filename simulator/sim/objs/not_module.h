@@ -6,12 +6,11 @@
 #define SIMULATOR_NOT_MODULE_H
 
 #include "bit.h"
-#include "module.h"
 
 namespace sim {
     namespace objs {
 
-        class not_module : module{
+        class not_module : evaluable{
         private:
             bit* in;
             bit* out;

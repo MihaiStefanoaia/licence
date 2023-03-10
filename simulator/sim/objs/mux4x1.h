@@ -5,13 +5,12 @@
 #ifndef SIMULATOR_MUX4X1_H
 #define SIMULATOR_MUX4X1_H
 
-#include "module.h"
 #include "bit.h"
 
 namespace sim {
     namespace objs {
 
-        class mux4x1 : protected module{
+        class mux4x1 : protected evaluable{
         private:
             bit* a;
             bit* b;

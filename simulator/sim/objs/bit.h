@@ -10,7 +10,7 @@
 namespace sim {
     namespace objs {
 
-        class bit : public triggering {
+        class bit : public triggering, public evaluable{
         private:
             bool content;
         public:

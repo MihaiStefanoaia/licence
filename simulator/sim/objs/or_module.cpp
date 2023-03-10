@@ -26,7 +26,7 @@ namespace sim {
         }
 
         void or_module::eval() {
-            this->flag = false;
+            this->flag = nullptr;
             this->out->set_content(this->a->get_content() || this->b->get_content());
         }
 

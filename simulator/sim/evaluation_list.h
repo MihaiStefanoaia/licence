@@ -13,7 +13,7 @@ namespace sim {
 
     class evaluation_list : public evaluable{
     private:
-        std::map<int,std::list<evaluable*>*>* lst;
+        std::map<int,std::list<evaluable*>> lst;
     public:
         evaluation_list();
         ~evaluation_list();

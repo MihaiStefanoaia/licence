@@ -20,7 +20,7 @@ namespace sim {
         }
 
         void not_module::eval() {
-            this->flag = false;
+            this->flag = nullptr;
             this->out->set_content(!in->get_content());
         }
     } // sim

@@ -5,13 +5,13 @@
 #ifndef SIMULATOR_BOOTLOADER_H
 #define SIMULATOR_BOOTLOADER_H
 
-#include "module.h"
 #include "bit.h"
+#include <string>
 
 namespace sim {
     namespace objs {
 
-        class bootloader : protected module{
+        class bootloader : protected evaluable{
             //inputs
             bit* start;
             bit* CLK;

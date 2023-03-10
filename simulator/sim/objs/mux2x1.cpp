@@ -24,7 +24,7 @@ namespace sim {
         }
 
         void mux2x1::eval() {
-            this->flag = false;
+            this->flag = nullptr;
             this->out->set_content((a->get_content() && !sel->get_content()) || (b->get_content() && sel->get_content()));
         }
     } // sim

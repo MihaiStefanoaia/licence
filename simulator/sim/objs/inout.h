@@ -5,13 +5,12 @@
 #ifndef SIMULATOR_INOUT_H
 #define SIMULATOR_INOUT_H
 
-#include "module.h"
 #include "bit.h"
 
 namespace sim {
     namespace objs {
 
-        class inout : public module{
+        class inout : public evaluable{
         private:
             bit* in_a;
             bit* in_b;

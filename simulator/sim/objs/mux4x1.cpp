@@ -41,7 +41,7 @@ namespace sim {
         }
 
         void mux4x1::eval() {
-            this->flag = false;
+            this->flag = nullptr;
             this->out->set_content( (a->get_content() && (!sel0->get_content() && !sel1->get_content())) ||
                                     (b->get_content() && ( sel0->get_content() && !sel1->get_content())) ||
                                     (c->get_content() && (!sel0->get_content() &&  sel1->get_content())) ||
