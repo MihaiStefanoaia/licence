@@ -14,9 +14,16 @@ namespace sim {
         private:
             bool content;
         public:
-            explicit bit(bool);
+            explicit bit(bool = false);
+            virtual ~bit();
             bool get_content() const;
             void set_content(bool);
+            void eval() final {
+                evaluable::eval();
+            }
+            void flag_for_eval(triggering* ev) final{
+                evaluable::flag_for_eval(ev);
+            }
         };
 
     } // sim

@@ -12,7 +12,7 @@ namespace sim {
     namespace objs {
 
         template<int addr>
-        class memory : protected evaluable{
+        class memory : public evaluable{
         private:
             //inputs
             bit* addr_i[addr];
@@ -27,9 +27,11 @@ namespace sim {
             bit* ready;
 
             //internal variables
+            enum st{LISTENING, DONE};
+            st state = LISTENING;
             u_int8_t mem[1<<addr];
         public:
-            memory(bit**, bit**, bit*, bit*, bit*, bit*, bit**);
+            memory(bit**, bit**, bit*, bit*, bit*, bit*, bit**, bit *&);
             ~memory();
             void eval() override;
             void flag_for_eval(triggering*) override;
@@ -43,33 +45,52 @@ namespace sim {
 
         template<int addr>
         void memory<addr>::eval() {
-            if(flag == RST){
+            if(flag == RST || RST->get_content()){
                 for(int i = 0; i < 1 << addr; i++) {
                     mem[i] = 0;
                 }
-            } else if(CE->get_content()) {
-                u_int32_t input_addr = 0;
-                for(int i = 0; i < addr; i++){
-                    input_addr *= 2;
-                    input_addr &= addr_i[i]->get_content();
+            } else if(flag == CLK) {
+                if(!CE->get_content()){
+                    ready->set_content(false);
+                    for(int i = 0; i < 8; i++){
+                        val_o[i]->set_content(false);
+                    }
+                    return;
                 }
-                if(rw->get_content()){ //write
-                    u_int8_t val_in = 0;
-                    for(int i = 0; i < 8; i++){
-                        val_in *= 2;
-                        val_in &= val_i[i]->get_content();
+
+                switch(state){
+                case LISTENING: {
+                    ready->set_content(false);
+                    u_int32_t input_addr = 0;
+                    for (int i = 0; i < addr; i++) {
+                        input_addr *= 2;
+                        input_addr &= addr_i[i]->get_content();
                     }
-                    mem[input_addr] = val_in;
-                } else { //read
-                    for(int i = 0; i < 8; i++){
-                        val_o[i]->set_content((mem[input_addr] >> i) & 1);
+                    if (rw->get_content()) { //write
+                        u_int8_t val_in = 0;
+                        for (int i = 0; i < 8; i++) {
+                            val_in *= 2;
+                            val_in &= val_i[7-i]->get_content();
+                        }
+                        mem[input_addr] = val_in;
+                    } else { //read
+                        for (int i = 0; i < 8; i++) {
+                            val_o[i]->set_content((mem[input_addr] >> i) & 1);
+                        }
                     }
+                    state = DONE;
+                }
+                    break;
+                case DONE: {
+                    ready->set_content(true);
+                    state = LISTENING;
+                }
                 }
             }
         }
 
         template<int addr>
-        memory<addr>::memory(bit ** addr_i, bit ** val_i, bit *rw, bit *CE, bit *CLK, bit* RST, bit ** val_o) {
+        memory<addr>::memory(bit * addr_i[], bit * val_i[], bit *rw, bit *CE, bit *CLK, bit* RST, bit * val_o[], bit*& ready) {
             for(int i = 0; i < addr; i++)
                 this->addr_i[i] = addr_i[i];
             for(int i = 0; i < 8; i++)
@@ -95,9 +116,12 @@ namespace sim {
                 this->val_o[i]->set_expected_level(get_expected_level());
                 val_o[i] = this->val_o[i];
             }
+            this->ready = new bit(false);
+            this->ready->set_expected_level(get_expected_level());
+            ready = this->ready;
+
             CLK->add_trigger(this,triggering::NEGATIVE);
             RST->add_trigger(this,triggering::POSITIVE);
-
         }
 
         template<int addr>
@@ -105,6 +129,7 @@ namespace sim {
             for(int i = 0; i < 8; i++){
                 delete val_o[i];
             }
+            delete ready;
         }
 
 

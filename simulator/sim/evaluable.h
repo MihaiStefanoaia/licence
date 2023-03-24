@@ -17,7 +17,7 @@ namespace sim {
         int expected_level = 0;
     public:
         evaluable() = default;
-        ~evaluable() = default;
+        virtual ~evaluable() = default;
         virtual void eval(){if(this->flag){this->flag = nullptr;}}
         virtual void flag_for_eval(triggering* ev){ if(this->flag == nullptr){this->flag = ev;}}
         bool is_flagged() const{return this->flag != nullptr;}
