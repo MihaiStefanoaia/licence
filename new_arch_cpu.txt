@@ -88,7 +88,7 @@ spc     | depends, see below
 jfg     | if(inp | rgf) goto <location>
 inc     | op++
 dec     | op--
-rot     | op1 = {op1[op2 & 7:0],op1[7:op2&7+1]}
+rot     | op1 = {op1[op2&7-1 : 0],op1[7 : op2&7]}
 and     | op1 &= op2
 nor     | op1 = ~(op1 | op2)
 adc     | op1 += op2

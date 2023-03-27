@@ -1,0 +1,39 @@
+.section heap:
+    TRANSLATE_7SD [0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xA,0xB,0xC,0xD,0xE,0xF] align 16
+
+.section code:
+
+_render_number_7sd:
+    push rgb
+    push rgc
+    push rmh
+    push rml
+
+    mov rgc 0
+    mov rmh TRANSLATE_7SD_H
+
+_render_digit:
+    mov rml TRANSLATE_7SD_L
+    mov rgb 10
+    div
+    add rml rgb
+    //save rga and display the number
+    push rga
+    mov rga rgc
+    wrp 2 0b01100000
+    mov rga @rmx
+    wrp 0 0xFF
+    pop rga
+
+    and rga rga
+    jz _render_number_7sd_finish
+
+    add rgc 0x20
+    jmp _render_digit
+
+_render_number_7sd_finish:
+    pop rml
+    pop rmh
+    pop rgc
+    pop rgb
+    ret
