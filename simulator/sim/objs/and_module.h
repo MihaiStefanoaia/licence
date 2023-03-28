@@ -11,11 +11,11 @@ namespace sim {
     namespace objs {
         class and_module : public evaluable{
         private:
-            bit* a;
-            bit* b;
-            bit* out;
+            bit& a;
+            bit& b;
+            bit& out;
         public:
-            and_module(bit*, bit*, bit*&);
+            and_module(bit&, bit&, bit&);
             ~and_module();
             void eval() override;
         };
