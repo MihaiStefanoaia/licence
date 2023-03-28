@@ -11,7 +11,7 @@ namespace sim {
     namespace objs {
 
         class byte {
-            bit* c[8];
+            bit* c[8] = {nullptr};
         public:
             byte();
             byte(const byte&);

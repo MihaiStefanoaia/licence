@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include "word.h"
+#include <iostream>
 
 namespace sim {
     namespace objs {
@@ -16,12 +17,16 @@ namespace sim {
         }
 
         bit &word::operator[](int i) const {
+#ifndef SAFETIES_OFF
             assert(i >= 0 && i < 16);
+#endif
             return *c[i];
         }
 
         void word::connect(bit &b, int i) {
+#ifndef SAFETIES_OFF
             assert(i >= 0 && i < 16);
+#endif
             c[i] = &b;
         }
     } // sim

@@ -3,6 +3,8 @@
 #include "sim/objs/bit.h"
 #include "sim/objs/and_module.h"
 #include "sim/evaluation_list.h"
+#include "word.h"
+#include "byte.h"
 
 ///demo sim for ((a&b)&c)
 int main(int argc, char** argv){
@@ -16,6 +18,9 @@ int main(int argc, char** argv){
     wire_db["tmp"] = new bit();
     wire_db["out"] = new bit();
 
+    byte x;
+    x.connect(*wire_db["a"],0);
+
     bit& a = *wire_db["a"];
     bit& b = *wire_db["b"];
     bit& c = *wire_db["c"];
@@ -26,7 +31,8 @@ int main(int argc, char** argv){
     std::cout << a.get_expected_level() << '\n'
               << b.get_expected_level() << '\n'
               << and_mod.get_expected_level() << '\n'
-              << tmp.get_expected_level() << '\n';
+              << tmp.get_expected_level() << '\n'
+              <<x[0].get_content()<<'\n';
 
     ev_list.add_on_expected_level(&and_mod);
     ev_list.add_on_expected_level(&and_out);
