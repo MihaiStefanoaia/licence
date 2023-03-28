@@ -6,6 +6,7 @@
 #define SIMULATOR_EVALUABLE_H
 
 
+#include <cassert>
 #include "triggering.h"
 
 namespace sim {
@@ -21,7 +22,7 @@ namespace sim {
         virtual void eval(){if(this->flag){this->flag = nullptr;}}
         virtual void flag_for_eval(triggering* ev){ if(this->flag == nullptr){this->flag = ev;}}
         bool is_flagged() const{return this->flag != nullptr;}
-        void set_expected_level(int new_level){this->expected_level = new_level;}
+        void set_expected_level(int new_level){assert(expected_level == 0); this->expected_level = new_level;}
         int get_expected_level() const{return this->expected_level;}
     };
 

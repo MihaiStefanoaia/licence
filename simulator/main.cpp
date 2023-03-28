@@ -13,20 +13,20 @@ int main(int argc, char** argv){
     wire_db["a"] = new bit();
     wire_db["b"] = new bit();
     wire_db["c"] = new bit();
-    wire_db["ot"] = new bit();
-    wire_db["o"] = new bit();
+    wire_db["tmp"] = new bit();
+    wire_db["out"] = new bit();
 
     bit& a = *wire_db["a"];
     bit& b = *wire_db["b"];
     bit& c = *wire_db["c"];
-    bit& ot = *wire_db["ot"];
-    bit& o = *wire_db["o"];
-    sim::objs::and_module and_mod(a, b, ot);
-    sim::objs::and_module and_out(c, ot, o);
+    bit& tmp = *wire_db["tmp"];
+    bit& out = *wire_db["out"];
+    sim::objs::and_module and_mod(a, b  , tmp);
+    sim::objs::and_module and_out(c, tmp, out);
     std::cout << a.get_expected_level() << '\n'
               << b.get_expected_level() << '\n'
               << and_mod.get_expected_level() << '\n'
-              << ot.get_expected_level() << '\n';
+              << tmp.get_expected_level() << '\n';
 
     ev_list.add_on_expected_level(&and_mod);
     ev_list.add_on_expected_level(&and_out);
@@ -40,8 +40,8 @@ int main(int argc, char** argv){
         std::cout << "a      : "<< ((a.get_content()) ? "true" : "false") << '\n';
         std::cout << "b      : "<< ((b.get_content()) ? "true" : "false") << '\n';
         std::cout << "c      : "<< ((c.get_content()) ? "true" : "false") << '\n';
-        std::cout << "a&b    : " << ((ot.get_content()) ? "true" : "false") << '\n';
-        std::cout << "(a&b)&c: " << ((o.get_content()) ? "true" : "false") << '\n';
+        std::cout << "a&b    : " << ((tmp.get_content()) ? "true" : "false") << '\n';
+        std::cout << "(a&b)&c: " << ((out.get_content()) ? "true" : "false") << '\n';
         std::cout<<">>>";
         char buf[100];
         std::cin.getline(buf,100);

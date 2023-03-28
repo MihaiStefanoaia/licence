@@ -6,21 +6,15 @@
 
 namespace sim {
     namespace objs {
-        button::button(bit *& output) {
-            this->output = new bit();
-            output = this->output;
-        }
-
-        button::~button() {
-            delete output;
+        button::button(bit& output) : output(output) {
         }
 
         void button::press() {
-            output->set_content(true);
+            output.set_content(true);
         }
 
         void button::release() {
-            output->set_content(false);
+            output.set_content(false);
         }
     } // sim
 } // objs

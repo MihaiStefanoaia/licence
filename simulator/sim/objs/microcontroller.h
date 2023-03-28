@@ -26,7 +26,7 @@ namespace sim {
             bit* CLK;
             bit* RST;
             cpu* cpu_module;
-            memory<16>* mem;
+            memory* mem;
         };
 
     } // sim

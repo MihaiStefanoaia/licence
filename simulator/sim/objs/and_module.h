@@ -16,7 +16,7 @@ namespace sim {
             bit& out;
         public:
             and_module(bit&, bit&, bit&);
-            ~and_module();
+            ~and_module() override;
             void eval() override;
         };
     } // sim

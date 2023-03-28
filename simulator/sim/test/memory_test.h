@@ -14,18 +14,23 @@
 namespace sim {
     namespace test {
 
-        using sim::objs::bit;
-        using sim::objs::memory;
+        using objs::bit;
+        using objs::memory;
+        using objs::word;
+        using objs::byte;
         class memory_test : public sim::environment {
-            bit* CLK;
-            bit* CE;
-            bit* addr_i[16];
-            bit* val_i[8];
-            bit* val_o[8];
-            bit* ready;
-            bit* rw;
-            bit* RST;
-            memory<16>* mem;
+            bit CLK;
+            bit CE;
+            bit addr_i[16];
+            bit val_i[8];
+            bit val_o[8];
+            bit ready;
+            bit rw;
+            bit RST;
+            word a_i;
+            byte v_i;
+            byte v_o;
+            memory* mem = nullptr;
         public:
             memory_test();
             ~memory_test();

@@ -14,7 +14,7 @@ namespace sim {
     class environment {
     protected:
         std::map<std::string,objs::bit*> wire_db;
-        std::map<std::string,environment*> module_db;
+        std::map<std::string,evaluable*> module_db;
         evaluation_list evl;
 
         virtual void step(){}

@@ -12,15 +12,15 @@ namespace sim {
 
         class mux4x1 : protected evaluable{
         private:
-            bit* a;
-            bit* b;
-            bit* c;
-            bit* d;
-            bit* sel0;
-            bit* sel1;
-            bit* out;
+            bit& a;
+            bit& b;
+            bit& c;
+            bit& d;
+            bit& sel0;
+            bit& sel1;
+            bit& out;
         public:
-            mux4x1(bit*,bit*,bit*,bit*,bit*,bit*,bit*&);
+            mux4x1(bit&,bit&,bit&,bit&,bit&,bit&,bit&);
             ~mux4x1();
             void eval() override;
         };

@@ -12,11 +12,11 @@ namespace sim {
 
         class or_module : public evaluable{
         private:
-            bit* a;
-            bit* b;
-            bit* out;
+            bit& a;
+            bit& b;
+            bit& out;
         public:
-            or_module(bit*, bit*, bit*&);
+            or_module(bit&, bit&, bit&);
             ~or_module();
             void eval() override;
         };

@@ -12,10 +12,10 @@ namespace sim {
 
         class not_module : evaluable{
         private:
-            bit* in;
-            bit* out;
+            bit& in;
+            bit& out;
         public:
-            not_module(bit*,bit*&);
+            not_module(bit&,bit&);
             ~not_module();
             void eval() override;
         };

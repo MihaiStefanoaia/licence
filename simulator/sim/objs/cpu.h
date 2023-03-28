@@ -6,6 +6,8 @@
 #define SIMULATOR_CPU_H
 #include "../evaluable.h"
 #include "bit.h"
+#include "byte.h"
+#include "word.h"
 #include <sys/types.h>
 
 
@@ -14,26 +16,26 @@ namespace sim {
         class cpu : protected evaluable{
         protected:
             //inputs
-            bit* P0_i[8];
-            bit* P1_i[8];
-            bit* P2_i[8];
-            bit* P3_i[8];
-            bit* mem_addr_i[16];
-            bit* mem_val_i[8];
-            bit* mem_ready;
-            bit* CLK;
-            bit* RST;
-            bit* CE;
+            byte P0_i;
+            byte P1_i;
+            byte P2_i;
+            byte P3_i;
+            word mem_addr_i;
+            byte mem_val_i;
+            bit& mem_ready;
+            bit& CLK;
+            bit& RST;
+            bit& CE;
 
             //outputs
-            bit* P0_o[8];
-            bit* P1_o[8];
-            bit* P2_o[8];
-            bit* P3_o[8];
-            bit* mem_addr_o[16];
-            bit* mem_val_o[8];
-            bit* mem_enable;
-            bit* mem_rw;
+            byte P0_o;
+            byte P1_o;
+            byte P2_o;
+            byte P3_o;
+            word mem_addr_o;
+            byte mem_val_o;
+            bit& mem_enable;
+            bit& mem_rw;
 
             //internal variables
             //registers

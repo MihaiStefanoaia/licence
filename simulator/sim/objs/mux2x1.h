@@ -12,12 +12,12 @@ namespace sim {
 
         class mux2x1 : evaluable{
         private:
-            bit* a;
-            bit* b;
-            bit* sel;
-            bit* out;
+            bit& a;
+            bit& b;
+            bit& sel;
+            bit& out;
         public:
-            mux2x1(bit*,bit*,bit*,bit*&);
+            mux2x1(bit&,bit&,bit&,bit&);
             ~mux2x1();
             void eval() override;
         };

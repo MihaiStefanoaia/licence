@@ -11,9 +11,8 @@ namespace sim {
     namespace objs {
 
         class button{
-            bit* output;
-            button(bit*&);
-            ~button();
+            bit& output;
+            button(bit&);
             void press();
             void release();
         };
