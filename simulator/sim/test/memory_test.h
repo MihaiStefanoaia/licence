@@ -37,8 +37,7 @@ namespace sim {
             void write(u_int16_t addr, u_int8_t val);
             u_int8_t read(u_int16_t addr);
             void reset();
-
-            void step() override;
+            void step();
         };
 
     } // sim

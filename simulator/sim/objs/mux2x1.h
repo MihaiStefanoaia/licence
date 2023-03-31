@@ -10,7 +10,7 @@
 namespace sim {
     namespace objs {
 
-        class mux2x1 : evaluable{
+        class mux2x1 : public evaluable{
         private:
             bit& a;
             bit& b;
