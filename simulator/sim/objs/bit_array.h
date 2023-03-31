@@ -7,34 +7,20 @@
 
 #include <cstdarg>
 #include <stdexcept>
+#include <cassert>
 #include "bit.h"
 
 namespace sim {
     namespace objs {
-        template<int size>
         class bit_array {
         private:
-            bit* content[size];
+            int size;
+            bit** content;
         public:
-            bit_array(std::initializer_list<bit*>);
-            bit* operator [](int);
+            explicit bit_array(int = 8);
+            void connect(bit&, int);
+            bit& operator [](int) const;
         };
-
-        template<int size>
-        bit *bit_array<size>::operator[](int i) {
-            return content[i];
-        }
-
-        template<int size>
-        bit_array<size>::bit_array(const std::initializer_list<bit *> init) {
-            if(init.size() != size){
-                throw std::invalid_argument("Size mismatch between initializer list and template declaration");
-            }
-            int i = 0;
-            for(auto it = init.begin(); i < size; i++, ++it){
-                content[i] = *it;
-            }
-        }
 
     } // sim
 } // objs

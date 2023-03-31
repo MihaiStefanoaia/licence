@@ -12,17 +12,17 @@ namespace sim {
         return master_clk::instance;
     }
 
-    master_clk::master_clk():triggering(){}
+    master_clk::master_clk():bit(false){}
 
     void master_clk::step() {
         master_clk::get_instance()->eval();
     }
 
     void master_clk::eval() {
-        for(auto ev : *this->on_neg){
+        for(auto ev : on_neg){
             ev->eval();
         }
-        for(auto ev : *this->on_pos){
+        for(auto ev : on_pos){
             ev->eval();
         }
     }

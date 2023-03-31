@@ -10,7 +10,7 @@
 
 namespace sim {
 
-    class master_clk : public triggering{
+    class master_clk : public objs::bit{
     private:
         static master_clk* instance;
         master_clk();

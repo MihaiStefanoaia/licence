@@ -10,13 +10,17 @@ memory access: <16bit register> (in an 8bit instruction)
 label regex: _.*
 
 
-special instructions and what they mean:
 
 jumps:
-jmp _label | jfg 15 _label
-jeq _label | jfg 15 _label
-jlt _label | jfg 15 _label
-jle _label | jfg 15 _label 
+
+jmp _label | jfg 0b0111 _label
+jz  _label | jfg 0b0110 _label //jump if 0
+jnz _label | jfg 0b1110 _label //jump if not 0
+js  _label | jfg 0b0011 _label //jump on sign change
+jns _label | jfg 0b1011 _label //jump on no sign change
+ 
+
+special instructions and what they mean:
 
 interrupt modification:
 ins mask | spc 14 mask //int |= mask
@@ -30,7 +34,9 @@ where:
     a in 0..5
     mask in 0..255
 
+======================================
 macros:
+======================================
 
 push x:
     mov   @rsx x
@@ -39,23 +45,3 @@ push x:
 pop x:
     mov   x @rsx
     add16 rsx 1
-
-call _label:
-    mov16 rmx rpx
-    add16 rmx 20
-    push rmh
-    push rml
-
-    push rbh
-    push rbl
-    mov16 rbx rsx
-    
-    jmp _label
-
-ret:
-    pop rbl
-    pop rbh
-    mov16 rsx rbx
-    pop rml
-    pop rmh
-    mov16 rpx rmx

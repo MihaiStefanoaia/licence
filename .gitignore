@@ -1,8 +1,11 @@
 *.out
 *.exe
 *.bin
+.*/
 .vscode/*
 experimentation/*
 simulator/.idea/*
 simulator/cmake-build-debug/*
 CMakeLists.txt
+another_arch_cpu.txt
+*.dia

@@ -6,11 +6,12 @@
 #include "evaluable.h"
 
 namespace sim {
+    class evaluable;
 
-    class triggering : public evaluable{
+    class triggering{
     protected:
-        std::list<evaluable*>* on_pos; //saves all the objects this object will trigger
-        std::list<evaluable*>* on_neg;
+        std::list<evaluable*> on_pos; //saves all the objects this object will trigger
+        std::list<evaluable*> on_neg;
     public:
         triggering();
         ~triggering();

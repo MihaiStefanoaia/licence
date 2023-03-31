@@ -6,28 +6,35 @@
 #define SIMULATOR_MEMORY_H
 
 #include "bit.h"
-#include "module.h"
+#include "byte.h"
+#include "word.h"
 #include <sys/types.h>
 
 namespace sim {
     namespace objs {
 
-        template<int addr>
-        class memory : protected module{
+        class memory : public evaluable{
         private:
             //inputs
-            bit* addr_i[addr];
-            bit* val_i[8];
-            bit* rw;
-            bit* CE;
-            bit* CLK;
+            word& addr_i;
+            byte& val_i;
+            bit& rw;
+            bit& CE;
+            bit& CLK;
+            bit& RST;
 
             //outputs
-            bit* val_o[8];
-            bit* ready;
+            byte& val_o;
+            bit& ready;
 
             //internal variables
-            u_int8_t mem[1<<addr];
+            enum st{LISTENING, DONE};
+            st state = LISTENING;
+            u_int8_t mem[1<<16] = {0};
+        public:
+            memory(word&, byte&, bit&, bit&, bit&, bit&, byte&, bit &);
+            void eval() override;
+            void flag_for_eval(triggering*) override;
         };
 
     } // sim

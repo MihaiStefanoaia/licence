@@ -24,5 +24,7 @@ namespace sim {
                 this->content = new_content;
             }
         }
+
+        bit::~bit() = default;
     } // sim
 } // objs

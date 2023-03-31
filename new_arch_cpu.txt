@@ -12,8 +12,8 @@ FEATURES
 
 8 bit value bus
 16 bit address bounds
-6 general purpose RW ports
-6 interrupt sources
+4 general purpose RW ports
+4 interrupt sources
 
 ======================================================================
 REGISTERS
@@ -29,10 +29,10 @@ rgd - general purpose register d
 
 16 bit usable registers - accessible by replacing the 'x' with 'h' or 'l' for accessing the high or low byte respectively:
 
-rmx - memory access
+rmx - general memory access
 rsx - stack top pointer
 rbx - stack base pointer
-rpx - 16 bit program counter
+rpx - program counter
 
 Reserved (non usable) registers:
 
@@ -42,14 +42,18 @@ rgf - flags register (bitwise, low to high)
 
     0 flag
     carry
-    negative/borrow
-    BCD adjust
+    sign change
+    unused (negation in conditions, always 1)
 
 int - interrupt mask register (bitwise, low to high)
 
-    external sources 0-5
-    unused
+    external sources 0-3
+    unused x3
     global interrupt disable
+
+rcd - 8 bit call depth register. breaks at overflow/underflow (too many subroutine calls or a ret instruction is executed without a paired call)
+
+cpr - stack call info register array - 256 x 32 bit
 
 
 ======================================================================
@@ -60,18 +64,18 @@ instruction name    | opcode    | description
                     |           |
 nop                 | 0x0       | no operation
 mov                 | 0x1       | move a value from the right operand into the left operand
-spc                 | 0x2       | special instructions - used port interaction
+spc                 | 0x2       | special instructions - used for port interaction
 jfg                 | 0x3       | conditional jump with flags. jumps to the inputted memory location if "( rgf OR inp ) == 0xF", where "inp" is a 4bit value. use like jxx <label/memory address>
 inc                 | 0x4       | increment the selected operand
 dec                 | 0x5       | decrement the selected operand
-not                 | 0x6       | bitwise not on the selected operand
-rot                 | 0x7       | bitwise rotate the selected operand
+rot                 | 0x6       | bitwise rotate the selected operand
+nor                 | 0x7       | bitwise nor on the selected operand
 and                 | 0x8       | bitwise and. saves result into the left operand
-or                  | 0x9       | bitwise or. saves result into the left operand
-adc                 | 0xA       | add with carry. saves result into the left operand 
-sbb                 | 0xB       | subtract with borrow. saves result into the left operand
-mul                 | 0xC       | multiply rga by rgb. saves result into rga and rgb using rgb as the high byte and rga as the low byte
-div                 | 0xD       | divide rga by rgb. saves result into rga, and remainder into rgb
+adc                 | 0x9       | add with carry. saves result into the left operand 
+mul                 | 0xA       | multiply rga by rgb. saves result into rga and rgb using rgb as the high byte and rga as the low byte
+div                 | 0xB       | divide rga by rgb. saves result into rga, and remainder into rgb
+ccs                 | 0xC       | conditional call to subroutine. conditions work exactly like for jfg
+ret                 | 0xD       | return from subroutine
 mov16               | 0xE       | move a value from the right operand into the left operand, both operands being one of the 4 16bit registers
 add16               | 0xF       | add a specific 16 bit register by an 8bit immediate
 
@@ -84,10 +88,9 @@ spc     | depends, see below
 jfg     | if(inp | rgf) goto <location>
 inc     | op++
 dec     | op--
-not     | op = ~op
-rot     | op = {op[0],op[7:1]}
+rot     | op1 = {op1[op2&7-1 : 0],op1[7 : op2&7]}
 and     | op1 &= op2
-or      | op1 |= op2
+nor     | op1 = ~(op1 | op2)
 adc     | op1 += op2
 sbb     | op1 -= op2
 
@@ -97,10 +100,10 @@ spc instructions meaning:
     0x2 : read port 1
     0x3 : write to port 1
     ...
-    0xA : read port 5
-    0xB : write to port 5
+    0x6 : read port 3
+    0x7 : write to port 3
 
-    0xC,0xD : reserved for future use
+    0x8-0xD : reserved for future use
     
     0xE : unset the high bits from the interrupt mask
     0xF : set the high bits from the interrupt mask
@@ -154,7 +157,7 @@ if memory access:
     0x2 - rbx
     0x3 - rpx
 
-instruction formatting for opcodes 0xC, 0xD:
+instruction formatting for opcodes 0xC, 0xD (mul, div):
 byte 0: <4bit opcode><4 unused bits>
 
 mov16 instruction formatting:
@@ -173,10 +176,17 @@ encoding of the 2bit info:
 
 spc instruction format:
 
-spc 0x0 - 0xB:
+spc 0x0 - 0x7:
 byte 0: <spc instruction code>
 byte 1: <8bit read/write mask immediate>
 
+jump format:
+
+jfg _flag _label:
+if _flag <  8:
+    jump to _label if ( rgf | _flag == 0b1111) 
+if _flag >= 8:
+    jump to _label if (~rgf | _flag == 0b1111) 
 
 
 ======================================================================

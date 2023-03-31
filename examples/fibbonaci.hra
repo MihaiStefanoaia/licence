@@ -1,0 +1,20 @@
+_fibb:
+    push rgb
+    push rgc
+    push rgd
+    mov rgb 1
+    mov rgc 0
+    mov rgd 0
+_compute_fibb_core:
+    add rgb rgc
+    add rgb rgd
+    mov rgd rgc
+    mov rgc rgb
+    mov rgb 0
+    dec rga
+    jnz _compute_fibb_core
+    mov rga rgb
+    pop rgd
+    pop rgc
+    pop rgb 
+    ret
