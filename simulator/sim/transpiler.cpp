@@ -47,7 +47,7 @@ namespace sim {
         std::string str;
         while(ss >> str){
             std::cout << str << '\n';
-            if(std::regex_match(str,std::regex("$.*"))){
+            if(std::regex_match(str,std::regex("\\$.*"))){
                 ret.emplace_back(token::SYSTEM_COMMAND, str);
             } else if(str == "(") {
                 ret.emplace_back(token::ARGS_START, str);
@@ -57,8 +57,6 @@ namespace sim {
                 ret.emplace_back(token::DECL_END, str);
             } else if(str == ",") {
                 ret.emplace_back(token::LIST_DELIMITER, str);
-            } else if(str == ".") {
-                ret.emplace_back(token::ACCESSOR, str);
             } else if(str == "wire") {
                 ret.emplace_back(token::WIRE, str);
             } else if(str == "byte") {

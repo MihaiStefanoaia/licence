@@ -1,0 +1,25 @@
+
+document ::= stmt | document stmt
+
+stmt ::= system_command | declaration
+
+system_command ::= "$" command_name "(" command_value ")"
+
+command_value ::= name | value
+
+command_name ::= "set_master_clk" | "set_poll_rate" | <TBD>
+
+declaration ::= wire_decl | module_decl
+
+wire_decl ::= type " " name
+
+type ::= "bit" | "byte" | "word"
+
+module_decl ::= module_type " " name "(" list ")"
+
+list ::= list name | name
+
+module_type ::= "and_module" | "or_module" | "not_module" | "cpu" | "mux_2x1" | "mux4x1" | "mux2x8" | "mux4x8" | "button" | "led"
+
+name ::= "[_a-zA-Z][_\w]*"
+value ::= "true" | "false" | "0|[1-9][\d]*"
