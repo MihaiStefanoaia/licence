@@ -11,8 +11,9 @@
 #include "led.h"
 
 namespace sim {
-    void environment::start() {
+    void environment::start(const std::string& path) {
         do {
+            topology_file = path;
             parse_phase();
             build_wire_phase();
             build_module_phase();
@@ -110,7 +111,7 @@ namespace sim {
             cli_input = buf;
             cmd = cli_input.substr(0, cli_input.find(' '));
             target = cli_input.substr(cli_input.find(' ') + 1, std::string::npos);
-            std::cout << cmd << "---" << target << std::endl;
+//            std::cout << cmd << "---" << target << std::endl;
             if (cmd == "set") {
                 change_input(target,true);
             } else if (cmd == "unset") {

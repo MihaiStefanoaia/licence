@@ -7,9 +7,11 @@
 #include "byte.h"
 #include "sim/environment_generator.h"
 #include "environment.h"
+#include "transpiler.h"
 
 ///demo sim for ((a&b)&c)
 int main(int argc, char** argv){
+    sim::transpiler::transpile("example.ndl");
     sim::environment env;
     env.start();
     return 0;

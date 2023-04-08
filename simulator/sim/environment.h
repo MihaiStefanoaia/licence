@@ -39,7 +39,7 @@ namespace sim {
         void run_phase();
         void cleanup_phase();
     public:
-        void start();
+        void start(const std::string& = "example");
         inline void change_input(const std::string&,bool);
     };
 

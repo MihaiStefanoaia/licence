@@ -16,7 +16,7 @@ namespace sim {
         bool to_update = false;
     public:
         explicit basic_input(objs::bit &output);
-
+        virtual ~basic_input() = default;
         void update() override;
         void set_value(bool);
         friend class environment;

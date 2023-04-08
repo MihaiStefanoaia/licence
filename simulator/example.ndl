@@ -1,0 +1,16 @@
+wire wire_a;
+wire wire_b;
+wire wire_c;
+
+wire output0;
+wire output1;
+
+and_module and_mod0(wire_a, wire_b, output0);
+and_module and_mod1(wire_c, output0, output1);
+
+button a(wire_a);
+button b(wire_b);
+button c(wire_c);
+
+led led_ab(output0);
+led led_abc(output1);

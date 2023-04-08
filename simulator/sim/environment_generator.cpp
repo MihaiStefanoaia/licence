@@ -23,13 +23,13 @@ namespace sim {
 
         ret["has_master_clock"] = false;
 
-        ret["wire_db"][0]["name"] = "input_a";
+        ret["wire_db"][0]["name"] = "wire_a";
         ret["wire_db"][0]["level"] = 0;
 
-        ret["wire_db"][1]["name"] = "input_b";
+        ret["wire_db"][1]["name"] = "wire_b";
         ret["wire_db"][1]["level"] = 0;
 
-        ret["wire_db"][2]["name"] = "input_c";
+        ret["wire_db"][2]["name"] = "wire_c";
         ret["wire_db"][2]["level"] = 0;
 
         ret["wire_db"][3]["name"] = "output0";
@@ -42,25 +42,25 @@ namespace sim {
         ret["component_db"][0]["type"] = "and_module";
         ret["component_db"][0]["name"] = "and_mod0";
         ret["component_db"][0]["level"] = 1;
-        ret["component_db"][0]["args"] = {"input_a", "input_b", "output0"};
+        ret["component_db"][0]["args"] = {"wire_a", "wire_b", "output0"};
 
         ret["component_db"][1]["type"] = "and_module";
         ret["component_db"][1]["name"] = "and_mod1";
         ret["component_db"][1]["level"] = 3;
-        ret["component_db"][1]["args"] = {"output0", "input_c", "output1"};
+        ret["component_db"][1]["args"] = {"output0", "wire_c", "output1"};
 
 
         ret["io_db"]["inputs"][0]["type"] = "button";
         ret["io_db"]["inputs"][0]["name"] = "a";
-        ret["io_db"]["inputs"][0]["args"] = {"input_a"};
+        ret["io_db"]["inputs"][0]["args"] = {"wire_a"};
 
         ret["io_db"]["inputs"][1]["type"] = "button";
         ret["io_db"]["inputs"][1]["name"] = "b";
-        ret["io_db"]["inputs"][1]["args"] = {"input_b"};
+        ret["io_db"]["inputs"][1]["args"] = {"wire_b"};
 
         ret["io_db"]["inputs"][2]["type"] = "button";
         ret["io_db"]["inputs"][2]["name"] = "c";
-        ret["io_db"]["inputs"][2]["args"] = {"input_c"};
+        ret["io_db"]["inputs"][2]["args"] = {"wire_c"};
 
 
         ret["io_db"]["outputs"][0]["type"] = "led";
