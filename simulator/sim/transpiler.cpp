@@ -6,6 +6,7 @@
 #include <regex>
 #include <iostream>
 #include <locale>
+#include <set>
 #include "transpiler.h"
 
 namespace sim {
@@ -37,38 +38,42 @@ namespace sim {
 
 
     nlohmann::json transpiler::transpile(const std::string &path) {
-        std::stringstream preprocessed = preprocess_file(path);
-        std::list<token> tokens = tokenize(preprocessed);
+        auto preprocessed = preprocess_file(path);
+        auto tokens = tokenize(preprocessed);
+        auto ast = generate_ast(tokens);
         return {};
     }
 
     std::list<transpiler::token> transpiler::tokenize(std::stringstream &ss) {
+        std::set<std::string> wires = {"wire", "byte", "word"};
+        std::set<std::string> modules = {"and_module"};
+        std::map<std::string,token::token_type> basic_tokens = {{"(",token::ARGS_START},
+                                                                {")",token::ARGS_END},
+                                                                {";",token::DECL_END},
+                                                                {",",token::LIST_DELIMITER},
+                                                                {".",token::ACCESSOR},
+                                                                {"[",token::ARRAY_ACCESSOR_BEGIN},
+                                                                {"]",token::ARRAY_ACCESSOR_END}};
         std::list<transpiler::token> ret = {};
         std::string str;
         while(ss >> str){
             std::cout << str << '\n';
             if(std::regex_match(str,std::regex("\\$.*"))){
                 ret.emplace_back(token::SYSTEM_COMMAND, str);
-            } else if(str == "(") {
-                ret.emplace_back(token::ARGS_START, str);
-            } else if(str == ")") {
-                ret.emplace_back(token::ARGS_END, str);
-            } else if(str == ";") {
-                ret.emplace_back(token::DECL_END, str);
-            } else if(str == ",") {
-                ret.emplace_back(token::LIST_DELIMITER, str);
-            } else if(str == "wire") {
-                ret.emplace_back(token::WIRE, str);
-            } else if(str == "byte") {
-                ret.emplace_back(token::BYTE, str);
-            } else if(str == "word") {
-                ret.emplace_back(token::WORD, str);
-            } else if(str == "and_module") {
-                ret.emplace_back(token::AND_MODULE, str);
-            } else {
+            } else if(basic_tokens.count(str)) {
+                ret.emplace_back(basic_tokens[str], str);
+            } else if(wires.count(str)) {
+                ret.emplace_back(token::WIRE_DECL, str);
+            } else if(modules.count(str)) {
+                ret.emplace_back(token::MODULE_DECL, str);
+            } else { // to add the rest of
                 ret.emplace_back(token::NAME, str);
             }
         }
         return ret;
+    }
+
+    std::list<transpiler::declaration> transpiler::generate_ast(std::list<token> &) {
+        return {};
     }
 } // sim
