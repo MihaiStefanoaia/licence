@@ -1,0 +1,8 @@
+wire a
+wire b
+wire out
+
+button b1(a)
+button b2(b)
+and_module amod(a,b,out)
+led light(out)

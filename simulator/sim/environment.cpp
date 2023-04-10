@@ -116,7 +116,7 @@ namespace sim {
                 change_input(target,true);
             } else if (cmd == "unset") {
                 change_input(target,false);
-            } else if (cli_input == std::string("exit")) {
+            } else if (cli_input == "exit") {
                 std::cout << "exiting\n";
                 break;
             } else {

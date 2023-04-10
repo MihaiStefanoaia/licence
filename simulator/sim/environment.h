@@ -23,6 +23,7 @@ namespace sim {
         std::map<std::string,evaluable*> component_db;
         std::map<std::string,basic_input*> input_db;
         std::map<std::string,basic_output*> output_db;
+        std::map<std::string,int> control_values;
         std::mutex run_lock;
         objs::bit master_clk;
         evaluation_list evl;
