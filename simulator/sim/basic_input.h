@@ -13,7 +13,6 @@ namespace sim {
     class basic_input : public basic_io{
         objs::bit& output;
         bool buffer = false;
-        bool to_update = false;
     public:
         explicit basic_input(objs::bit &output);
         virtual ~basic_input() = default;

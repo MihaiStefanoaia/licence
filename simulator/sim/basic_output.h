@@ -15,6 +15,7 @@ namespace sim {
         objs::bit& input;
         bool render_value = false;
         explicit basic_output(objs::bit &input);
+        virtual ~basic_output() = default;
         void update() override;
         virtual void render() const;
     };

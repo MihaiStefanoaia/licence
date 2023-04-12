@@ -3,6 +3,7 @@
 //
 
 #include <fstream>
+#include <iostream>
 #include "environment_generator.h"
 
 namespace sim {
@@ -70,7 +71,7 @@ namespace sim {
         ret["io_db"]["outputs"][1]["type"] = "led";
         ret["io_db"]["outputs"][1]["name"] = "led_abc";
         ret["io_db"]["outputs"][1]["args"] = {"output1"};
-
+        std::cout << ret.dump(2);
         return ret;
     }
 } // sim

@@ -16,7 +16,7 @@ namespace sim {
     class transpiler {
         class token{
         public:
-            enum token_type {NAME, NUMBER, SYSTEM_COMMAND, DECL_END, ARGS_BEGIN, ARGS_END, ACCESSOR, ARRAY_ACCESSOR_BEGIN, ARRAY_ACCESSOR_END, LIST_DELIMITER, WIRE_DECL, MODULE_DECL};
+            enum token_type {NAME, VALUE, SYSTEM_COMMAND, DECL_END, ARGS_BEGIN, ARGS_END, ACCESSOR, ARRAY_ACCESSOR_BEGIN, ARRAY_ACCESSOR_END, LIST_DELIMITER, WIRE_DECL, MODULE_DECL};
             std::string value;
             token_type t_type;
             token(token_type t_type,std::string& value){
@@ -24,15 +24,10 @@ namespace sim {
                 this->value = value;
             }
         };
-        class declaration{
-        public:
-            std::string module_type;
-            std::string instance_name;
-            std::list<std::string> arguments = {};
-        };
         static std::stringstream preprocess_file(const std::string& path);
         static std::list<token> tokenize(std::stringstream&);
-        static std::list<declaration> generate_ast(std::list<token>&);
+        static nlohmann::json generate_ast(std::list<token>&);
+        static nlohmann::json add_semantics(nlohmann::json&);
     public:
         static nlohmann::json transpile(const std::string& path);
     };
