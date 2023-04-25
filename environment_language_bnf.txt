@@ -19,9 +19,9 @@ module_decl ::= module_type name "(" list ")"
 
 list ::= list access | access
 
-access ::= access "." name | access "[" value "]"| name
+access ::= name "[" value "]" | name
 
 module_type ::= "and_module" | "or_module" | "not_module" | "cpu" | "mux_2x1" | "mux4x1" | "mux2x8" | "mux4x8" | "button" | "led"
 
-name ::= "[_a-zA-Z][_\w]*"
 value ::= "true" | "false" | "0|[1-9][0-9]*"
+name ::= "[_a-zA-Z][_\w]*"

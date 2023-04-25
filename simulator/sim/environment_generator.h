@@ -5,7 +5,7 @@
 #ifndef SIMULATOR_ENVIRONMENT_GENERATOR_H
 #define SIMULATOR_ENVIRONMENT_GENERATOR_H
 
-#include "../json.hpp"
+#include "json.hpp"
 
 namespace sim {
 

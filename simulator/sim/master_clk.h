@@ -6,7 +6,7 @@
 #define SIMULATOR_MASTER_CLK_H
 
 #include "triggering.h"
-#include "objs/bit.h"
+#include "bit.h"
 
 namespace sim {
 

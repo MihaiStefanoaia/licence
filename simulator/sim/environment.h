@@ -7,8 +7,8 @@
 
 #include "evaluation_list.h"
 #include <map>
-#include "objs/bit.h"
-#include "../json.hpp"
+#include "bit.h"
+#include "json.hpp"
 #include "environment_generator.h"
 #include "basic_input.h"
 #include "basic_output.h"
@@ -23,7 +23,7 @@ namespace sim {
         std::map<std::string,evaluable*> component_db;
         std::map<std::string,basic_input*> input_db;
         std::map<std::string,basic_output*> output_db;
-        std::map<std::string,int> control_values;
+        std::map<std::string,int> config_db;
         std::mutex run_lock;
         objs::bit master_clk;
         evaluation_list evl;

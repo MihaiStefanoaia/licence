@@ -1,37 +1,30 @@
-//
-// Created by mihai-laptop on 4/4/23.
-//
-
 #ifndef SIMULATOR_TRANSPILER_H
+
 #define SIMULATOR_TRANSPILER_H
 
-
-#include <sstream>
+#include "json.hpp"
 #include <string>
-#include <list>
-#include "../json.hpp"
+#include "parser.hh"
 
-namespace sim {
-
-    class transpiler {
-        class token{
-        public:
-            enum token_type {NAME, VALUE, SYSTEM_COMMAND, DECL_END, ARGS_BEGIN, ARGS_END, ACCESSOR, ARRAY_ACCESSOR_BEGIN, ARRAY_ACCESSOR_END, LIST_DELIMITER, WIRE_DECL, MODULE_DECL};
-            std::string value;
-            token_type t_type;
-            token(token_type t_type,std::string& value){
-                this->t_type = t_type;
-                this->value = value;
-            }
-        };
-        static std::stringstream preprocess_file(const std::string& path);
-        static std::list<token> tokenize(std::stringstream&);
-        static nlohmann::json generate_ast(std::list<token>&);
-        static nlohmann::json add_semantics(nlohmann::json&);
+// Give Flex the prototype of yylex we want ...
+# define YY_DECL yy::parser::symbol_type yylex (sim::transpiler& trp)
+// ... and declare it for the parser's sake.
+YY_DECL;
+namespace sim{
+    class transpiler{
     public:
-        static nlohmann::json transpile(const std::string& path);
+        transpiler();
+        std::string file;
+        nlohmann::json ret;
+        int parse(const std::string& str);
+        int result;
+        void scan_begin ();
+        void scan_end ();
+        bool trace_scanning;
+        bool trace_parsing;
+        yy::location location;
+        nlohmann::json transpile(const std::string&);
+        nlohmann::json add_semantics(nlohmann::json&);
     };
-
-} // sim
-
-#endif //SIMULATOR_TRANSPILER_H
+}
+#endif

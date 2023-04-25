@@ -5,17 +5,15 @@
 #include <fstream>
 #include <iostream>
 #include "environment_generator.h"
+#include "transpiler.h"
 
 namespace sim {
 
     nlohmann::json environment_generator::generate(const std::string& path) {
         if(path == "example")
             return example();
-        nlohmann::json ret;
-        std::ifstream file(path);
-        ret["wire_db"]["name"] = 4;
-        ret["component_db"] = {0,1,2};
-        return ret;
+        transpiler inst;
+        return inst.transpile(path);
     }
 
     nlohmann::json environment_generator::example() { //((a&b)&c) - pre-validated
