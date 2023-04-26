@@ -25,5 +25,9 @@ namespace sim {
             content = new bit*[size];
         }
 
+        int bit_array::get_size() const {
+            return size;
+        }
+
     } // sim
 } // objs

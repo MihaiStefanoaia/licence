@@ -12,8 +12,12 @@ namespace sim {
     nlohmann::json environment_generator::generate(const std::string& path) {
         if(path == "example")
             return example();
-        transpiler inst;
-        return inst.transpile(path);
+        try{
+            return sim::transpiler::transpile(path);
+        } catch(std::runtime_error& err) {
+            std::cout << err.what() << "\n";
+            return example();
+        }
     }
 
     nlohmann::json environment_generator::example() { //((a&b)&c) - pre-validated

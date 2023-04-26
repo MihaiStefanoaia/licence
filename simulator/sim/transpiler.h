@@ -23,8 +23,8 @@ namespace sim{
         bool trace_scanning;
         bool trace_parsing;
         yy::location location;
-        nlohmann::json transpile(const std::string&);
-        nlohmann::json add_semantics(nlohmann::json&);
+        int add_semantics();
+        static nlohmann::json transpile(const std::string&);
     };
 }
 #endif

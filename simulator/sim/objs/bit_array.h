@@ -20,6 +20,7 @@ namespace sim {
             explicit bit_array(int = 8);
             void connect(bit&, int);
             bit& operator [](int) const;
+            int get_size() const;
         };
 
     } // sim
