@@ -30,6 +30,8 @@ namespace sim{
     int transpiler::setup_dbs() {
         std::set<std::string> identifiers = {};
         std::set<std::string> valid_modules = {"and_module", "mux_2x1"};
+        std::set<std::string> valid_inputs  = {"button"};
+        std::set<std::string> valid_outputs = {"led"};
         nlohmann::json fin;
         std::string err;
         fin["config_db"] = nlohmann::json::array();
@@ -37,8 +39,13 @@ namespace sim{
         fin["component_db"] = nlohmann::json::array();
         for(auto& stmt : ret){
             if(!stmt.contains("stmt_type")){
-                err = "No type. How?";
+                err = "No statement type. How?";
                 throw std::runtime_error(err);
+            }
+            if(stmt["stmt_type"] != "sys_cmd"){
+                if(identifiers.count(stmt["name"]))
+                    throw std::runtime_error("Identifier \"" + std::string(stmt["name"]) + "\" is defined twice.");
+                identifiers.insert(stmt["name"]);
             }
             if(stmt["stmt_type"] == "sys_cmd"){
                 nlohmann::json tmp;
@@ -53,6 +60,8 @@ namespace sim{
                 tmp["name"] = stmt["name"];
                 fin["wire_db"] += tmp;
             } else if(stmt["stmt_type"] == "module_decl"){
+                if(!valid_modules.count(stmt["type"]) && !valid_inputs.count(stmt["type"]) && !valid_outputs.count(stmt["type"]))
+                    throw std::runtime_error("Invalid type identifier " + std::string(stmt["type"]));
                 nlohmann::json tmp;
                 tmp["name"] = stmt["name"];
                 tmp["type"] = stmt["type"];
@@ -72,6 +81,8 @@ namespace sim{
             }
         }
         ret = fin;
+        std::cout << "dbs setup:\n";
+        std::cout << ret.dump(2);
         return 0;
     }
 
