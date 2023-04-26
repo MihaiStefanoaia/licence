@@ -16,7 +16,7 @@ namespace sim {
     class transpiler {
         class token{
         public:
-            enum token_type {NAME, VALUE, SYSTEM_COMMAND, DECL_END, ARGS_BEGIN, ARGS_END, ACCESSOR, ARRAY_ACCESSOR_BEGIN, ARRAY_ACCESSOR_END, LIST_DELIMITER, WIRE_DECL, MODULE_DECL};
+            enum token_type {NAME, VALUE, SYSTEM_COMMAND, DECL_END, ARGS_BEGIN, ARGS_END, ACCESSOR, ARRAY_ACCESSOR_BEGIN, ARRAY_ACCESSOR_END, LIST_DELIMITER, WIRE_DECL, MODULE_DECL, _EOF};
             std::string value;
             token_type t_type;
             token(token_type t_type,std::string& value){

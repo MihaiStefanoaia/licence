@@ -76,6 +76,8 @@ namespace sim {
                 throw std::runtime_error("invalid token \"" + str + "\"");
             }
         }
+        str = "";
+        ret.emplace_back(token::NAME, str);
         return ret;
     }
 
