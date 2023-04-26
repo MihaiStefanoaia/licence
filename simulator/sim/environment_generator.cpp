@@ -14,7 +14,7 @@ namespace sim {
             return example();
         try{
             return sim::transpiler::transpile(path);
-        } catch(std::runtime_error& err) {
+        } catch(std::runtime_error err) {
             std::cout << err.what() << "\n";
             return example();
         }

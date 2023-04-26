@@ -105,9 +105,10 @@ comment (<<-).*(->>)
 ")"        return yy::parser::make_ARGS_E (loc);
 "["        return yy::parser::make_ACC_B  (loc);
 "]"        return yy::parser::make_ACC_E  (loc);
-"$"        return yy::parser::make_SYS_C  (loc);
+"$"        return yy::parser::make_DOLLAR (loc);
 ";"        return yy::parser::make_SEMIC  (loc);
 ","        return yy::parser::make_COMMA  (loc);
+":"        return yy::parser::make_COLON  (loc);
 
 
 {int}      return make_NUMBER (yytext, loc);

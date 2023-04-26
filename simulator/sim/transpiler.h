@@ -12,7 +12,6 @@
 YY_DECL;
 namespace sim{
     class transpiler{
-    public:
         transpiler();
         std::string file;
         nlohmann::json ret;
@@ -22,9 +21,12 @@ namespace sim{
         void scan_end ();
         bool trace_scanning;
         bool trace_parsing;
+
+        int setup_dbs();
+    public:
         yy::location location;
-        int add_semantics();
         static nlohmann::json transpile(const std::string&);
+        friend class yy::parser;
     };
 }
 #endif

@@ -33,9 +33,10 @@
   ARGS_E  ")"
   ACC_B   "["
   ACC_E   "]"
-  SYS_C   "$"
+  DOLLAR  "$"
   SEMIC   ";"
   COMMA   ","
+  COLON   ":"
 ;
 
 %token <std::string> IDENTIFIER
@@ -62,7 +63,7 @@ stmt:
 |  wire_decl {$$ = $1;}
 
 sys_cmd:
-  SYS_C IDENTIFIER ARGS_B NUMBER ARGS_E{
+  DOLLAR IDENTIFIER ARGS_B NUMBER ARGS_E{
     $$["stmt_type"] = "sys_cmd";
     $$["type"] = $2;
     $$["value"] = $4;
