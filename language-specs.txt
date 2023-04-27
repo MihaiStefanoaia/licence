@@ -23,15 +23,15 @@ jns _label | jfg 0b1011 _label //jump on no sign change
 special instructions and what they mean:
 
 interrupt modification:
-ins mask | spc 14 mask //int |= mask
-inr mask | spc 15 mask //int &= ~mask
+inr mask | spc 14 mask //int &= ~mask
+ins mask | spc 15 mask //int |= mask
 
 port reading/writing:
 rdp a mask | spc 2a mask
 wrp a mask | spc 2a+1 mask
 
 where:
-    a in 0..5
+    a in 0..3
     mask in 0..255
 
 ======================================

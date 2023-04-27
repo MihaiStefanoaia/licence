@@ -1,0 +1,16 @@
+.start _main
+`include "fibbonaci.hra"
+
+`include "render.hra"
+
+
+_main:
+    mov rgb 0
+_loop:
+    mov rga rgb
+    call _fibb
+    call _render_number_7sd
+    mov rga rgb
+    mov rgb 13
+    div
+    jmp _loop
