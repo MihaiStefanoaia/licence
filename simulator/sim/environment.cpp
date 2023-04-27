@@ -22,6 +22,7 @@ namespace sim {
             run_phase();
             cleanup_phase();
         } while(!clean_exit);
+        std::cout << "exiting cleanly\n";
     }
 
     void environment::parse_phase() {

@@ -29,14 +29,18 @@ namespace sim{
 
     int transpiler::setup_dbs() {
         std::set<std::string> identifiers = {};
-        std::set<std::string> valid_modules = {"and_module", "mux_2x1"};
+        std::set<std::string> valid_modules = {"and_module", "master_clk"};
         std::set<std::string> valid_inputs  = {"button"};
         std::set<std::string> valid_outputs = {"led"};
+        std::set<std::string> valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap", "master_clk_division"};
         nlohmann::json fin;
         std::string err;
         fin["config_db"] = nlohmann::json::array();
         fin["wire_db"] = nlohmann::json::array();
         fin["component_db"] = nlohmann::json::array();
+        fin["io_db"]["inputs"] = nlohmann::json::array();
+        fin["io_db"]["outputs"] = nlohmann::json::array();
+
         for(auto& stmt : ret){
             if(!stmt.contains("stmt_type")){
                 err = "No statement type. How?";
@@ -48,10 +52,7 @@ namespace sim{
                 identifiers.insert(stmt["name"]);
             }
             if(stmt["stmt_type"] == "sys_cmd"){
-                nlohmann::json tmp;
-                tmp["cmd"] = stmt["type"];
-                tmp["val"] = stmt["value"];
-                fin["config_db"] += tmp;
+                fin["config_db"][stmt["type"]] = stmt["value"];
             } else if(stmt["stmt_type"] == "wire_decl"){
                 std::string w_type = stmt["type"];
                 if(stmt["type"] != "wire")
@@ -71,7 +72,15 @@ namespace sim{
                         throw std::runtime_error("Unsupported feature (yet)");
                     tmp["args"] += arg["name"];
                 }
-                fin["component_db"] += tmp;
+                if(tmp["type"] == "master_clk"){
+                    fin["config_db"]["reactive_only"] = 1;
+                    fin["config_db"]["master_clk"] = tmp["args"][0]["type"];
+                } else if(valid_modules.count(tmp["type"]))
+                    fin["component_db"] += tmp;
+                else if(valid_inputs.count(tmp["type"]))
+                    fin["io_db"]["inputs"] += tmp;
+                else
+                    fin["io_db"]["outputs"] += tmp;
 
             } else {
                 err = "Invalid type \"";

@@ -41,6 +41,9 @@ namespace sim {
         void cleanup_phase();
     public:
         void start(const std::string& = "example");
+        void operator()(const std::string& s = "example"){
+            start(s);
+        }
         inline void change_input(const std::string&,bool);
     };
 

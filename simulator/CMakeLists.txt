@@ -2,12 +2,14 @@ cmake_minimum_required(VERSION 3.23)
 project(simulator)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread")
 set(CMAKE_CXX_FLAGS_DEBUG "-Os")
 
 include_directories(sim)
 include_directories(sim/objs)
 include_directories(lib)
+
+#find_package(Boost)
 
 add_executable(simulator
         sim/objs/and_module.cpp
