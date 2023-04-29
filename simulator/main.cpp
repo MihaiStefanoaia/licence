@@ -4,6 +4,7 @@
 #include "environment.h"
 #include "transpiler.h"
 #include <thread>
+#include "cpu.h"
 
 ///demo sim for ((a&b)&c)
 int main(int argc, char** argv){
@@ -14,5 +15,7 @@ int main(int argc, char** argv){
     };
     std::thread server(server_core, &env);
     server.join();
+
+    std::cout << sizeof(sim::objs::cpu) << " " << alignof(sim::objs::cpu);
     return 0;
 }

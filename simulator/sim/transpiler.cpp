@@ -27,7 +27,7 @@ namespace sim{
         return instance.ret;
     }
 
-    int transpiler::setup_dbs() {
+    void transpiler::setup_dbs() {
         std::set<std::string> identifiers = {};
         std::set<std::string> valid_modules = {"and_module", "master_clk"};
         std::set<std::string> valid_inputs  = {"button"};
@@ -92,7 +92,6 @@ namespace sim{
         ret = fin;
         std::cout << "dbs setup:\n";
         std::cout << ret.dump(2);
-        return 0;
     }
 
 }

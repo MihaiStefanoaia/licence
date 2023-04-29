@@ -8,3 +8,6 @@ simulator/.idea/*
 simulator/cmake-build-debug/*
 another_arch_cpu.txt
 *.dia
+!experimentation/contiguous_allocator.cpp
+!experimentation/contiguous_allocator.h
+!experimentation/main.cpp

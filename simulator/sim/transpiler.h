@@ -22,7 +22,7 @@ namespace sim{
         bool trace_scanning;
         bool trace_parsing;
 
-        int setup_dbs();
+        void setup_dbs();
     public:
         yy::location location;
         static nlohmann::json transpile(const std::string&);
