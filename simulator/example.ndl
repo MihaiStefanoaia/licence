@@ -2,6 +2,12 @@ wire wire_a;
 wire wire_b;
 wire wire_c;
 
+$sim_frequency_min(10);
+$sim_frequency_max(100);
+$frame_rate_cap(60);
+
+master_clk master_clk(wire_a);
+
 wire output0;
 wire output1;
 

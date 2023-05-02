@@ -20,7 +20,7 @@ namespace sim{
         transpiler instance;
         int parse_res = instance.parse(path);
         if(parse_res){
-            std::string str = "Parser exited with status " + std::to_string(parse_res) + ", loading example";
+            std::string str = "Parser exited with status " + std::to_string(parse_res);
             throw std::runtime_error(str);
         }
         instance.setup_dbs();
@@ -28,14 +28,13 @@ namespace sim{
     }
 
     void transpiler::setup_dbs() {
-        std::set<std::string> identifiers = {};
+        std::set<std::string> wire_identifiers = {};
         std::set<std::string> valid_modules = {"and_module", "master_clk"};
         std::set<std::string> valid_inputs  = {"button"};
         std::set<std::string> valid_outputs = {"led"};
-        std::set<std::string> valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap", "master_clk_division"};
+        std::set<std::string> valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap"};
         nlohmann::json fin;
         std::string err;
-        fin["config_db"] = nlohmann::json::array();
         fin["wire_db"] = nlohmann::json::array();
         fin["component_db"] = nlohmann::json::array();
         fin["io_db"]["inputs"] = nlohmann::json::array();
@@ -47,9 +46,8 @@ namespace sim{
                 throw std::runtime_error(err);
             }
             if(stmt["stmt_type"] != "sys_cmd"){
-                if(identifiers.count(stmt["name"]))
+                if(wire_identifiers.count(stmt["name"]))
                     throw std::runtime_error("Identifier \"" + std::string(stmt["name"]) + "\" is defined twice.");
-                identifiers.insert(stmt["name"]);
             }
             if(stmt["stmt_type"] == "sys_cmd"){
                 fin["config_db"][stmt["type"]] = stmt["value"];
@@ -60,6 +58,7 @@ namespace sim{
                 nlohmann::json tmp;
                 tmp["name"] = stmt["name"];
                 fin["wire_db"] += tmp;
+                wire_identifiers.insert(stmt["name"]);
             } else if(stmt["stmt_type"] == "module_decl"){
                 if(!valid_modules.count(stmt["type"]) && !valid_inputs.count(stmt["type"]) && !valid_outputs.count(stmt["type"]))
                     throw std::runtime_error("Invalid type identifier " + std::string(stmt["type"]));
@@ -68,13 +67,20 @@ namespace sim{
                 tmp["type"] = stmt["type"];
                 tmp["args"] = nlohmann::json::array();
                 for(auto arg : stmt["args"]){
-                    if(arg["type"] != "basic")
+                    if(arg["type"] == "basic"){
+                        if(!wire_identifiers.count(arg["name"]))
+                            throw std::runtime_error("Identifier \"" + std::string(arg["name"]) + "\" is not defined");
+                        tmp["args"] += arg["name"];
+                    } else {
                         throw std::runtime_error("Unsupported feature (yet)");
-                    tmp["args"] += arg["name"];
+                    }
                 }
                 if(tmp["type"] == "master_clk"){
-                    fin["config_db"]["reactive_only"] = 1;
-                    fin["config_db"]["master_clk"] = tmp["args"][0]["type"];
+                    if(fin["config_db"].contains("master_clk"))
+                        throw std::runtime_error("Only one instance of master_clk is allowed");
+//                    throw std::runtime_error("not supported yet....");
+                    fin["config_db"]["reactive_only"] = 0;
+                    fin["config_db"]["master_clk"] = tmp["args"][0];
                 } else if(valid_modules.count(tmp["type"]))
                     fin["component_db"] += tmp;
                 else if(valid_inputs.count(tmp["type"]))

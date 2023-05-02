@@ -18,7 +18,7 @@ namespace sim {
             build_wire_phase();
             build_module_phase();
             build_io_phase();
-            pre_run_phase();
+            config_phase();
             run_phase();
             cleanup_phase();
         } while(!clean_exit);
@@ -77,7 +77,20 @@ namespace sim {
         }
     }
 
-    void environment::pre_run_phase() {
+    void environment::config_phase() {
+        auto const& configs = topology["config_db"];
+        if(configs.contains("sim_frequency_min")){
+            sim_frequency_min = configs["sim_frequency_min"];
+        } else if(configs.contains("sim_frequency_max")){
+            sim_frequency_max = configs["sim_frequency_max"];
+        } else if(configs.contains("frame_rate_cap")){
+            frame_rate_cap = configs["frame_rate_cap"];
+        } else if(configs.contains("reactive_only")){
+            reactive_only = configs["reactive_only"];
+        }
+        if(!reactive_only)
+            master_clk = wire_db[configs["master_clk"]];
+
         for (auto const &kvp: wire_db) {
             std::cout << "adding wire " << kvp.first << " at level " << kvp.second->get_expected_level() << '\n';
             evl.add_on_expected_level(kvp.second);

@@ -14,8 +14,10 @@ namespace sim {
             return example();
         try{
             return sim::transpiler::transpile(path);
-        } catch(std::runtime_error err) {
+        } catch(std::runtime_error& err) {
+            std::cout << "Generation failed:\n";
             std::cout << err.what() << "\n";
+            std::cout << "loading example...\n";
             return example();
         }
     }

@@ -25,10 +25,14 @@ namespace sim {
         std::map<std::string,basic_output*> output_db;
         std::map<std::string,int> config_db;
         std::mutex run_lock;
-        objs::bit master_clk;
+        std::mutex io_lock;
+        objs::bit* master_clk;
         evaluation_list evl;
         std::string topology_file = "example";
-        unsigned int min_cycles = 1;
+        unsigned int sim_frequency_min = 1;
+        unsigned int sim_frequency_max = 1000;
+        unsigned int reactive_only = 1;
+        unsigned int frame_rate_cap = -1;
         bool clean_exit = false;
         bool has_master_clk = false;
 
@@ -36,7 +40,7 @@ namespace sim {
         void build_wire_phase();
         void build_module_phase();
         void build_io_phase();
-        void pre_run_phase();
+        void config_phase();
         void run_phase();
         void cleanup_phase();
     public:
