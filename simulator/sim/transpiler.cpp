@@ -29,9 +29,9 @@ namespace sim{
 
     void transpiler::setup_dbs() {
         std::set<std::string> wire_identifiers = {};
-        std::set<std::string> valid_modules = {"and_module", "master_clk"};
-        std::set<std::string> valid_inputs  = {"button"};
-        std::set<std::string> valid_outputs = {"led"};
+        std::map<std::string,unsigned int> valid_modules = {{"and_module",3},{"master_clk",1}};
+        std::map<std::string,unsigned int> valid_inputs  = {{"button",1}};
+        std::map<std::string,unsigned int> valid_outputs = {{"led",1}};
         std::set<std::string> valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap"};
         nlohmann::json fin;
         std::string err;
@@ -75,6 +75,25 @@ namespace sim{
                         throw std::runtime_error("Unsupported feature (yet)");
                     }
                 }
+                size_t argc = tmp["args"].size();
+                if( (valid_inputs .count(tmp["type"]) && argc != valid_inputs [tmp["type"]]) ||
+                    (valid_modules.count(tmp["type"]) && argc != valid_modules[tmp["type"]]) ||
+                    (valid_outputs.count(tmp["type"]) && argc != valid_outputs[tmp["type"]])){
+                    unsigned int expected = 0;
+                    if(valid_inputs.count(tmp["type"])){
+                        expected = valid_inputs[tmp["type"]];
+                    } else if(valid_modules.count(tmp["type"])){
+                        expected = valid_modules[tmp["type"]];
+                    } else {
+                        expected = valid_outputs[tmp["type"]];
+                    }
+                    err = "incorrect amount of arguments in generation of module ";
+                    err += std::string(tmp["type"]);
+                    err += " (expected " + std::to_string(expected);
+                    err += ", got " + std::to_string(argc) + ")";
+                    throw std::runtime_error(err);
+                }
+
                 if(tmp["type"] == "master_clk"){
                     if(fin["config_db"].contains("master_clk"))
                         throw std::runtime_error("Only one instance of master_clk is allowed");
