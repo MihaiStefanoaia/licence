@@ -25,19 +25,13 @@ namespace sim{
             throw std::runtime_error(str);
         }
         instance.setup_dbs();
+        instance.graph_analysis();
         return instance.ret;
     }
 
     void transpiler::setup_dbs() {
         std::set<std::string> identifiers = {"nil"};
 
-        // these are the valid modules, and the list contains the width of each argument
-        // the number of arguments can be inferred from the length of the list
-        std::map<std::string,std::vector<unsigned int>> valid_modules = {{"and_module",{1,1,1}},{"master_clk",{1}}};
-        std::map<std::string,std::vector<unsigned int>> valid_inputs  = {{"button",{1}}};
-        std::map<std::string,std::vector<unsigned int>> valid_outputs = {{"led",{1}}};
-
-        std::set<std::string> valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap"};
         nlohmann::json fin;
         std::string err;
         fin["wire_db"] = nlohmann::json::array();
@@ -195,6 +189,15 @@ namespace sim{
             throw std::runtime_error("invalid or unsupported access type");
         }
         throw std::runtime_error("identifier \"" + std::string(lookup["name"]) + "\" does not exist");
+    }
+
+    void transpiler::graph_analysis() {
+        std::list<node*> wire_pool;
+        std::list<node*> pos_graph;
+        std::list<node*> neg_graph;
+        for(auto& wire : ret["wire_db"]){
+            wire_pool.push_back(new node(wire["name"],"wire"));
+        }
     }
 
 }
