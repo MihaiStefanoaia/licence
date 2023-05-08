@@ -32,4 +32,4 @@ add_executable(simulator
         sim/evaluation_list.h
         sim/triggering.cpp
         sim/triggering.h
-        main.cpp sim/objs/bit_array.cpp sim/objs/bit_array.h sim/objs/or_module.cpp sim/objs/or_module.h sim/objs/not_module.cpp sim/objs/not_module.h sim/test/memory_test.cpp sim/test/memory_test.h sim/environment.cpp sim/environment.h sim/objs/button.cpp sim/objs/button.h sim/objs/byte.cpp sim/objs/byte.h sim/objs/word.cpp sim/objs/word.h sim/objs/memory.cpp sim/basic_output.cpp sim/basic_input.cpp sim/environment_generator.cpp sim/transpiler.cpp sim/transpiler.h lib/parser.hh lib/parser.cc lib/scanner.cc)
+        main.cpp sim/objs/bit_array.cpp sim/objs/bit_array.h sim/objs/or_module.cpp sim/objs/or_module.h sim/objs/not_module.cpp sim/objs/not_module.h sim/test/memory_test.cpp sim/test/memory_test.h sim/environment.cpp sim/environment.h sim/objs/button.cpp sim/objs/button.h sim/objs/byte.cpp sim/objs/byte.h sim/objs/word.cpp sim/objs/word.h sim/objs/memory.cpp sim/basic_output.cpp sim/basic_input.cpp sim/environment_generator.cpp sim/transpiler.cpp sim/transpiler.h lib/parser.hh lib/parser.cc lib/scanner.cc sim/objs/none.h)

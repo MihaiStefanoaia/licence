@@ -28,14 +28,16 @@ namespace sim{
     }
 
     void transpiler::setup_dbs() {
-        std::set<std::string> wire_identifiers = {};
+        std::set<std::string> identifiers = {"nil"};
         std::map<std::string,unsigned int> valid_modules = {{"and_module",3},{"master_clk",1}};
+        std::map<std::string,unsigned int> valid_arrays  = {{"byte",8},{"word",16}};
         std::map<std::string,unsigned int> valid_inputs  = {{"button",1}};
         std::map<std::string,unsigned int> valid_outputs = {{"led",1}};
         std::set<std::string> valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap"};
         nlohmann::json fin;
         std::string err;
         fin["wire_db"] = nlohmann::json::array();
+        fin["array_db"] = nlohmann::json::array();
         fin["component_db"] = nlohmann::json::array();
         fin["io_db"]["inputs"] = nlohmann::json::array();
         fin["io_db"]["outputs"] = nlohmann::json::array();
@@ -45,30 +47,63 @@ namespace sim{
                 err = "No statement type. How?";
                 throw std::runtime_error(err);
             }
+            //if it is not a configuration setting, check if an object with the identifier has not been created yet
+            //if it is a new identifier, add it to the list of reserved identifiers
             if(stmt["stmt_type"] != "sys_cmd"){
-                if(wire_identifiers.count(stmt["name"]))
-                    throw std::runtime_error("Identifier \"" + std::string(stmt["name"]) + "\" is defined twice.");
+                if(identifiers.count(stmt["name"]))
+                    throw std::runtime_error("Identifier \"" + std::string(stmt["name"]) + "\" is defined multiple times.");
+                identifiers.insert(stmt["name"]);
             }
-            if(stmt["stmt_type"] == "sys_cmd"){
+
+            if(stmt["stmt_type"] == "sys_cmd"){ //set the config to the inputted value. straightforward
                 fin["config_db"][stmt["type"]] = stmt["value"];
-            } else if(stmt["stmt_type"] == "wire_decl"){
-                std::string w_type = stmt["type"];
-                if(stmt["type"] != "wire")
-                    throw std::runtime_error("Invalid type identifier " + w_type);
+            } else if(stmt["stmt_type"] == "wire_decl"){ //simply add the wire to the list of wires
                 nlohmann::json tmp;
                 tmp["name"] = stmt["name"];
                 fin["wire_db"] += tmp;
-                wire_identifiers.insert(stmt["name"]);
-            } else if(stmt["stmt_type"] == "module_decl"){
-                if(!valid_modules.count(stmt["type"]) && !valid_inputs.count(stmt["type"]) && !valid_outputs.count(stmt["type"]))
+            } else if(stmt["stmt_type"] == "array_decl"){ //generate a sized array
+                nlohmann::json tmp;
+                tmp["name"] = stmt["name"];
+                tmp["size"] = stmt["size"];
+                tmp["args"] = nlohmann::json::array();
+                for(auto arg : stmt["args"]){
+                    if(arg["type"] == "basic"){ // replace this thing with the "resolve_lookup" function
+                        if(!identifiers.count(arg["name"]))
+                            throw std::runtime_error("Identifier \"" + std::string(arg["name"]) + "\" is not defined");
+                        tmp["args"] += arg["name"];
+                    } else {
+                        throw std::runtime_error("Unsupported feature (yet)");
+                    }
+                }
+                // allow for incomplete definition by padding the end with nil
+                // for example the statement:
+                // array<2> arr(arg);
+                // is the same as:
+                // array<2> arr(arg,nil);
+                // nil is just a non-writeable wire
+                // any writes to it will not change it and any writes will return false
+
+                // the generation downstream of this also allows to have too many arguments to a sized array
+                // but the extra ones are just ignored
+
+                while(tmp["args"].size() < tmp["size"]){
+                    tmp["args"] += "nil";
+                }
+
+                fin["array_db"] += tmp;
+
+            } else if(stmt["stmt_type"] == "module_decl"){ //generate a module (including io modules)
+                if( !valid_modules.count(stmt["type"]) &&
+                    !valid_inputs .count(stmt["type"]) &&
+                    !valid_outputs.count(stmt["type"])) //check for a valid type
                     throw std::runtime_error("Invalid type identifier " + std::string(stmt["type"]));
                 nlohmann::json tmp;
                 tmp["name"] = stmt["name"];
                 tmp["type"] = stmt["type"];
                 tmp["args"] = nlohmann::json::array();
                 for(auto arg : stmt["args"]){
-                    if(arg["type"] == "basic"){
-                        if(!wire_identifiers.count(arg["name"]))
+                    if(arg["type"] == "basic"){ //once again, replace with "resolve_lookup" once implemented
+                        if(!identifiers.count(arg["name"]))
                             throw std::runtime_error("Identifier \"" + std::string(arg["name"]) + "\" is not defined");
                         tmp["args"] += arg["name"];
                     } else {
@@ -76,6 +111,7 @@ namespace sim{
                     }
                 }
                 size_t argc = tmp["args"].size();
+                // check for correct amount of arguments, this time it is important
                 if( (valid_inputs .count(tmp["type"]) && argc != valid_inputs [tmp["type"]]) ||
                     (valid_modules.count(tmp["type"]) && argc != valid_modules[tmp["type"]]) ||
                     (valid_outputs.count(tmp["type"]) && argc != valid_outputs[tmp["type"]])){
@@ -93,7 +129,8 @@ namespace sim{
                     err += ", got " + std::to_string(argc) + ")";
                     throw std::runtime_error(err);
                 }
-
+                // check if it is an instance of master_clk and if it is, check if there is another
+                // otherwise just add it to the appropriate database
                 if(tmp["type"] == "master_clk"){
                     if(fin["config_db"].contains("master_clk"))
                         throw std::runtime_error("Only one instance of master_clk is allowed");
@@ -117,6 +154,10 @@ namespace sim{
         ret = fin;
         std::cout << "dbs setup:\n";
         std::cout << ret.dump(2);
+    }
+
+    std::string transpiler::resolve_lookup(nlohmann::json &dbs, nlohmann::json &lookup) {
+        return {};
     }
 
 }

@@ -37,6 +37,10 @@
   SEMIC   ";"
   COMMA   ","
   COLON   ":"
+  WIRE    "wire"
+  ARRAY   "array"
+  LT      "<"
+  GT      ">"
 ;
 
 %token <std::string> IDENTIFIER
@@ -44,6 +48,7 @@
 %nterm <nlohmann::json> stmt
 %nterm <nlohmann::json> sys_cmd
 %nterm <nlohmann::json> wire_decl
+%nterm <nlohmann::json> array_decl
 %nterm <nlohmann::json> module_decl
 %nterm <nlohmann::json> args
 %nterm <nlohmann::json> access
@@ -55,27 +60,38 @@
 
 document:
   document stmt SEMIC {trp.ret += $2;}
-| %empty {trp.ret = nlohmann::json::array();};
+| %empty {trp.ret = nlohmann::json::array();}
+;
 
 stmt: 
   sys_cmd {$$ = $1;};
-| module_decl {$$ = $1;};
-|  wire_decl {$$ = $1;}
+| module_decl {$$ = $1;}
+| wire_decl {$$ = $1;}
+| array_decl {$$ = $1};
+;
 
 sys_cmd:
   DOLLAR IDENTIFIER ARGS_B NUMBER ARGS_E{
     $$["stmt_type"] = "sys_cmd";
     $$["type"] = $2;
     $$["value"] = $4;
-  };
+  }
 ;
 
 wire_decl:
-  IDENTIFIER IDENTIFIER {
+  WIRE IDENTIFIER {
     $$["stmt_type"] = "wire_decl";
-    $$["type"] = $1;
     $$["name"] = $2;
   };
+
+array_decl:
+  ARRAY LT NUMBER GT IDENTIFIER ARGS_B args ARGS_E{
+    $$["stmt_type"] = "array_decl";
+    $$["name"] = $5;
+    $$["size"] = $2;
+    $$["args"] = $7;
+  }
+;
 
 module_decl:
   IDENTIFIER IDENTIFIER ARGS_B args ARGS_E{

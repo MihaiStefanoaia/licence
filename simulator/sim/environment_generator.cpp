@@ -26,7 +26,7 @@ namespace sim {
         using namespace nlohmann;
         json ret;
 
-        ret["has_master_clock"] = false;
+//        ret["has_master_clock"] = false;
 
         ret["wire_db"][0]["name"] = "wire_a";
         ret["wire_db"][0]["level"] = 0;

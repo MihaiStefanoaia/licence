@@ -13,7 +13,7 @@ namespace sim {
     basic_input::basic_input(objs::bit &output) : output(output) {}
 
     void basic_input::set_value(bool value) {
-        flagged = buffer ^ value;
+        flagged = buffer != value;
         buffer = value;
     }
 } // sim

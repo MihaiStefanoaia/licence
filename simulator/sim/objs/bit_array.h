@@ -13,11 +13,13 @@
 namespace sim {
     namespace objs {
         class bit_array {
-        private:
-            int size;
+        protected:
             bit** content;
+            int size;
         public:
             explicit bit_array(int = 8);
+            bit_array(const bit_array&);
+            ~bit_array();
             void connect(bit&, int);
             bit& operator [](int) const;
             int get_size() const;

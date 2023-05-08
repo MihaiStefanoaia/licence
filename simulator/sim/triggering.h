@@ -14,7 +14,7 @@ namespace sim {
         std::list<evaluable*> on_neg;
     public:
         triggering();
-        virtual ~triggering();
+        ~triggering();
         enum trig_type{
             NEGATIVE, POSITIVE, BOTH
         };

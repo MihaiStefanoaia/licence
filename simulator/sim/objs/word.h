@@ -6,17 +6,15 @@
 #define SIMULATOR_WORD_H
 
 #include "bit.h"
+#include "bit_array.h"
 
 namespace sim {
     namespace objs {
 
-        class word {
-            bit* c[16] = {nullptr};
+        class word : public bit_array {
         public:
             word();
             word(const word&);
-            void connect(bit&,int);
-            bit& operator[](int) const;
         };
 
     } // sim

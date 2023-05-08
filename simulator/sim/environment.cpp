@@ -16,7 +16,8 @@ namespace sim {
             topology_file = path;
             parse_phase();
             build_wire_phase();
-            build_module_phase();
+            build_array_phase();
+            build_component_phase();
             build_io_phase();
             config_phase();
             run_phase();
@@ -37,9 +38,19 @@ namespace sim {
             tmp->set_expected_level(wire["level"]);
             wire_db[wire["name"]] = tmp;
         }
+        wire_db["nil"] = &nil;
     }
 
-    void environment::build_module_phase() {
+    void environment::build_array_phase() {
+        for(auto& array : topology["array_db"]){
+            auto* tmp = new objs::bit_array(array["size"]);
+            for(int i = 0; i < tmp->get_size(); i++)
+                tmp->connect(*wire_db[array["args"][i]], i);
+            array_db[array["name"]] = tmp;
+        }
+    }
+
+    void environment::build_component_phase() {
         std::cout << "\ngenerating components:\n";
         for(auto& component : topology["component_db"]){
             evaluable* tmp;
@@ -101,6 +112,7 @@ namespace sim {
         }
     }
     void environment::run_phase() {
+        //will need overhauling once I actually add gui to this
         std::string cli_input;
         std::string cmd, target;
         while(cli_input != "exit") {
@@ -156,6 +168,11 @@ namespace sim {
             delete kvp.second;
         }
         wire_db.clear();
+
+        for(auto const& kvp : array_db){
+            delete kvp.second;
+        }
+        array_db.clear();
 
         for(auto const& kvp : component_db){
             delete kvp.second;

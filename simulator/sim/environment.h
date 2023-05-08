@@ -12,6 +12,8 @@
 #include "environment_generator.h"
 #include "basic_input.h"
 #include "basic_output.h"
+#include "bit_array.h"
+#include "none.h"
 #include <mutex>
 
 namespace sim {
@@ -19,7 +21,9 @@ namespace sim {
     class environment {
     protected:
         nlohmann::json topology;
+        objs::none nil = objs::none();
         std::map<std::string,objs::bit*> wire_db;
+        std::map<std::string,objs::bit_array*> array_db;
         std::map<std::string,evaluable*> component_db;
         std::map<std::string,basic_input*> input_db;
         std::map<std::string,basic_output*> output_db;
@@ -35,10 +39,13 @@ namespace sim {
         unsigned int frame_rate_cap = -1;
         bool clean_exit = false;
         bool has_master_clk = false;
+        bool exit_flag = false;
+
 
         void parse_phase();
         void build_wire_phase();
-        void build_module_phase();
+        void build_array_phase();
+        void build_component_phase();
         void build_io_phase();
         void config_phase();
         void run_phase();

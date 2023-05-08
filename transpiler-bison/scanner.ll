@@ -100,7 +100,8 @@ comment (<<-).*(->>)
 \n+        loc.lines (yyleng); loc.step ();
 {comment}+ loc.step ();
 
-
+"wire"     return yy::parser::make_WIRE   (loc);
+"array"    return yy::parser::make_ARRAY  (loc);
 "("        return yy::parser::make_ARGS_B (loc);
 ")"        return yy::parser::make_ARGS_E (loc);
 "["        return yy::parser::make_ACC_B  (loc);
@@ -109,6 +110,8 @@ comment (<<-).*(->>)
 ";"        return yy::parser::make_SEMIC  (loc);
 ","        return yy::parser::make_COMMA  (loc);
 ":"        return yy::parser::make_COLON  (loc);
+"<"        return yy::parser::make_LT     (loc);
+">"        return yy::parser::make_GT     (loc);
 
 
 {int}      return make_NUMBER (yytext, loc);
