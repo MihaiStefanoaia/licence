@@ -8,11 +8,15 @@ $frame_rate_cap(60);
 
 master_clk master_clk(wire_a);
 
+array<3> test(nil, wire_a);
+
 wire output0;
 wire output1;
 
-and_module and_mod0(wire_a, wire_b, output0);
+and_module and_mod0(test[1], wire_b, output0);
 and_module and_mod1(wire_c, output0, output1);
+
+array<5> chain(wire_b,test[1], test[0], wire_c);
 
 button a(wire_a);
 button b(wire_b);

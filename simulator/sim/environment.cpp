@@ -164,6 +164,7 @@ namespace sim {
     }
 
     void environment::cleanup_phase() {
+        wire_db.erase("nil");
         for(auto const& kvp : wire_db){
             delete kvp.second;
         }

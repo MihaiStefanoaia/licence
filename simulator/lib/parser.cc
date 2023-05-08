@@ -246,20 +246,21 @@ namespace yy {
   {
     switch (that.type_get ())
     {
-      case 12: // NUMBER
+      case 16: // NUMBER
         value.YY_MOVE_OR_COPY< int > (YY_MOVE (that.value));
         break;
 
-      case 14: // stmt
-      case 15: // sys_cmd
-      case 16: // wire_decl
-      case 17: // module_decl
-      case 18: // args
-      case 19: // access
+      case 18: // stmt
+      case 19: // sys_cmd
+      case 20: // wire_decl
+      case 21: // array_decl
+      case 22: // module_decl
+      case 23: // args
+      case 24: // access
         value.YY_MOVE_OR_COPY< nlohmann::json > (YY_MOVE (that.value));
         break;
 
-      case 11: // IDENTIFIER
+      case 15: // IDENTIFIER
         value.YY_MOVE_OR_COPY< std::string > (YY_MOVE (that.value));
         break;
 
@@ -278,20 +279,21 @@ namespace yy {
   {
     switch (that.type_get ())
     {
-      case 12: // NUMBER
+      case 16: // NUMBER
         value.move< int > (YY_MOVE (that.value));
         break;
 
-      case 14: // stmt
-      case 15: // sys_cmd
-      case 16: // wire_decl
-      case 17: // module_decl
-      case 18: // args
-      case 19: // access
+      case 18: // stmt
+      case 19: // sys_cmd
+      case 20: // wire_decl
+      case 21: // array_decl
+      case 22: // module_decl
+      case 23: // args
+      case 24: // access
         value.move< nlohmann::json > (YY_MOVE (that.value));
         break;
 
-      case 11: // IDENTIFIER
+      case 15: // IDENTIFIER
         value.move< std::string > (YY_MOVE (that.value));
         break;
 
@@ -310,20 +312,21 @@ namespace yy {
     state = that.state;
     switch (that.type_get ())
     {
-      case 12: // NUMBER
+      case 16: // NUMBER
         value.copy< int > (that.value);
         break;
 
-      case 14: // stmt
-      case 15: // sys_cmd
-      case 16: // wire_decl
-      case 17: // module_decl
-      case 18: // args
-      case 19: // access
+      case 18: // stmt
+      case 19: // sys_cmd
+      case 20: // wire_decl
+      case 21: // array_decl
+      case 22: // module_decl
+      case 23: // args
+      case 24: // access
         value.copy< nlohmann::json > (that.value);
         break;
 
-      case 11: // IDENTIFIER
+      case 15: // IDENTIFIER
         value.copy< std::string > (that.value);
         break;
 
@@ -341,20 +344,21 @@ namespace yy {
     state = that.state;
     switch (that.type_get ())
     {
-      case 12: // NUMBER
+      case 16: // NUMBER
         value.move< int > (that.value);
         break;
 
-      case 14: // stmt
-      case 15: // sys_cmd
-      case 16: // wire_decl
-      case 17: // module_decl
-      case 18: // args
-      case 19: // access
+      case 18: // stmt
+      case 19: // sys_cmd
+      case 20: // wire_decl
+      case 21: // array_decl
+      case 22: // module_decl
+      case 23: // args
+      case 24: // access
         value.move< nlohmann::json > (that.value);
         break;
 
-      case 11: // IDENTIFIER
+      case 15: // IDENTIFIER
         value.move< std::string > (that.value);
         break;
 
@@ -397,52 +401,58 @@ namespace yy {
         << yysym.location << ": ";
     switch (yytype)
     {
-      case 11: // IDENTIFIER
-#line 51 "parser.yy"
+      case 15: // IDENTIFIER
+#line 56 "parser.yy"
                  { yyo << yysym.value.template as < std::string > (); }
-#line 404 "parser.cc"
+#line 408 "parser.cc"
         break;
 
-      case 12: // NUMBER
-#line 51 "parser.yy"
+      case 16: // NUMBER
+#line 56 "parser.yy"
                  { yyo << yysym.value.template as < int > (); }
-#line 410 "parser.cc"
+#line 414 "parser.cc"
         break;
 
-      case 14: // stmt
-#line 51 "parser.yy"
+      case 18: // stmt
+#line 56 "parser.yy"
                  { yyo << yysym.value.template as < nlohmann::json > (); }
-#line 416 "parser.cc"
+#line 420 "parser.cc"
         break;
 
-      case 15: // sys_cmd
-#line 51 "parser.yy"
+      case 19: // sys_cmd
+#line 56 "parser.yy"
                  { yyo << yysym.value.template as < nlohmann::json > (); }
-#line 422 "parser.cc"
+#line 426 "parser.cc"
         break;
 
-      case 16: // wire_decl
-#line 51 "parser.yy"
+      case 20: // wire_decl
+#line 56 "parser.yy"
                  { yyo << yysym.value.template as < nlohmann::json > (); }
-#line 428 "parser.cc"
+#line 432 "parser.cc"
         break;
 
-      case 17: // module_decl
-#line 51 "parser.yy"
+      case 21: // array_decl
+#line 56 "parser.yy"
                  { yyo << yysym.value.template as < nlohmann::json > (); }
-#line 434 "parser.cc"
+#line 438 "parser.cc"
         break;
 
-      case 18: // args
-#line 51 "parser.yy"
+      case 22: // module_decl
+#line 56 "parser.yy"
                  { yyo << yysym.value.template as < nlohmann::json > (); }
-#line 440 "parser.cc"
+#line 444 "parser.cc"
         break;
 
-      case 19: // access
-#line 51 "parser.yy"
+      case 23: // args
+#line 56 "parser.yy"
                  { yyo << yysym.value.template as < nlohmann::json > (); }
-#line 446 "parser.cc"
+#line 450 "parser.cc"
+        break;
+
+      case 24: // access
+#line 56 "parser.yy"
+                 { yyo << yysym.value.template as < nlohmann::json > (); }
+#line 456 "parser.cc"
         break;
 
       default:
@@ -660,20 +670,21 @@ namespace yy {
          when using variants.  */
       switch (yyr1_[yyn])
     {
-      case 12: // NUMBER
+      case 16: // NUMBER
         yylhs.value.emplace< int > ();
         break;
 
-      case 14: // stmt
-      case 15: // sys_cmd
-      case 16: // wire_decl
-      case 17: // module_decl
-      case 18: // args
-      case 19: // access
+      case 18: // stmt
+      case 19: // sys_cmd
+      case 20: // wire_decl
+      case 21: // array_decl
+      case 22: // module_decl
+      case 23: // args
+      case 24: // access
         yylhs.value.emplace< nlohmann::json > ();
         break;
 
-      case 11: // IDENTIFIER
+      case 15: // IDENTIFIER
         yylhs.value.emplace< std::string > ();
         break;
 
@@ -698,104 +709,120 @@ namespace yy {
           switch (yyn)
             {
   case 2:
-#line 57 "parser.yy"
+#line 62 "parser.yy"
                       {trp.ret += yystack_[1].value.as < nlohmann::json > ();}
-#line 704 "parser.cc"
+#line 715 "parser.cc"
     break;
 
   case 3:
-#line 58 "parser.yy"
+#line 63 "parser.yy"
          {trp.ret = nlohmann::json::array();}
-#line 710 "parser.cc"
+#line 721 "parser.cc"
     break;
 
   case 4:
-#line 61 "parser.yy"
+#line 67 "parser.yy"
           {yylhs.value.as < nlohmann::json > () = yystack_[0].value.as < nlohmann::json > ();}
-#line 716 "parser.cc"
+#line 727 "parser.cc"
     break;
 
   case 5:
-#line 62 "parser.yy"
+#line 68 "parser.yy"
               {yylhs.value.as < nlohmann::json > () = yystack_[0].value.as < nlohmann::json > ();}
-#line 722 "parser.cc"
+#line 733 "parser.cc"
     break;
 
   case 6:
-#line 63 "parser.yy"
-             {yylhs.value.as < nlohmann::json > () = yystack_[0].value.as < nlohmann::json > ();}
-#line 728 "parser.cc"
+#line 69 "parser.yy"
+            {yylhs.value.as < nlohmann::json > () = yystack_[0].value.as < nlohmann::json > ();}
+#line 739 "parser.cc"
     break;
 
   case 7:
-#line 66 "parser.yy"
+#line 70 "parser.yy"
+             {yylhs.value.as < nlohmann::json > () = yystack_[0].value.as < nlohmann::json > ();}
+#line 745 "parser.cc"
+    break;
+
+  case 8:
+#line 74 "parser.yy"
                                         {
     yylhs.value.as < nlohmann::json > ()["stmt_type"] = "sys_cmd";
     yylhs.value.as < nlohmann::json > ()["type"] = yystack_[3].value.as < std::string > ();
     yylhs.value.as < nlohmann::json > ()["value"] = yystack_[1].value.as < int > ();
   }
-#line 738 "parser.cc"
-    break;
-
-  case 8:
-#line 74 "parser.yy"
-                        {
-    yylhs.value.as < nlohmann::json > ()["stmt_type"] = "wire_decl";
-    yylhs.value.as < nlohmann::json > ()["type"] = yystack_[1].value.as < std::string > ();
-    yylhs.value.as < nlohmann::json > ()["name"] = yystack_[0].value.as < std::string > ();
-  }
-#line 748 "parser.cc"
+#line 755 "parser.cc"
     break;
 
   case 9:
-#line 81 "parser.yy"
+#line 82 "parser.yy"
+                  {
+    yylhs.value.as < nlohmann::json > ()["stmt_type"] = "wire_decl";
+    yylhs.value.as < nlohmann::json > ()["name"] = yystack_[0].value.as < std::string > ();
+  }
+#line 764 "parser.cc"
+    break;
+
+  case 10:
+#line 88 "parser.yy"
+                                                  {
+    yylhs.value.as < nlohmann::json > ()["stmt_type"] = "array_decl";
+    yylhs.value.as < nlohmann::json > ()["name"] = yystack_[3].value.as < std::string > ();
+    yylhs.value.as < nlohmann::json > ()["size"] = yystack_[5].value.as < int > ();
+    yylhs.value.as < nlohmann::json > ()["args"] = yystack_[1].value.as < nlohmann::json > ();
+  }
+#line 775 "parser.cc"
+    break;
+
+  case 11:
+#line 97 "parser.yy"
                                           {
     yylhs.value.as < nlohmann::json > ()["stmt_type"] = "module_decl";
     yylhs.value.as < nlohmann::json > ()["type"] = yystack_[4].value.as < std::string > ();
     yylhs.value.as < nlohmann::json > ()["name"] = yystack_[3].value.as < std::string > ();
     yylhs.value.as < nlohmann::json > ()["args"] = yystack_[1].value.as < nlohmann::json > ();
   }
-#line 759 "parser.cc"
+#line 786 "parser.cc"
     break;
 
-  case 10:
-#line 89 "parser.yy"
+  case 12:
+#line 105 "parser.yy"
                    {
     yylhs.value.as < nlohmann::json > () = yystack_[2].value.as < nlohmann::json > ();
     yylhs.value.as < nlohmann::json > () += yystack_[0].value.as < nlohmann::json > ();
   }
-#line 768 "parser.cc"
+#line 795 "parser.cc"
     break;
 
-  case 11:
-#line 93 "parser.yy"
+  case 13:
+#line 109 "parser.yy"
          {
     yylhs.value.as < nlohmann::json > () = {yystack_[0].value.as < nlohmann::json > ()};
   }
-#line 776 "parser.cc"
+#line 803 "parser.cc"
     break;
 
-  case 12:
-#line 98 "parser.yy"
+  case 14:
+#line 114 "parser.yy"
             {
     yylhs.value.as < nlohmann::json > ()["type"] = "basic";
     yylhs.value.as < nlohmann::json > ()["name"] = yystack_[0].value.as < std::string > ();
   }
-#line 785 "parser.cc"
+#line 812 "parser.cc"
     break;
 
-  case 13:
-#line 102 "parser.yy"
+  case 15:
+#line 118 "parser.yy"
                                {
-    yylhs.value.as < nlohmann::json > ()["type"] = "array";
+    yylhs.value.as < nlohmann::json > ()["type"] = "array_access";
     yylhs.value.as < nlohmann::json > ()["name"] = yystack_[3].value.as < std::string > ();
-    yylhs.value.as < nlohmann::json > ()["value"] = yystack_[1].value.as < int > ();
+    yylhs.value.as < nlohmann::json > ()["index"] = yystack_[1].value.as < int > ();
   }
-#line 795 "parser.cc"
+#line 822 "parser.cc"
     break;
 
 
-#line 799 "parser.cc"
+#line 826 "parser.cc"
 
             default:
               break;
@@ -984,7 +1011,7 @@ namespace yy {
        - If this state is a consistent state with a default action, then
          the only way this function was invoked is if the default action
          is an error action.  In that case, don't check for expected
-         tokens because there are nil.
+         tokens because there are none.
        - The only way there can be no lookahead present (in yyla) is
          if this state is a consistent state with a default action.
          Thus, detecting the absence of a lookahead is sufficient to
@@ -1066,72 +1093,79 @@ namespace yy {
   }
 
 
-  const signed char parser::yypact_ninf_ = -10;
+  const signed char parser::yypact_ninf_ = -14;
 
   const signed char parser::yytable_ninf_ = -1;
 
   const signed char
   parser::yypact_[] =
   {
-     -10,     0,   -10,    -9,    -8,    -4,   -10,   -10,   -10,     2,
-       5,   -10,    -2,     1,     9,     4,    -3,   -10,   -10,     3,
-     -10,     1,     8,   -10,   -10
+     -14,     0,   -14,   -13,   -11,    -8,    -6,     2,   -14,   -14,
+     -14,   -14,    10,   -14,    -2,    13,   -14,     1,     4,     5,
+      15,     6,    17,    -3,   -14,   -14,    20,     8,   -14,     5,
+       5,    19,   -14,    -1,   -14,   -14
   };
 
   const signed char
   parser::yydefact_[] =
   {
-       3,     0,     1,     0,     0,     0,     4,     6,     5,     0,
-       8,     2,     0,     0,     0,    12,     0,    11,     7,     0,
-       9,     0,     0,    10,    13
+       3,     0,     1,     0,     0,     0,     0,     0,     4,     6,
+       7,     5,     0,     9,     0,     0,     2,     0,     0,     0,
+       0,     0,    14,     0,    13,     8,     0,     0,    11,     0,
+       0,     0,    12,     0,    15,    10
   };
 
   const signed char
   parser::yypgoto_[] =
   {
-     -10,   -10,   -10,   -10,   -10,   -10,    -5,   -10
+     -14,   -14,   -14,   -14,   -14,   -14,    -4,     3,   -14
   };
 
   const signed char
   parser::yydefgoto_[] =
   {
-      -1,     5,     6,     7,     8,    16,    17,     1
+      -1,     7,     8,     9,    10,    11,    23,    24,     1
   };
 
   const signed char
   parser::yytable_[] =
   {
-       2,    20,     9,    10,    11,    12,    21,     3,    13,    19,
-      14,     4,    15,    18,    24,    22,    23
+       2,    28,    12,    35,    13,    14,    29,     3,    29,    15,
+      16,     4,     5,    17,    18,     6,    19,    20,    21,    25,
+      22,    26,    27,    30,    31,    34,    33,     0,     0,     0,
+       0,     0,    32
   };
 
   const signed char
   parser::yycheck_[] =
   {
-       0,     4,    11,    11,     8,     3,     9,     7,     3,     5,
-      12,    11,    11,     4,     6,    12,    21
+       0,     4,    15,     4,    15,    13,     9,     7,     9,    15,
+       8,    11,    12,     3,    16,    15,     3,    16,    14,     4,
+      15,    15,     5,     3,    16,     6,    30,    -1,    -1,    -1,
+      -1,    -1,    29
   };
 
   const signed char
   parser::yystos_[] =
   {
-       0,    20,     0,     7,    11,    14,    15,    16,    17,    11,
-      11,     8,     3,     3,    12,    11,    18,    19,     4,     5,
-       4,     9,    12,    19,     6
+       0,    25,     0,     7,    11,    12,    15,    18,    19,    20,
+      21,    22,    15,    15,    13,    15,     8,     3,    16,     3,
+      16,    14,    15,    23,    24,     4,    15,     5,     4,     9,
+       3,    16,    24,    23,     6,     4
   };
 
   const signed char
   parser::yyr1_[] =
   {
-       0,    13,    20,    20,    14,    14,    14,    15,    16,    17,
-      18,    18,    19,    19
+       0,    17,    25,    25,    18,    18,    18,    18,    19,    20,
+      21,    22,    23,    23,    24,    24
   };
 
   const signed char
   parser::yyr2_[] =
   {
-       0,     2,     3,     0,     1,     1,     1,     5,     2,     5,
-       3,     1,     1,     4
+       0,     2,     3,     0,     1,     1,     1,     1,     5,     2,
+       8,     5,     3,     1,     1,     4
   };
 
 
@@ -1142,17 +1176,17 @@ namespace yy {
   const parser::yytname_[] =
   {
   "\"end of file\"", "error", "$undefined", "\"(\"", "\")\"", "\"[\"",
-  "\"]\"", "\"$\"", "\";\"", "\",\"", "\":\"", "IDENTIFIER", "NUMBER",
-  "$accept", "stmt", "sys_cmd", "wire_decl", "module_decl", "args",
-  "access", "document", YY_NULLPTR
+  "\"]\"", "\"$\"", "\";\"", "\",\"", "\":\"", "\"wire\"", "\"array\"",
+  "\"<\"", "\">\"", "IDENTIFIER", "NUMBER", "$accept", "stmt", "sys_cmd",
+  "wire_decl", "array_decl", "module_decl", "args", "access", "document", YY_NULLPTR
   };
 
 #if YYDEBUG
   const signed char
   parser::yyrline_[] =
   {
-       0,    57,    57,    58,    61,    62,    63,    66,    74,    81,
-      89,    93,    98,   102
+       0,    62,    62,    63,    67,    68,    69,    70,    74,    82,
+      88,    97,   105,   109,   114,   118
   };
 
   // Print the state stack on the debug stream.
@@ -1186,9 +1220,9 @@ namespace yy {
 
 
 } // yy
-#line 1190 "parser.cc"
+#line 1224 "parser.cc"
 
-#line 107 "parser.yy"
+#line 123 "parser.yy"
 
 
 void

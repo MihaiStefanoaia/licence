@@ -67,7 +67,7 @@ stmt:
   sys_cmd {$$ = $1;};
 | module_decl {$$ = $1;}
 | wire_decl {$$ = $1;}
-| array_decl {$$ = $1};
+| array_decl {$$ = $1;};
 ;
 
 sys_cmd:
@@ -75,7 +75,7 @@ sys_cmd:
     $$["stmt_type"] = "sys_cmd";
     $$["type"] = $2;
     $$["value"] = $4;
-  }
+  };
 ;
 
 wire_decl:
@@ -88,9 +88,9 @@ array_decl:
   ARRAY LT NUMBER GT IDENTIFIER ARGS_B args ARGS_E{
     $$["stmt_type"] = "array_decl";
     $$["name"] = $5;
-    $$["size"] = $2;
+    $$["size"] = $3;
     $$["args"] = $7;
-  }
+  };
 ;
 
 module_decl:
@@ -116,9 +116,9 @@ access:
     $$["name"] = $1;
   }
 | IDENTIFIER ACC_B NUMBER ACC_E{
-    $$["type"] = "array";
+    $$["type"] = "array_access";
     $$["name"] = $1;
-    $$["value"] = $3;
+    $$["index"] = $3;
   };
 %%
 

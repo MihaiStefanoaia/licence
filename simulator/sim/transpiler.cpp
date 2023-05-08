@@ -2,6 +2,7 @@
 #include "transpiler.h"
 namespace sim{
     transpiler::transpiler() : trace_scanning(false), trace_parsing(false){
+        result = 0;
     }
 
     int transpiler::parse(const std::string& str){
@@ -29,10 +30,13 @@ namespace sim{
 
     void transpiler::setup_dbs() {
         std::set<std::string> identifiers = {"nil"};
-        std::map<std::string,unsigned int> valid_modules = {{"and_module",3},{"master_clk",1}};
-        std::map<std::string,unsigned int> valid_arrays  = {{"byte",8},{"word",16}};
-        std::map<std::string,unsigned int> valid_inputs  = {{"button",1}};
-        std::map<std::string,unsigned int> valid_outputs = {{"led",1}};
+
+        // these are the valid modules, and the list contains the width of each argument
+        // the number of arguments can be inferred from the length of the list
+        std::map<std::string,std::vector<unsigned int>> valid_modules = {{"and_module",{1,1,1}},{"master_clk",{1}}};
+        std::map<std::string,std::vector<unsigned int>> valid_inputs  = {{"button",{1}}};
+        std::map<std::string,std::vector<unsigned int>> valid_outputs = {{"led",{1}}};
+
         std::set<std::string> valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap"};
         nlohmann::json fin;
         std::string err;
@@ -51,7 +55,7 @@ namespace sim{
             //if it is a new identifier, add it to the list of reserved identifiers
             if(stmt["stmt_type"] != "sys_cmd"){
                 if(identifiers.count(stmt["name"]))
-                    throw std::runtime_error("Identifier \"" + std::string(stmt["name"]) + "\" is defined multiple times.");
+                    throw std::runtime_error("Identifier \"" + std::string(stmt["name"]) + "\" is defined multiple times");
                 identifiers.insert(stmt["name"]);
             }
 
@@ -65,15 +69,14 @@ namespace sim{
                 nlohmann::json tmp;
                 tmp["name"] = stmt["name"];
                 tmp["size"] = stmt["size"];
+                if(tmp["size"] < 2)
+                    throw std::runtime_error("an array cannot be smaller than 2 elements");
                 tmp["args"] = nlohmann::json::array();
                 for(auto arg : stmt["args"]){
-                    if(arg["type"] == "basic"){ // replace this thing with the "resolve_lookup" function
-                        if(!identifiers.count(arg["name"]))
-                            throw std::runtime_error("Identifier \"" + std::string(arg["name"]) + "\" is not defined");
-                        tmp["args"] += arg["name"];
-                    } else {
-                        throw std::runtime_error("Unsupported feature (yet)");
-                    }
+                    auto info = resolve_access(fin,arg);
+                    if(info.second != 1)
+                        throw std::runtime_error("argument with invalid length " + std::to_string(info.second) + " in generating array " + std::string(arg["name"]));
+                    tmp["args"] += info.first;
                 }
                 // allow for incomplete definition by padding the end with nil
                 // for example the statement:
@@ -92,48 +95,57 @@ namespace sim{
 
                 fin["array_db"] += tmp;
 
-            } else if(stmt["stmt_type"] == "module_decl"){ //generate a module (including io modules)
+            } else if(stmt["stmt_type"] == "module_decl"){ //generate a module (including I/O modules)
                 if( !valid_modules.count(stmt["type"]) &&
                     !valid_inputs .count(stmt["type"]) &&
                     !valid_outputs.count(stmt["type"])) //check for a valid type
-                    throw std::runtime_error("Invalid type identifier " + std::string(stmt["type"]));
+                    throw std::runtime_error("Invalid type identifier \"" + std::string(stmt["type"]) + "\"");
                 nlohmann::json tmp;
+                std::vector<unsigned int> arg_sizes;
+
                 tmp["name"] = stmt["name"];
                 tmp["type"] = stmt["type"];
                 tmp["args"] = nlohmann::json::array();
-                for(auto arg : stmt["args"]){
-                    if(arg["type"] == "basic"){ //once again, replace with "resolve_lookup" once implemented
-                        if(!identifiers.count(arg["name"]))
-                            throw std::runtime_error("Identifier \"" + std::string(arg["name"]) + "\" is not defined");
-                        tmp["args"] += arg["name"];
-                    } else {
-                        throw std::runtime_error("Unsupported feature (yet)");
-                    }
+
+                if(valid_inputs.count(tmp["type"])){
+                    arg_sizes = valid_inputs[tmp["type"]];
+                } else if(valid_modules.count(tmp["type"])){
+                    arg_sizes = valid_modules[tmp["type"]];
+                } else {
+                    arg_sizes = valid_outputs[tmp["type"]];
                 }
-                size_t argc = tmp["args"].size();
+
                 // check for correct amount of arguments, this time it is important
-                if( (valid_inputs .count(tmp["type"]) && argc != valid_inputs [tmp["type"]]) ||
-                    (valid_modules.count(tmp["type"]) && argc != valid_modules[tmp["type"]]) ||
-                    (valid_outputs.count(tmp["type"]) && argc != valid_outputs[tmp["type"]])){
+                if(stmt["args"].size() != arg_sizes.size()){
                     unsigned int expected = 0;
                     if(valid_inputs.count(tmp["type"])){
-                        expected = valid_inputs[tmp["type"]];
+                        expected = valid_inputs[tmp["type"]].size();
                     } else if(valid_modules.count(tmp["type"])){
-                        expected = valid_modules[tmp["type"]];
+                        expected = valid_modules[tmp["type"]].size();
                     } else {
-                        expected = valid_outputs[tmp["type"]];
+                        expected = valid_outputs[tmp["type"]].size();
                     }
                     err = "incorrect amount of arguments in generation of module ";
                     err += std::string(tmp["type"]);
                     err += " (expected " + std::to_string(expected);
-                    err += ", got " + std::to_string(argc) + ")";
+                    err += ", got " + std::to_string(arg_sizes.size()) + ")";
                     throw std::runtime_error(err);
                 }
+
+                int i = 0;
+                for(auto arg : stmt["args"]){
+                    auto info = resolve_access(fin,arg);
+                    if(info.second != arg_sizes[i])
+                        throw std::runtime_error("incorrect argument size");
+                    tmp["args"] += info.first;
+                    i++;
+                }
+
                 // check if it is an instance of master_clk and if it is, check if there is another
                 // otherwise just add it to the appropriate database
                 if(tmp["type"] == "master_clk"){
                     if(fin["config_db"].contains("master_clk"))
-                        throw std::runtime_error("Only one instance of master_clk is allowed");
+                        throw std::runtime_error("only one instance of master_clk is allowed");
 //                    throw std::runtime_error("not supported yet....");
                     fin["config_db"]["reactive_only"] = 0;
                     fin["config_db"]["master_clk"] = tmp["args"][0];
@@ -156,8 +168,33 @@ namespace sim{
         std::cout << ret.dump(2);
     }
 
-    std::string transpiler::resolve_lookup(nlohmann::json &dbs, nlohmann::json &lookup) {
-        return {};
+    std::pair<std::string,unsigned int> transpiler::resolve_access(nlohmann::json &dbs, nlohmann::json &lookup) {
+        if(lookup["type"] == "basic") {
+            if(lookup["name"] == "nil")
+                return {"nil",1};
+
+            for(auto& wire : dbs["wire_db"])
+                if(lookup["name"] == wire["name"])
+                    return {lookup["name"],1};
+
+            for(auto& array : dbs["array_db"])
+                if(lookup["name"] == array["name"])
+                    return {lookup["name"],array["size"]};
+
+        } else if(lookup["type"] == "array_access"){
+            for(auto& arr : dbs["array_db"]){
+                if(lookup["name"] == arr["name"]) {
+                    int i = lookup["index"];
+                    if (i < arr["size"])
+                        return {arr["args"][i], 1};
+                    else
+                        throw std::runtime_error("array access out of bounds (" + std::to_string(i) + " with maximum of " + std::string(arr["size"]) + ")");
+                }
+            }
+        } else {
+            throw std::runtime_error("invalid or unsupported access type");
+        }
+        throw std::runtime_error("identifier \"" + std::string(lookup["name"]) + "\" does not exist");
     }
 
 }

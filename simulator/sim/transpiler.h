@@ -23,7 +23,7 @@ namespace sim{
         bool trace_parsing;
 
         void setup_dbs();
-        static std::string resolve_lookup(nlohmann::json&,nlohmann::json&);
+        static std::pair<std::string,unsigned int> resolve_access(nlohmann::json &dbs, nlohmann::json &lookup);
     public:
         yy::location location;
         static nlohmann::json transpile(const std::string&);
