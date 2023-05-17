@@ -9,6 +9,9 @@
 #include "mux2x1.h"
 #include "button.h"
 #include "led.h"
+#include "not_module.h"
+#include "tiny_cpu.h"
+#include "tiny_mem.h"
 
 namespace sim {
     void environment::start(const std::string& path) {
@@ -60,13 +63,55 @@ namespace sim {
                 auto* b = wire_db[component["args"][1]];
                 auto* o = wire_db[component["args"][2]];
                 tmp = new objs::and_module(*a,*b,*o, false);
-            } else {
+            } else if(component["type"] == "not_module"){
+                std::cout << "not_module " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ")" << "; level "<< component["level"] <<'\n';
+                auto* i = wire_db[component["args"][0]];
+                auto* o = wire_db[component["args"][1]];
+                tmp = new objs::not_module(*i, *o);
+            } else if(component["type"] == "tiny_cpu") {
+                auto& args = component["args"];
+                std::cout << "tiny_cpu " << component["name"] << "(" << args.dump() << "); level " << component["level"] << '\n';
+
+                auto* addr_o = array_db[args[0]];
+                auto* data_i = array_db[args[1]];
+                auto* data_o = array_db[args[2]];
+
+                auto* active = wire_db[args[3]];
+                auto* rw = wire_db[args[4]];
+                auto* ready = wire_db[args[5]];
+
+                auto* port_i = array_db[args[6]];
+                auto* port_o = array_db[args[7]];
+
+                auto* interr = wire_db[args[8]];
+                auto* CLK = wire_db[args[9]];
+                auto* RST = wire_db[args[10]];
+
+                tmp = new objs::tiny_cpu(*addr_o,*data_i,*data_o,*active,*rw,*ready,*port_i,*port_o,*interr,*CLK,*RST);
+            } else if(component["type"] == "tiny_mem") {
+                auto& args = component["args"];
+                std::cout << "tiny_mem " << component["name"] << "(" << args.dump() << "); level " << component["level"] << '\n';
+
+                auto* addr_i = array_db[args[0]];
+                auto* data_i = array_db[args[1]];
+                auto* data_o = array_db[args[2]];
+
+                auto* active = wire_db[args[3]];
+                auto* rw = wire_db[args[4]];
+                auto* ready = wire_db[args[5]];
+                auto* CLK = wire_db[args[6]];
+                auto* RST = wire_db[args[7]];
+
+                tmp = new objs::tiny_mem(*addr_i,*data_i,*data_o,*active,*rw,*ready,*CLK,*RST);
+            } else if(component["type"] == "mux2x1") {
                 std::cout << "mux2x1 " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ", "<< component["args"][2] << ", "<< component["args"][3] << ", " << ")" << "; level "<< component["level"] <<'\n';
                 auto* a = wire_db[component["args"][0]];
                 auto* b = wire_db[component["args"][1]];
                 auto* s = wire_db[component["args"][2]];
                 auto* o = wire_db[component["args"][3]];
                 tmp = new objs::mux2x1(*a,*b,*s,*o);
+            } else {
+                throw std::runtime_error("invalid type. how did you manage to pass all the fail safes?");
             }
             tmp->set_expected_level(component["level"]);
             component_db[component["name"]] = tmp;

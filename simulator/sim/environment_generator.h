@@ -13,6 +13,7 @@ namespace sim {
     public:
         static nlohmann::json generate(const std::string &path);
         static nlohmann::json example();
+        static nlohmann::json tiny_playground();
     };
 
 } // sim

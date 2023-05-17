@@ -192,11 +192,19 @@ namespace sim{
     }
 
     void transpiler::graph_analysis() {
-        std::list<node*> wire_pool;
-        std::list<node*> pos_graph;
-        std::list<node*> neg_graph;
+        std::map<std::string,node*> elements;
         for(auto& wire : ret["wire_db"]){
-            wire_pool.push_back(new node(wire["name"],"wire"));
+            elements[wire["name"]] = new node(wire["name"], "wire");
+        }
+        for(auto& input : ret["io_db"]["inputs"]){
+            elements[input["name"]] = new node(input["name"],input["type"]);
+            if(input["type"] == "button"){
+                for(auto& arg : input["args"]){
+                }
+            }
+        }
+
+        for(auto& component : ret["component_db"]){
         }
     }
 

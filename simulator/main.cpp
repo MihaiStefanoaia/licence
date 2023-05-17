@@ -8,7 +8,9 @@
 
 ///demo sim for ((a&b)&c)
 int main(int argc, char** argv){
+    std::cout << sim::environment_generator::tiny_playground().dump(2) << "\n\n\n\n\n";
     std::cout << sim::environment_generator::generate("example.ndl").dump(2) << '\n';
+    return 0;
     sim::environment env;
     auto server_core = [](sim::environment* env){
         env->start();

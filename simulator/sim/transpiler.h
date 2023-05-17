@@ -5,6 +5,8 @@
 #include "json.hpp"
 #include <string>
 #include <list>
+#include <set>
+#include <map>
 #include <utility>
 #include "parser.hh"
 
@@ -26,7 +28,7 @@ namespace sim{
 
         // these are the valid modules, and the list contains the width of each argument
         // the number of arguments can be inferred from the length of the list
-        std::map<std::string,std::vector<unsigned int>> valid_modules = {{"and_module",{1,1,1}},{"master_clk",{1}}};
+        std::map<std::string,std::vector<unsigned int>> valid_modules = {{"and_module",{1,1,1}},{"master_clk",{1}},{"not_module",{1,1}},{"tiny_cpu",{4,4,4,1,1,1,4,4,1,1,1}},{"tiny_mem",{4,4,4,1,1,1,1,1}}};
         std::map<std::string,std::vector<unsigned int>> valid_inputs  = {{"button",{1}}};
         std::map<std::string,std::vector<unsigned int>> valid_outputs = {{"led",{1}}};
 
@@ -40,14 +42,20 @@ namespace sim{
         public:
             std::string name;
             std::string n_type;
-            std::list<node*> incoming;
-            std::list<node*> outgoing;
-            int level;
+            int level_pos = 0;
+            int level_neg = 0;
+            struct {
+                bool at_neg = false;
+                bool at_pos = false;
+            } driven, read;
             bool visited = false;
             node(std::string name, std::string n_type){
                 this->name = std::move(name);
                 this->n_type = std::move(n_type);
             };
+            int possible_level() const{
+                return std::max(level_pos,level_neg);
+            }
         };
     public:
         yy::location location;

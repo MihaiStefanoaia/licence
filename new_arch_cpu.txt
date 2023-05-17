@@ -190,6 +190,65 @@ if _flag >= 8:
 
 
 ======================================================================
+MICROCODE
+======================================================================
+
+the microcode is the set of smallest instructions that can be executed.
+these instructions can be run in parallel, along as they do not interfere.
+the microcode instructions are the following:
+
+nop // used to signal the end of an instruction
+
+rga_to_op1
+rgb_to_op1
+... // all 8 bit registers, including the derived ones
+rpl_to_op1
+rph_to_op1
+mem_to_op1 // the memory buffer
+
+rga_to_op2
+rgb_to_op2
+... // all 8 bit registers, including the derived ones
+rph_to_op2
+imm_to_op2 // the immediate portion of the instruction register
+
+op1_to_rga
+... // again, all 8 bit registers
+op1_to_rph
+op1_to_mem
+
+op2_to_rml
+op2_to_rmh
+... // only the derived 8 bit registers
+op2_to_rpl
+op2_to_rph
+op2_to_rgb // for the mul and div operations
+
+
+rmx_to_addr
+rsx_to_addr
+rbx_to_addr
+rpx_to_addr
+
+rsx_to_rbx //makes the calls faster
+rbx_to_rsx
+
+mem_rd_start
+mem_wr_start
+mem_wait
+
+alu_start
+alu_wait
+
+alu16_start
+alu16_wait
+
+cond_loc_to_rpx // conditionally move bytes 1 and 2 of rgi into rpx, used for jumping. see jmp instruction
+cond_push_frame // conditionally push rpx|rbx onto the call register array
+pop_frame       // return
+
+
+======================================================================
 ROM LAYOUT
 ======================================================================
 
