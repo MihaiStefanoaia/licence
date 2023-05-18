@@ -9,6 +9,9 @@
 #include "mux2x1.h"
 #include "button.h"
 #include "led.h"
+#include "not_module.h"
+#include "tiny_cpu.h"
+#include "tiny_mem.h"
 
 namespace sim {
     void environment::start(const std::string& path) {
@@ -16,12 +19,14 @@ namespace sim {
             topology_file = path;
             parse_phase();
             build_wire_phase();
-            build_module_phase();
+            build_array_phase();
+            build_component_phase();
             build_io_phase();
-            pre_run_phase();
+            config_phase();
             run_phase();
             cleanup_phase();
         } while(!clean_exit);
+        std::cout << "exiting cleanly\n";
     }
 
     void environment::parse_phase() {
@@ -36,9 +41,19 @@ namespace sim {
             tmp->set_expected_level(wire["level"]);
             wire_db[wire["name"]] = tmp;
         }
+        wire_db["nil"] = &nil;
     }
 
-    void environment::build_module_phase() {
+    void environment::build_array_phase() {
+        for(auto& array : topology["array_db"]){
+            auto* tmp = new objs::bit_array(array["size"]);
+            for(int i = 0; i < tmp->get_size(); i++)
+                tmp->connect(*wire_db[array["args"][i]], i);
+            array_db[array["name"]] = tmp;
+        }
+    }
+
+    void environment::build_component_phase() {
         std::cout << "\ngenerating components:\n";
         for(auto& component : topology["component_db"]){
             evaluable* tmp;
@@ -48,13 +63,55 @@ namespace sim {
                 auto* b = wire_db[component["args"][1]];
                 auto* o = wire_db[component["args"][2]];
                 tmp = new objs::and_module(*a,*b,*o, false);
-            } else {
+            } else if(component["type"] == "not_module"){
+                std::cout << "not_module " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ")" << "; level "<< component["level"] <<'\n';
+                auto* i = wire_db[component["args"][0]];
+                auto* o = wire_db[component["args"][1]];
+                tmp = new objs::not_module(*i, *o);
+            } else if(component["type"] == "tiny_cpu") {
+                auto& args = component["args"];
+                std::cout << "tiny_cpu " << component["name"] << "(" << args.dump() << "); level " << component["level"] << '\n';
+
+                auto* addr_o = array_db[args[0]];
+                auto* data_i = array_db[args[1]];
+                auto* data_o = array_db[args[2]];
+
+                auto* active = wire_db[args[3]];
+                auto* rw = wire_db[args[4]];
+                auto* ready = wire_db[args[5]];
+
+                auto* port_i = array_db[args[6]];
+                auto* port_o = array_db[args[7]];
+
+                auto* interr = wire_db[args[8]];
+                auto* CLK = wire_db[args[9]];
+                auto* RST = wire_db[args[10]];
+
+                tmp = new objs::tiny_cpu(*addr_o,*data_i,*data_o,*active,*rw,*ready,*port_i,*port_o,*interr,*CLK,*RST);
+            } else if(component["type"] == "tiny_mem") {
+                auto& args = component["args"];
+                std::cout << "tiny_mem " << component["name"] << "(" << args.dump() << "); level " << component["level"] << '\n';
+
+                auto* addr_i = array_db[args[0]];
+                auto* data_i = array_db[args[1]];
+                auto* data_o = array_db[args[2]];
+
+                auto* active = wire_db[args[3]];
+                auto* rw = wire_db[args[4]];
+                auto* ready = wire_db[args[5]];
+                auto* CLK = wire_db[args[6]];
+                auto* RST = wire_db[args[7]];
+
+                tmp = new objs::tiny_mem(*addr_i,*data_i,*data_o,*active,*rw,*ready,*CLK,*RST);
+            } else if(component["type"] == "mux2x1") {
                 std::cout << "mux2x1 " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ", "<< component["args"][2] << ", "<< component["args"][3] << ", " << ")" << "; level "<< component["level"] <<'\n';
                 auto* a = wire_db[component["args"][0]];
                 auto* b = wire_db[component["args"][1]];
                 auto* s = wire_db[component["args"][2]];
                 auto* o = wire_db[component["args"][3]];
                 tmp = new objs::mux2x1(*a,*b,*s,*o);
+            } else {
+                throw std::runtime_error("invalid type. how did you manage to pass all the fail safes?");
             }
             tmp->set_expected_level(component["level"]);
             component_db[component["name"]] = tmp;
@@ -76,7 +133,20 @@ namespace sim {
         }
     }
 
-    void environment::pre_run_phase() {
+    void environment::config_phase() {
+        auto const& configs = topology["config_db"];
+        if(configs.contains("sim_frequency_min")){
+            sim_frequency_min = configs["sim_frequency_min"];
+        } else if(configs.contains("sim_frequency_max")){
+            sim_frequency_max = configs["sim_frequency_max"];
+        } else if(configs.contains("frame_rate_cap")){
+            frame_rate_cap = configs["frame_rate_cap"];
+        } else if(configs.contains("reactive_only")){
+            reactive_only = configs["reactive_only"];
+        }
+        if(!reactive_only)
+            master_clk = wire_db[configs["master_clk"]];
+
         for (auto const &kvp: wire_db) {
             std::cout << "adding wire " << kvp.first << " at level " << kvp.second->get_expected_level() << '\n';
             evl.add_on_expected_level(kvp.second);
@@ -87,6 +157,7 @@ namespace sim {
         }
     }
     void environment::run_phase() {
+        //will need overhauling once I actually add gui to this
         std::string cli_input;
         std::string cmd, target;
         while(cli_input != "exit") {
@@ -138,10 +209,16 @@ namespace sim {
     }
 
     void environment::cleanup_phase() {
+        wire_db.erase("nil");
         for(auto const& kvp : wire_db){
             delete kvp.second;
         }
         wire_db.clear();
+
+        for(auto const& kvp : array_db){
+            delete kvp.second;
+        }
+        array_db.clear();
 
         for(auto const& kvp : component_db){
             delete kvp.second;

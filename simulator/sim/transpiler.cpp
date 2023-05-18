@@ -1,127 +1,211 @@
-//
-// Created by mihai-laptop on 4/4/23.
-//
-
-#include <fstream>
-#include <regex>
-#include <iostream>
-#include <locale>
 #include <set>
 #include "transpiler.h"
-#include <stdexcept>
-
-namespace sim {
-    std::stringstream transpiler::preprocess_file(const std::string& path) {
-
-        std::ifstream file(path);
-
-        std::string processed(std::istreambuf_iterator<char>(file),{});
-
-//        std::cout << processed << '\n';
-        processed = std::regex_replace(processed,std::regex("<<-.*->>")," ");
-
-        processed = std::regex_replace(processed,std::regex(";")," ; ");
-        processed = std::regex_replace(processed,std::regex("=")," = ");
-        processed = std::regex_replace(processed,std::regex("\\.")," . ");
-        processed = std::regex_replace(processed,std::regex(",")," , ");
-
-        processed = std::regex_replace(processed,std::regex("\\(")," ( ");
-        processed = std::regex_replace(processed,std::regex("\\)")," ) ");
-
-        processed = std::regex_replace(processed,std::regex("\\[")," [ ");
-        processed = std::regex_replace(processed,std::regex("\\]")," ] ");
-
-//        std::cout << processed << '\n';
-        std::stringstream ret(processed);
-        return ret;
+namespace sim{
+    transpiler::transpiler() : trace_scanning(false), trace_parsing(false){
+        result = 0;
     }
 
+    int transpiler::parse(const std::string& str){
+        file = str;
+        location.initialize (&file);
+        scan_begin ();
+        yy::parser parse (*this);
+        parse.set_debug_level (trace_parsing);
+        int res = parse ();
+        scan_end ();
+        return res;
+    }
 
 
     nlohmann::json transpiler::transpile(const std::string &path) {
-        auto preprocessed = preprocess_file(path);
-        auto tokens = tokenize(preprocessed);
-        auto ast = generate_ast(tokens);
-        auto ret = add_semantics(ast);
-        return ret;
+        transpiler instance;
+        int parse_res = instance.parse(path);
+        if(parse_res){
+            std::string str = "Parser exited with status " + std::to_string(parse_res);
+            throw std::runtime_error(str);
+        }
+        instance.setup_dbs();
+        instance.graph_analysis();
+        return instance.ret;
     }
 
-    std::list<transpiler::token> transpiler::tokenize(std::stringstream &ss) {
-        std::set<std::string> wires = {"wire", "byte", "word"};
-        std::set<std::string> modules = {"and_module"};
-        std::map<std::string,token::token_type> basic_tokens = {{"(",token::ARGS_BEGIN},
-                                                                {")",token::ARGS_END},
-                                                                {";",token::DECL_END},
-                                                                {",",token::LIST_DELIMITER},
-                                                                {".",token::ACCESSOR},
-                                                                {"[",token::ARRAY_ACCESSOR_BEGIN},
-                                                                {"]",token::ARRAY_ACCESSOR_END}};
-        std::list<transpiler::token> ret = {};
-        std::string str;
-        while(ss >> str){
-            std::cout << str << '\n';
-            if(basic_tokens.count(str)) {
-                ret.emplace_back(basic_tokens[str], str);
-            } else if(wires.count(str)) {
-                ret.emplace_back(token::WIRE_DECL, str);
-            } else if(modules.count(str)) {
-                ret.emplace_back(token::MODULE_DECL, str);
-            } else if(std::regex_match(str,std::regex("\\$.*"))){
-                ret.emplace_back(token::SYSTEM_COMMAND, str);
-            } else if(str == "true" || str == "false" || std::regex_match(str,std::regex("^(0|[1-9][0-9]*)$"))) {
-                ret.emplace_back(token::VALUE, str);
-            } else if(std::regex_match(str,std::regex(R"(^[_a-z][_a-z0-9]*$)"))) {
-                ret.emplace_back(token::NAME, str);
+    void transpiler::setup_dbs() {
+        std::set<std::string> identifiers = {"nil"};
+
+        nlohmann::json fin;
+        std::string err;
+        fin["wire_db"] = nlohmann::json::array();
+        fin["array_db"] = nlohmann::json::array();
+        fin["component_db"] = nlohmann::json::array();
+        fin["io_db"]["inputs"] = nlohmann::json::array();
+        fin["io_db"]["outputs"] = nlohmann::json::array();
+
+        for(auto& stmt : ret){
+            if(!stmt.contains("stmt_type")){
+                err = "No statement type. How?";
+                throw std::runtime_error(err);
+            }
+            //if it is not a configuration setting, check if an object with the identifier has not been created yet
+            //if it is a new identifier, add it to the list of reserved identifiers
+            if(stmt["stmt_type"] != "sys_cmd"){
+                if(identifiers.count(stmt["name"]))
+                    throw std::runtime_error("Identifier \"" + std::string(stmt["name"]) + "\" is defined multiple times");
+                identifiers.insert(stmt["name"]);
+            }
+
+            if(stmt["stmt_type"] == "sys_cmd"){ //set the config to the inputted value. straightforward
+                fin["config_db"][stmt["type"]] = stmt["value"];
+            } else if(stmt["stmt_type"] == "wire_decl"){ //simply add the wire to the list of wires
+                nlohmann::json tmp;
+                tmp["name"] = stmt["name"];
+                fin["wire_db"] += tmp;
+            } else if(stmt["stmt_type"] == "array_decl"){ //generate a sized array
+                nlohmann::json tmp;
+                tmp["name"] = stmt["name"];
+                tmp["size"] = stmt["size"];
+                if(tmp["size"] < 2)
+                    throw std::runtime_error("an array cannot be smaller than 2 elements");
+                tmp["args"] = nlohmann::json::array();
+                for(auto arg : stmt["args"]){
+                    auto info = resolve_access(fin,arg);
+                    if(info.second != 1)
+                        throw std::runtime_error("argument with invalid length " + std::to_string(info.second) + " in generating array " + std::string(arg["name"]));
+                    tmp["args"] += info.first;
+                }
+                // allow for incomplete definition by padding the end with nil
+                // for example the statement:
+                // array<2> arr(arg);
+                // is the same as:
+                // array<2> arr(arg,nil);
+                // nil is just a non-writeable wire
+                // any writes to it will not change it and any writes will return false
+
+                // the generation downstream of this also allows to have too many arguments to a sized array
+                // but the extra ones are just ignored
+
+                while(tmp["args"].size() < tmp["size"]){
+                    tmp["args"] += "nil";
+                }
+
+                fin["array_db"] += tmp;
+
+            } else if(stmt["stmt_type"] == "module_decl"){ //generate a module (including I/O modules)
+                if( !valid_modules.count(stmt["type"]) &&
+                    !valid_inputs .count(stmt["type"]) &&
+                    !valid_outputs.count(stmt["type"])) //check for a valid type
+                    throw std::runtime_error("Invalid type identifier \"" + std::string(stmt["type"]) + "\"");
+                nlohmann::json tmp;
+                std::vector<unsigned int> arg_sizes;
+
+                tmp["name"] = stmt["name"];
+                tmp["type"] = stmt["type"];
+                tmp["args"] = nlohmann::json::array();
+
+                if(valid_inputs.count(tmp["type"])){
+                    arg_sizes = valid_inputs[tmp["type"]];
+                } else if(valid_modules.count(tmp["type"])){
+                    arg_sizes = valid_modules[tmp["type"]];
+                } else {
+                    arg_sizes = valid_outputs[tmp["type"]];
+                }
+
+                // check for correct amount of arguments, this time it is important
+                if(stmt["args"].size() != arg_sizes.size()){
+                    unsigned int expected = 0;
+                    if(valid_inputs.count(tmp["type"])){
+                        expected = valid_inputs[tmp["type"]].size();
+                    } else if(valid_modules.count(tmp["type"])){
+                        expected = valid_modules[tmp["type"]].size();
+                    } else {
+                        expected = valid_outputs[tmp["type"]].size();
+                    }
+                    err = "incorrect amount of arguments in generation of module ";
+                    err += std::string(tmp["type"]);
+                    err += " (expected " + std::to_string(expected);
+                    err += ", got " + std::to_string(arg_sizes.size()) + ")";
+                    throw std::runtime_error(err);
+                }
+
+                int i = 0;
+                for(auto arg : stmt["args"]){
+                    auto info = resolve_access(fin,arg);
+                    if(info.second != arg_sizes[i])
+                        throw std::runtime_error("incorrect argument size");
+                    tmp["args"] += info.first;
+                    i++;
+                }
+
+                // check if it is an instance of master_clk and if it is, check if there is another
+                // otherwise just add it to the appropriate database
+                if(tmp["type"] == "master_clk"){
+                    if(fin["config_db"].contains("master_clk"))
+                        throw std::runtime_error("only one instance of master_clk is allowed");
+//                    throw std::runtime_error("not supported yet....");
+                    fin["config_db"]["reactive_only"] = 0;
+                    fin["config_db"]["master_clk"] = tmp["args"][0];
+                } else if(valid_modules.count(tmp["type"]))
+                    fin["component_db"] += tmp;
+                else if(valid_inputs.count(tmp["type"]))
+                    fin["io_db"]["inputs"] += tmp;
+                else
+                    fin["io_db"]["outputs"] += tmp;
+
             } else {
-                throw std::runtime_error("invalid token \"" + str + "\"");
+                err = "Invalid type \"";
+                err += stmt["type"];
+                err += "\". How?";
+                throw std::runtime_error(err);
             }
         }
-        str = "";
-        ret.emplace_back(token::NAME, str);
-        return ret;
-    }
-
-    nlohmann::json transpiler::generate_ast(std::list<token> &tokens) {
-        nlohmann::json ret;
-        ret["document"] = nlohmann::json::array();
-        int nr_stmt = 0;
+        ret = fin;
+        std::cout << "dbs setup:\n";
         std::cout << ret.dump(2);
-        std::map<std::pair<std::string,token::token_type>,std::pair<std::string,int>> valid_transitions =
-        {
-            {{"document",token::SYSTEM_COMMAND},{"cmd",0}},
-            {{"document",token::WIRE_DECL},{"decl",0}},
-            {{"document",token::MODULE_DECL},{"decl",0}},
-            {{"cmd",token::ARGS_BEGIN},{"cmd_args",0}},
-            {{"cmd_args",token::VALUE},{"cmd_value",0}},
-            {{"cmd_value",token::ARGS_END},{"__pop",2}},
-            {{"stmt",token::DECL_END},{"__pop",1}}
-        };
-        std::stack<std::string> context_stack;
-        context_stack.emplace("document");
-        token::token_type last_token;
-        for(auto& tk : tokens){
-            std::string con = context_stack.top();
-            if(valid_transitions.count({con,tk.t_type})){
-                auto& transition = valid_transitions[{con,tk.t_type}];
+    }
 
-                if(transition.first == "__pop"){
-                    for(int i = 0; i < transition.second; i++)
-                        context_stack.pop();
-                } else if(transition.first != "__continue"){
-                    context_stack.push(transition.first);
+    std::pair<std::string,unsigned int> transpiler::resolve_access(nlohmann::json &dbs, nlohmann::json &lookup) {
+        if(lookup["type"] == "basic") {
+            if(lookup["name"] == "nil")
+                return {"nil",1};
+
+            for(auto& wire : dbs["wire_db"])
+                if(lookup["name"] == wire["name"])
+                    return {lookup["name"],1};
+
+            for(auto& array : dbs["array_db"])
+                if(lookup["name"] == array["name"])
+                    return {lookup["name"],array["size"]};
+
+        } else if(lookup["type"] == "array_access"){
+            for(auto& arr : dbs["array_db"]){
+                if(lookup["name"] == arr["name"]) {
+                    int i = lookup["index"];
+                    if (i < arr["size"])
+                        return {arr["args"][i], 1};
+                    else
+                        throw std::runtime_error("array access out of bounds (" + std::to_string(i) + " with maximum of " + std::string(arr["size"]) + ")");
                 }
-                if(tk.t_type == token::DECL_END){
-                    nr_stmt++;
+            }
+        } else {
+            throw std::runtime_error("invalid or unsupported access type");
+        }
+        throw std::runtime_error("identifier \"" + std::string(lookup["name"]) + "\" does not exist");
+    }
+
+    void transpiler::graph_analysis() {
+        std::map<std::string,node*> elements;
+        for(auto& wire : ret["wire_db"]){
+            elements[wire["name"]] = new node(wire["name"], "wire");
+        }
+        for(auto& input : ret["io_db"]["inputs"]){
+            elements[input["name"]] = new node(input["name"],input["type"]);
+            if(input["type"] == "button"){
+                for(auto& arg : input["args"]){
                 }
-            } else {
-                throw std::runtime_error("invalid token \"" + tk.value + "\"");
             }
         }
 
-        return ret;
+        for(auto& component : ret["component_db"]){
+        }
     }
 
-    nlohmann::json transpiler::add_semantics(nlohmann::json& ast) {
-        return false;
-    }
-} // sim
+}

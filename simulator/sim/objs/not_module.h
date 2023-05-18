@@ -10,13 +10,13 @@
 namespace sim {
     namespace objs {
 
-        class not_module : evaluable{
+        class not_module : public evaluable{
         private:
             bit& in;
             bit& out;
         public:
             not_module(bit&,bit&);
-            ~not_module();
+            ~not_module() override;
             void eval() override;
         };
 

@@ -77,7 +77,7 @@ div                 | 0xB       | divide rga by rgb. saves result into rga, and 
 ccs                 | 0xC       | conditional call to subroutine. conditions work exactly like for jfg
 ret                 | 0xD       | return from subroutine
 mov16               | 0xE       | move a value from the right operand into the left operand, both operands being one of the 4 16bit registers
-add16               | 0xF       | add a specific 16 bit register by an 8bit immediate
+add16               | 0xF       | add a specific 16 bit register by a signed 8bit immediate
 
 C/Verilog explanations:
 for any op[7:0],op1[7:0],op2[7:0]
@@ -114,16 +114,16 @@ spc instructions meaning:
 INSTRUCTION FORMAT
 ======================================================================
 
-instruction formatting for opcodes 0x1, 0x8 - 0xB:
+instruction formatting for opcodes 0x1, 0x7 - 0xB:
 
 byte 0: <4 bit opcode><2 bit info on left operand><2 bit info on right operand>
 byte 1: <4 bit info on left operand><4 bit info on right operand>
 byte 2: <situational 8 bit immediate>
 
-instruction formatting for opcodes 0x4 - 0x6:
+instruction formatting for opcodes 0x4, 0x5:
 byte 0: <4 bit opcode><4 bit info on the operand>
 
-instruction formatting for opcde 0x7:
+instruction formatting for opcode 0x6:
 byte 0: <4 bit opcode><4 bit info on the operand>
 byte 1: <8 bit immediate>
 
@@ -187,6 +187,65 @@ if _flag <  8:
     jump to _label if ( rgf | _flag == 0b1111) 
 if _flag >= 8:
     jump to _label if (~rgf | _flag == 0b1111) 
+
+
+======================================================================
+MICROCODE
+======================================================================
+
+the microcode is the set of smallest instructions that can be executed.
+these instructions can be run in parallel, along as they do not interfere.
+the microcode instructions are the following:
+
+nop // used to signal the end of an instruction
+
+rga_to_op1
+rgb_to_op1
+... // all 8 bit registers, including the derived ones
+rpl_to_op1
+rph_to_op1
+mem_to_op1 // the memory buffer
+
+rga_to_op2
+rgb_to_op2
+... // all 8 bit registers, including the derived ones
+rph_to_op2
+imm_to_op2 // the immediate portion of the instruction register
+
+op1_to_rga
+... // again, all 8 bit registers
+op1_to_rph
+op1_to_mem
+
+op2_to_rml
+op2_to_rmh
+... // only the derived 8 bit registers
+op2_to_rpl
+op2_to_rph
+op2_to_rgb // for the mul and div operations
+
+
+rmx_to_addr
+rsx_to_addr
+rbx_to_addr
+rpx_to_addr
+
+rsx_to_rbx //makes the calls faster
+rbx_to_rsx
+
+mem_rd_start
+mem_wr_start
+mem_wait
+
+alu_start
+alu_wait
+
+alu16_start
+alu16_wait
+
+cond_loc_to_rpx // conditionally move bytes 1 and 2 of rgi into rpx, used for jumping. see jmp instruction
+cond_push_frame // conditionally push rpx|rbx onto the call register array
+pop_frame       // return
 
 
 ======================================================================

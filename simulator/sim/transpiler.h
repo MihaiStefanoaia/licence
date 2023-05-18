@@ -1,37 +1,66 @@
-//
-// Created by mihai-laptop on 4/4/23.
-//
-
 #ifndef SIMULATOR_TRANSPILER_H
+
 #define SIMULATOR_TRANSPILER_H
 
-
-#include <sstream>
+#include "json.hpp"
 #include <string>
 #include <list>
-#include "../json.hpp"
+#include <set>
+#include <map>
+#include <utility>
+#include "parser.hh"
 
-namespace sim {
+// Give Flex the prototype of yylex we want ...
+# define YY_DECL yy::parser::symbol_type yylex (sim::transpiler& trp)
+// ... and declare it for the parser's sake.
+YY_DECL;
+namespace sim{
+    class transpiler{
+        transpiler();
+        std::string file;
+        nlohmann::json ret;
+        int parse(const std::string& str);
+        int result;
+        void scan_begin ();
+        void scan_end ();
+        bool trace_scanning;
+        bool trace_parsing;
 
-    class transpiler {
-        class token{
+        // these are the valid modules, and the list contains the width of each argument
+        // the number of arguments can be inferred from the length of the list
+        std::map<std::string,std::vector<unsigned int>> valid_modules = {{"and_module",{1,1,1}},{"master_clk",{1}},{"not_module",{1,1}},{"tiny_cpu",{4,4,4,1,1,1,4,4,1,1,1}},{"tiny_mem",{4,4,4,1,1,1,1,1}}};
+        std::map<std::string,std::vector<unsigned int>> valid_inputs  = {{"button",{1}}};
+        std::map<std::string,std::vector<unsigned int>> valid_outputs = {{"led",{1}}};
+
+        std::set<std::string> valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap"};
+
+        void setup_dbs();
+        void graph_analysis();
+        static std::pair<std::string,unsigned int> resolve_access(nlohmann::json &dbs, nlohmann::json &lookup);
+
+        class node{
         public:
-            enum token_type {NAME, VALUE, SYSTEM_COMMAND, DECL_END, ARGS_BEGIN, ARGS_END, ACCESSOR, ARRAY_ACCESSOR_BEGIN, ARRAY_ACCESSOR_END, LIST_DELIMITER, WIRE_DECL, MODULE_DECL, _EOF};
-            std::string value;
-            token_type t_type;
-            token(token_type t_type,std::string& value){
-                this->t_type = t_type;
-                this->value = value;
+            std::string name;
+            std::string n_type;
+            int level_pos = 0;
+            int level_neg = 0;
+            struct {
+                bool at_neg = false;
+                bool at_pos = false;
+            } driven, read;
+            bool visited = false;
+            node(std::string name, std::string n_type){
+                this->name = std::move(name);
+                this->n_type = std::move(n_type);
+            };
+            int possible_level() const{
+                return std::max(level_pos,level_neg);
             }
         };
-        static std::stringstream preprocess_file(const std::string& path);
-        static std::list<token> tokenize(std::stringstream&);
-        static nlohmann::json generate_ast(std::list<token>&);
-        static nlohmann::json add_semantics(nlohmann::json&);
     public:
-        static nlohmann::json transpile(const std::string& path);
+        yy::location location;
+        static nlohmann::json transpile(const std::string&);
+        friend class yy::parser;
     };
-
-} // sim
-
-#endif //SIMULATOR_TRANSPILER_H
+}
+#endif

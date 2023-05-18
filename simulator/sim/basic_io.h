@@ -8,6 +8,8 @@
 namespace sim {
 
     class basic_io {
+    protected:
+        bool flagged = false;
     public:
         virtual void update() = 0;
         friend class evaluation_list;

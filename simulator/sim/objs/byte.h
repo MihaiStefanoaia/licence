@@ -6,17 +6,15 @@
 #define SIMULATOR_BYTE_H
 
 #include "bit.h"
+#include "bit_array.h"
 
 namespace sim {
     namespace objs {
 
-        class byte {
-            bit* c[8] = {nullptr};
+        class byte : public bit_array{
         public:
             byte();
             byte(const byte&);
-            void connect(bit&,int);
-            bit& operator[](int) const;
         };
 
     } // sim

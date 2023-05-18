@@ -25,5 +25,19 @@ namespace sim {
             content = new bit*[size];
         }
 
+        int bit_array::get_size() const {
+            return size;
+        }
+
+        bit_array::bit_array(const bit_array &other){
+            size = other.size;
+            content = new bit*[size];
+            for(int i = 0; i < size; i++)
+                content[i] = other.content[i];
+        }
+
+        bit_array::~bit_array() {
+            delete content;
+        };
     } // sim
 } // objs

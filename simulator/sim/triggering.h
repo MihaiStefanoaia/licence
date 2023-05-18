@@ -16,7 +16,7 @@ namespace sim {
         triggering();
         ~triggering();
         enum trig_type{
-            POSITIVE, NEGATIVE, BOTH
+            NEGATIVE, POSITIVE, BOTH
         };
         void add_trigger(evaluable*, trig_type);
     protected:

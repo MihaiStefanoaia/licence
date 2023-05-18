@@ -15,12 +15,9 @@ namespace sim {
             bool content;
         public:
             explicit bit(bool = false);
-            virtual ~bit();
+            ~bit() override;
             bool get_content() const;
-            void set_content(bool);
-            void eval() override{
-                evaluable::eval();
-            }
+            virtual void set_content(bool);
             void flag_for_eval(triggering* ev) final{
                 evaluable::flag_for_eval(ev);
             }

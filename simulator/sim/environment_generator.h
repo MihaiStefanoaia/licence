@@ -5,7 +5,7 @@
 #ifndef SIMULATOR_ENVIRONMENT_GENERATOR_H
 #define SIMULATOR_ENVIRONMENT_GENERATOR_H
 
-#include "../json.hpp"
+#include "json.hpp"
 
 namespace sim {
 
@@ -13,6 +13,7 @@ namespace sim {
     public:
         static nlohmann::json generate(const std::string &path);
         static nlohmann::json example();
+        static nlohmann::json tiny_playground();
     };
 
 } // sim
