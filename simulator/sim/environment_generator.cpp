@@ -177,7 +177,7 @@ namespace sim {
         ret["component_db"][0]["args"] = {"addr","data_miso","data_mosi","active","rw","ready","port_i","port_o","interr","m_clk","rst"};
 
         ret["component_db"][1]["type"] = "tiny_mem";
-        ret["component_db"][1]["name"] = "memory";
+        ret["component_db"][1]["name"] = "mem";
         ret["component_db"][1]["level"] = 3;
         ret["component_db"][1]["args"] = {"addr","data_mosi","data_miso","active","rw","ready","m_clk","rst_mem"};
 

@@ -60,7 +60,6 @@ namespace sim{
                 tmp["name"] = stmt["name"];
                 fin["wire_db"] += tmp;
             } else if(stmt["stmt_type"] == "autogen_decl"){ //generate a sized array and the wires inside it
-                std::cout << "auto generating the wires......\n";
                 nlohmann::json tmp;
                 tmp["name"] = stmt["name"];
                 tmp["size"] = stmt["size"];

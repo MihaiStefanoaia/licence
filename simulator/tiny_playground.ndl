@@ -1,0 +1,24 @@
+$sim_frequency_min(2);
+$sim_frequency_max(2);
+$frame_rate_cap(60);
+
+wire m_clk;
+wire rst;
+wire interr;
+wire active;
+wire rw;
+wire ready;
+wire rst_mem;
+
+
+master_clk m(m_clk);
+
+array<4> data_mosi(__autogen);
+array<4> data_miso(__autogen);
+array<4> addr(__autogen);
+array<4> port_i(__autogen);
+array<4> port_o(__autogen);
+
+tiny_cpu processor(addr,data_miso,data_mosi,active,rw,ready,port_i,port_o,interr,m_clk,rst);
+not_module rst_neg(rst,rst_mem);
+tiny_mem mem(addr,data_mosi,data_miso,active,rw,ready,m_clk,rst_mem);
