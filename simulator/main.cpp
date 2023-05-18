@@ -6,18 +6,37 @@
 #include <thread>
 #include "cpu.h"
 
+#include <QMainWindow>
+#include <QApplication>
+#include <QLabel>
+#include <QPushButton>
+#include <QGridLayout>
+
 ///demo sim for ((a&b)&c)
 int main(int argc, char** argv){
-    std::cout << sim::environment_generator::tiny_playground().dump(2) << "\n\n\n\n\n";
-    std::cout << sim::environment_generator::generate("example.ndl").dump(2) << '\n';
-    return 0;
-    sim::environment env;
-    auto server_core = [](sim::environment* env){
-        env->start();
-    };
-    std::thread server(server_core, &env);
-    server.join();
+    sim::transpiler::transpile("example.ndl");
+    QApplication app(argc,argv);
 
-    std::cout << sizeof(sim::objs::cpu) << " " << alignof(sim::objs::cpu);
-    return 0;
+    auto *window = new QWidget();
+    auto *grid = new QGridLayout();
+    auto *label = new QLabel("Hello world");
+    label->setMinimumSize(200,50);
+    label->setAlignment(Qt::AlignCenter);
+    label->resize(250,100);
+
+
+    auto on_click = [](){
+        std::cout << "clicked\n";
+    };
+    auto *button = new QPushButton("click me");
+    button->setMinimumSize(100,50);
+    QPushButton::connect(button,&QPushButton::clicked, window ,on_click);
+
+    grid->addWidget(label);
+    grid->addWidget(button);
+    window->setLayout(grid);
+    window->show();
+    //    sim::environment env;
+//    env.start();
+    return app.exec();
 }
