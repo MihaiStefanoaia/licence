@@ -464,8 +464,9 @@ namespace yy {
         TOK_ARRAY = 267,
         TOK_LT = 268,
         TOK_GT = 269,
-        TOK_IDENTIFIER = 270,
-        TOK_NUMBER = 271
+        TOK_AUTOGEN = 270,
+        TOK_IDENTIFIER = 271,
+        TOK_NUMBER = 272
       };
     };
 
@@ -581,21 +582,21 @@ namespace yy {
         // Type destructor.
 switch (yytype)
     {
-      case 16: // NUMBER
+      case 17: // NUMBER
         value.template destroy< int > ();
         break;
 
-      case 18: // stmt
-      case 19: // sys_cmd
-      case 20: // wire_decl
-      case 21: // array_decl
-      case 22: // module_decl
-      case 23: // args
-      case 24: // access
+      case 19: // stmt
+      case 20: // sys_cmd
+      case 21: // wire_decl
+      case 22: // array_decl
+      case 23: // module_decl
+      case 24: // args
+      case 25: // access
         value.template destroy< nlohmann::json > ();
         break;
 
-      case 15: // IDENTIFIER
+      case 16: // IDENTIFIER
         value.template destroy< std::string > ();
         break;
 
@@ -675,13 +676,13 @@ switch (yytype)
       symbol_type (int tok, location_type l)
         : super_type(token_type (tok), std::move (l))
       {
-        YY_ASSERT (tok == token::TOK_END || tok == token::TOK_ARGS_B || tok == token::TOK_ARGS_E || tok == token::TOK_ACC_B || tok == token::TOK_ACC_E || tok == token::TOK_DOLLAR || tok == token::TOK_SEMIC || tok == token::TOK_COMMA || tok == token::TOK_COLON || tok == token::TOK_WIRE || tok == token::TOK_ARRAY || tok == token::TOK_LT || tok == token::TOK_GT);
+        YY_ASSERT (tok == token::TOK_END || tok == token::TOK_ARGS_B || tok == token::TOK_ARGS_E || tok == token::TOK_ACC_B || tok == token::TOK_ACC_E || tok == token::TOK_DOLLAR || tok == token::TOK_SEMIC || tok == token::TOK_COMMA || tok == token::TOK_COLON || tok == token::TOK_WIRE || tok == token::TOK_ARRAY || tok == token::TOK_LT || tok == token::TOK_GT || tok == token::TOK_AUTOGEN);
       }
 #else
       symbol_type (int tok, const location_type& l)
         : super_type(token_type (tok), l)
       {
-        YY_ASSERT (tok == token::TOK_END || tok == token::TOK_ARGS_B || tok == token::TOK_ARGS_E || tok == token::TOK_ACC_B || tok == token::TOK_ACC_E || tok == token::TOK_DOLLAR || tok == token::TOK_SEMIC || tok == token::TOK_COMMA || tok == token::TOK_COLON || tok == token::TOK_WIRE || tok == token::TOK_ARRAY || tok == token::TOK_LT || tok == token::TOK_GT);
+        YY_ASSERT (tok == token::TOK_END || tok == token::TOK_ARGS_B || tok == token::TOK_ARGS_E || tok == token::TOK_ACC_B || tok == token::TOK_ACC_E || tok == token::TOK_DOLLAR || tok == token::TOK_SEMIC || tok == token::TOK_COMMA || tok == token::TOK_COLON || tok == token::TOK_WIRE || tok == token::TOK_ARRAY || tok == token::TOK_LT || tok == token::TOK_GT || tok == token::TOK_AUTOGEN);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -940,6 +941,21 @@ switch (yytype)
       make_GT (const location_type& l)
       {
         return symbol_type (token::TOK_GT, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_AUTOGEN (location_type l)
+      {
+        return symbol_type (token::TOK_AUTOGEN, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_AUTOGEN (const location_type& l)
+      {
+        return symbol_type (token::TOK_AUTOGEN, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -1278,10 +1294,10 @@ switch (yytype)
     enum
     {
       yyeof_ = 0,
-      yylast_ = 32,     ///< Last index in yytable_.
+      yylast_ = 39,     ///< Last index in yytable_.
       yynnts_ = 9,  ///< Number of nonterminal symbols.
       yyfinal_ = 2, ///< Termination state number.
-      yyntokens_ = 17  ///< Number of tokens.
+      yyntokens_ = 18  ///< Number of tokens.
     };
 
 
@@ -1326,9 +1342,9 @@ switch (yytype)
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16
+      15,    16,    17
     };
-    const int user_token_number_max_ = 271;
+    const int user_token_number_max_ = 272;
 
     if (t <= 0)
       return yyeof_;
@@ -1348,21 +1364,21 @@ switch (yytype)
   {
     switch (this->type_get ())
     {
-      case 16: // NUMBER
+      case 17: // NUMBER
         value.move< int > (std::move (that.value));
         break;
 
-      case 18: // stmt
-      case 19: // sys_cmd
-      case 20: // wire_decl
-      case 21: // array_decl
-      case 22: // module_decl
-      case 23: // args
-      case 24: // access
+      case 19: // stmt
+      case 20: // sys_cmd
+      case 21: // wire_decl
+      case 22: // array_decl
+      case 23: // module_decl
+      case 24: // args
+      case 25: // access
         value.move< nlohmann::json > (std::move (that.value));
         break;
 
-      case 15: // IDENTIFIER
+      case 16: // IDENTIFIER
         value.move< std::string > (std::move (that.value));
         break;
 
@@ -1381,21 +1397,21 @@ switch (yytype)
   {
     switch (this->type_get ())
     {
-      case 16: // NUMBER
+      case 17: // NUMBER
         value.copy< int > (YY_MOVE (that.value));
         break;
 
-      case 18: // stmt
-      case 19: // sys_cmd
-      case 20: // wire_decl
-      case 21: // array_decl
-      case 22: // module_decl
-      case 23: // args
-      case 24: // access
+      case 19: // stmt
+      case 20: // sys_cmd
+      case 21: // wire_decl
+      case 22: // array_decl
+      case 23: // module_decl
+      case 24: // args
+      case 25: // access
         value.copy< nlohmann::json > (YY_MOVE (that.value));
         break;
 
-      case 15: // IDENTIFIER
+      case 16: // IDENTIFIER
         value.copy< std::string > (YY_MOVE (that.value));
         break;
 
@@ -1421,21 +1437,21 @@ switch (yytype)
     super_type::move (s);
     switch (this->type_get ())
     {
-      case 16: // NUMBER
+      case 17: // NUMBER
         value.move< int > (YY_MOVE (s.value));
         break;
 
-      case 18: // stmt
-      case 19: // sys_cmd
-      case 20: // wire_decl
-      case 21: // array_decl
-      case 22: // module_decl
-      case 23: // args
-      case 24: // access
+      case 19: // stmt
+      case 20: // sys_cmd
+      case 21: // wire_decl
+      case 22: // array_decl
+      case 23: // module_decl
+      case 24: // args
+      case 25: // access
         value.move< nlohmann::json > (YY_MOVE (s.value));
         break;
 
-      case 15: // IDENTIFIER
+      case 16: // IDENTIFIER
         value.move< std::string > (YY_MOVE (s.value));
         break;
 
@@ -1494,7 +1510,7 @@ switch (yytype)
   }
 
 } // yy
-#line 1498 "parser.hh"
+#line 1514 "parser.hh"
 
 
 

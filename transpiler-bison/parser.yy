@@ -41,6 +41,7 @@
   ARRAY   "array"
   LT      "<"
   GT      ">"
+  AUTOGEN "__autogen"
 ;
 
 %token <std::string> IDENTIFIER
@@ -90,7 +91,12 @@ array_decl:
     $$["name"] = $5;
     $$["size"] = $3;
     $$["args"] = $7;
-  };
+  }
+| ARRAY LT NUMBER GT IDENTIFIER ARGS_B AUTOGEN ARGS_E {
+  $$["stmt_type"] = "autogen_decl";
+  $$["name"] = $5;
+  $$["size"] = $3;
+};
 ;
 
 module_decl:

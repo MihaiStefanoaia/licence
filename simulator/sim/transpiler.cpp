@@ -59,6 +59,25 @@ namespace sim{
                 nlohmann::json tmp;
                 tmp["name"] = stmt["name"];
                 fin["wire_db"] += tmp;
+            } else if(stmt["stmt_type"] == "autogen_decl"){ //generate a sized array and the wires inside it
+                std::cout << "auto generating the wires......\n";
+                nlohmann::json tmp;
+                tmp["name"] = stmt["name"];
+                tmp["size"] = stmt["size"];
+                tmp["args"] = nlohmann::json::array();
+                for(int i = 0; i < tmp["size"]; i++){
+                    nlohmann::json wire_tmp;
+                    wire_tmp["name"] = (std::string(tmp["name"]) + "_" + std::to_string(i));
+                    if(identifiers.count(wire_tmp["name"])){
+                        throw std::runtime_error("wire " + std::string(wire_tmp["name"]) + " has already been defined");
+                    } else {
+                        fin["wire_db"] += wire_tmp;
+                        identifiers.insert(wire_tmp["name"]);
+                    }
+                    tmp["args"] += wire_tmp["name"];
+                }
+                fin["array_db"] += tmp;
+
             } else if(stmt["stmt_type"] == "array_decl"){ //generate a sized array
                 nlohmann::json tmp;
                 tmp["name"] = stmt["name"];

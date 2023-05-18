@@ -16,7 +16,7 @@
 ///demo sim for ((a&b)&c)
 
 int main(int argc, char** argv){
-//    sim::transpiler::transpile("example.ndl");
+    sim::transpiler::transpile("example.ndl");
     QApplication app(argc,argv);
 
     auto *window = new QWidget();

@@ -17,10 +17,12 @@ and_module and_mod0(test[1], wire_b, output0);
 and_module and_mod1(wire_c, output0, output1);
 
 array<5> chain(wire_b,test[1], test[0], wire_c);
-
+array<8> auto_test(__autogen);
 button a(wire_a);
 button b(wire_b);
 button c(wire_c);
+button d(auto_test[6]);
 
+led autogen(auto_test[6]);
 led led_ab(output0);
 led led_abc(output1);
