@@ -1,5 +1,8 @@
 #include <set>
+#include <queue>
 #include "transpiler.h"
+#include "level_promise.h"
+
 namespace sim{
     transpiler::transpiler() : trace_scanning(false), trace_parsing(false){
         result = 0;
@@ -210,20 +213,58 @@ namespace sim{
     }
 
     void transpiler::graph_analysis() {
-        std::map<std::string,node*> elements;
-        for(auto& wire : ret["wire_db"]){
-            elements[wire["name"]] = new node(wire["name"], "wire");
+        std::map<std::string, node*> nodes;
+        std::set<std::string> positive_driven = {"tiny_cpu"};
+        std::set<std::string> negative_driven = {"tiny_memory"};
+        std::set<std::string> always_driven = {"and_module","not_module"};
+        for(auto wire : ret["wire_db"]){
+            nodes[wire["name"]] = new node(wire["name"],"wire");
         }
-        for(auto& input : ret["io_db"]["inputs"]){
-            elements[input["name"]] = new node(input["name"],input["type"]);
-            if(input["type"] == "button"){
-                for(auto& arg : input["args"]){
+        for(auto component : ret["component_db"]){
+            nodes[component["name"]] = new node(component["name"], "component");
+        }
+        for(auto input : ret["io_db"]["inputs"]){
+            nodes[input["name"]] = new node(input["name"], "input");
+            nodes[input["name"]]->level.op = level_promise::BASE;
+            // THIS ASSUMES ALL INPUTS ARE ONLY WRITTEN TO
+            for(const auto& arg : input["args"]) {
+                auto arg_wires = get_wires_from_argument(ret,arg);
+                for(const auto& arg_wire : arg_wires){
+                    nodes[arg_wire]->level.op = level_promise::INHERIT;
+                    nodes[arg_wire]->level.add_dependency(&nodes[input["args"]]->level);
+                    nodes[arg_wire]->drive(1);
                 }
             }
         }
-
-        for(auto& component : ret["component_db"]){
+        for(auto output : ret["io_db"]["outputs"]){
+            nodes[output["name"]] = new node(output["name"], "output");
         }
+        if(ret["config_db"].contains("master_clk")) {
+            nodes[ret["config_db"]["master_clk"]]->level.op = level_promise::BASE;
+            nodes[ret["config_db"]["master_clk"]]->drive(3);
+        }
+
+        std::queue<node*> traversal;
+
+        std::map<std::string, level_promise*> levels;
+        level_promise* last_undetermined = nullptr;
+        std::queue<level_promise*> to_determine;
+    }
+
+    std::list<std::string> transpiler::get_wires_from_argument(nlohmann::json &dbs, const std::string& lookup) {
+        for(auto wire : dbs["wire_db"]){
+            if(lookup == wire["name"])
+                return {lookup};
+        }
+        for(auto array : dbs["array_db"]){
+            if(lookup == array["name"]){
+                std::list<std::string> ret;
+                for(const auto& arg : array["args"])
+                    ret.emplace_back(arg);
+                return ret;
+            }
+        }
+        throw std::runtime_error("Invalid lookup for graph analysis. No wire or array called \"" + lookup + "\"");
     }
 
 }

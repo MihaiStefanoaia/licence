@@ -9,6 +9,7 @@
 #include <map>
 #include <utility>
 #include "parser.hh"
+#include "level_promise.h"
 
 // Give Flex the prototype of yylex we want ...
 # define YY_DECL yy::parser::symbol_type yylex (sim::transpiler& trp)
@@ -37,24 +38,30 @@ namespace sim{
         void setup_dbs();
         void graph_analysis();
         static std::pair<std::string,unsigned int> resolve_access(nlohmann::json &dbs, nlohmann::json &lookup);
-
+        static std::list<std::string> get_wires_from_argument(nlohmann::json &dbs, const std::string& lookup);
         class node{
         public:
             std::string name;
             std::string n_type;
-            int level_pos = 0;
-            int level_neg = 0;
+            level_promise level = level_promise(level_promise::NONE,{});
+
             struct {
                 bool at_neg = false;
                 bool at_pos = false;
-            } driven, read;
+            } driven;
             bool visited = false;
             node(std::string name, std::string n_type){
                 this->name = std::move(name);
                 this->n_type = std::move(n_type);
             };
-            int possible_level() const{
-                return std::max(level_pos,level_neg);
+            void drive(unsigned int on_what) {
+                if(driven.at_pos || driven.at_neg) //wires can only be driven by one module
+                    throw std::runtime_error("Failed: wire " + name + " is being driven by multiple objects");
+                driven.at_neg = (on_what == 1) || (on_what == 3);
+                driven.at_pos = (on_what == 2) || (on_what == 3);
+            }
+            bool is_driven() const{
+                return driven.at_pos || driven.at_neg;
             }
         };
     public:
