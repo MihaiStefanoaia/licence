@@ -32,7 +32,7 @@ namespace sim {
                     determined = true;
                 }
                 break;
-            case INC:
+            case INCREMENT:
                 if((*dependencies.begin())->determined) {
                     level = (*dependencies.begin())->level + 1;
                     determined = true;

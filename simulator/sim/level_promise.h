@@ -13,7 +13,7 @@ namespace sim {
 
     class level_promise {
     public:
-        enum operation : u_int8_t {NONE,BASE,INHERIT,INC,ADD,MAX,MAX_INC};
+        enum operation : u_int8_t {NONE,BASE,INHERIT,INCREMENT,ADD,MAX,MAX_INC};
         int level = -1;
         bool determined = false;
         operation op;

@@ -44,8 +44,12 @@ namespace sim{
             std::string name;
             std::string n_type;
             level_promise level = level_promise(level_promise::NONE,{});
+            std::map<node*,bool> dependencies; // the value at the map is whether the dependency is critical
+            enum drive_type {POSITIVE, NEGATIVE, BOTH, REACTIVE};
 
-            struct {
+            drive_type driven_when;
+
+            struct drive_struct {
                 bool at_neg = false;
                 bool at_pos = false;
             } driven;
@@ -60,8 +64,39 @@ namespace sim{
                 driven.at_neg = (on_what == 1) || (on_what == 3);
                 driven.at_pos = (on_what == 2) || (on_what == 3);
             }
+            void add_dependency(node* dpd){
+                if(!dependencies.count(dpd))
+                    dependencies[dpd] = true;
+            }
             bool is_driven() const{
                 return driven.at_pos || driven.at_neg;
+            }
+            bool scrutinize_dependency(node* dpd){ // returns the status of the dependency after the
+                if(!dependencies.count(dpd))
+                    throw std::runtime_error("dependency "+ dpd->name + " is not found in module " + name);
+                if(!dpd->is_driven())
+                    return true;
+                switch (driven_when) {
+                    case POSITIVE:
+                        if(dpd->driven.at_pos)
+                            return true;
+                        dependencies[dpd] = false;
+                        return false;
+                    case NEGATIVE:
+                        if(dpd->driven.at_neg)
+                            return true;
+                        return false;
+                    case BOTH:
+                    case REACTIVE:
+                        return true;
+                }
+            }
+            bool only_critical_dependencies(){
+                bool ret_ = true;
+                for(auto& dep : dependencies){
+                    ret_ &= (dep.first->is_driven() && scrutinize_dependency(dep.first));
+                }
+                return ret_;
             }
         };
     public:

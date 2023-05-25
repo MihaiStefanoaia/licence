@@ -213,19 +213,32 @@ namespace sim{
     }
 
     void transpiler::graph_analysis() {
-        std::map<std::string, node*> nodes;
+        // databases of the read and written arguments of each
         std::set<std::string> positive_driven = {"tiny_cpu"};
-        std::set<std::string> negative_driven = {"tiny_memory"};
-        std::set<std::string> always_driven = {"and_module","not_module"};
+        std::set<std::string> negative_driven = {"tiny_mem","button"};
+        std::set<std::string> always_driven = {};
+        std::set<std::string> reactive_driven = {"and_module","not_module"};
+        std::map<std::string,std::vector<bool>> read_args = { // true is an input (read) argument, false is an output (written) argument
+                {"and_module",{true,true,false}},
+                {"not_module",{true,false}},
+                {"tiny_cpu",{false,true,false,true,true,false,true,true,false,true,true}}, //not sure, will have to double-check
+                {"tiny_mem",{true,true,false,true,true,false,true,true}},
+                {"button",{false}}
+        };
+
+        std::map<std::string, node*> nodes;
         for(auto wire : ret["wire_db"]){
             nodes[wire["name"]] = new node(wire["name"],"wire");
+            nodes[wire["name"]]->driven_when = node::REACTIVE;
         }
         for(auto component : ret["component_db"]){
-            nodes[component["name"]] = new node(component["name"], "component");
+            nodes[component["name"]] = new node(component["name"], component["type"]);
         }
         for(auto input : ret["io_db"]["inputs"]){
-            nodes[input["name"]] = new node(input["name"], "input");
+            nodes[input["name"]] = new node(input["name"],input["type"]);
             nodes[input["name"]]->level.op = level_promise::BASE;
+            nodes[input["name"]]->drive(1);
+
             // THIS ASSUMES ALL INPUTS ARE ONLY WRITTEN TO
             for(const auto& arg : input["args"]) {
                 auto arg_wires = get_wires_from_argument(ret,arg);
@@ -237,7 +250,7 @@ namespace sim{
             }
         }
         for(auto output : ret["io_db"]["outputs"]){
-            nodes[output["name"]] = new node(output["name"], "output");
+            nodes[output["name"]] = new node(output["name"], output["type"]);
         }
         if(ret["config_db"].contains("master_clk")) {
             nodes[ret["config_db"]["master_clk"]]->level.op = level_promise::BASE;
