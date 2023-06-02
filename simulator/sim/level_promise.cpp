@@ -19,66 +19,66 @@ namespace sim {
         if(determined)
             return true;
         bool success = true;
-        for(auto dependency : dependencies) {
-        }
         switch (op) {
             case BASE:
-                level = 0;
+                value = 0;
                 determined = true;
                 break;
             case INHERIT:
                 if((*dependencies.begin())->determined) {
-                    level = (*dependencies.begin())->level;
+                    value = (*dependencies.begin())->value;
                     determined = true;
                 }
                 break;
             case INCREMENT:
                 if((*dependencies.begin())->determined) {
-                    level = (*dependencies.begin())->level + 1;
+                    value = (*dependencies.begin())->value + 1;
                     determined = true;
                 }
                 break;
             case ADD:
-                level = 0;
+                value = 0;
                 for(auto dependency : dependencies) {
                     if(dependency->determined)
-                        level += dependency->level;
+                        value += dependency->value;
                     else {
                         success = false;
-                        level = -1;
+                        value = -1;
                         break;
                     }
                 }
                 determined = success;
                 break;
             case MAX:
-                level = 0;
+                value = 0;
                 for(auto dependency : dependencies) {
                     if(dependency->determined) {
-                        level = std::max(level, dependency->level);
+                        value = std::max(value, dependency->value);
                     } else {
                         success = false;
-                        level = -1;
+                        value = -1;
                         break;
                     }
                 }
                 determined = success;
                 break;
             case MAX_INC:
-                level = 0;
+                value = 0;
                 for(auto dependency : dependencies) {
                     if(dependency->determined)
-                        level = std::max(level, dependency->level);
+                        value = std::max(value, dependency->value);
                     else {
                         success = false;
-                        level = -2;
+                        value = -2;
                         break;
                     }
                 }
-                level++;
+                value++;
                 determined = success;
                 break;
             case NONE:
+                determined = success;
+                break;
             default:
                 break;
         }

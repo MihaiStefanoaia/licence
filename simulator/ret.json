@@ -1,0 +1,297 @@
+{
+  "array_db": [
+    {
+      "args": [
+        "data_mosi_0",
+        "data_mosi_1",
+        "data_mosi_2",
+        "data_mosi_3"
+      ],
+      "name": "data_mosi",
+      "size": 4
+    },
+    {
+      "args": [
+        "data_miso_0",
+        "data_miso_1",
+        "data_miso_2",
+        "data_miso_3"
+      ],
+      "name": "data_miso",
+      "size": 4
+    },
+    {
+      "args": [
+        "addr_0",
+        "addr_1",
+        "addr_2",
+        "addr_3"
+      ],
+      "name": "addr",
+      "size": 4
+    },
+    {
+      "args": [
+        "port_i_0",
+        "port_i_1",
+        "port_i_2",
+        "port_i_3"
+      ],
+      "name": "port_i",
+      "size": 4
+    },
+    {
+      "args": [
+        "port_o_0",
+        "port_o_1",
+        "port_o_2",
+        "port_o_3"
+      ],
+      "name": "port_o",
+      "size": 4
+    }
+  ],
+  "component_db": [
+    {
+      "args": [
+        "addr",
+        "data_miso",
+        "data_mosi",
+        "active",
+        "rw",
+        "ready",
+        "port_i",
+        "port_o",
+        "interr",
+        "m_clk",
+        "rst"
+      ],
+      "level": 1,
+      "name": "processor",
+      "type": "tiny_cpu"
+    },
+    {
+      "args": [
+        "rst",
+        "rst_mem"
+      ],
+      "level": 2,
+      "name": "rst_neg",
+      "type": "not_module"
+    },
+    {
+      "args": [
+        "addr",
+        "data_mosi",
+        "data_miso",
+        "active",
+        "rw",
+        "ready",
+        "m_clk",
+        "rst_mem"
+      ],
+      "level": 4,
+      "name": "mem",
+      "type": "tiny_mem"
+    }
+  ],
+  "config_db": {
+    "frame_rate_cap": 60,
+    "master_clk": "m_clk",
+    "reactive_only": 0,
+    "sim_frequency_max": 2,
+    "sim_frequency_min": 2
+  },
+  "io_db": {
+    "inputs": [
+      {
+        "args": [
+          "port_i_0"
+        ],
+        "level": 0,
+        "name": "btn_0",
+        "type": "button"
+      },
+      {
+        "args": [
+          "port_i_1"
+        ],
+        "level": 0,
+        "name": "btn_1",
+        "type": "button"
+      },
+      {
+        "args": [
+          "port_i_2"
+        ],
+        "level": 0,
+        "name": "btn_2",
+        "type": "button"
+      },
+      {
+        "args": [
+          "port_i_3"
+        ],
+        "level": 0,
+        "name": "btn_3",
+        "type": "button"
+      },
+      {
+        "args": [
+          "interr"
+        ],
+        "level": 0,
+        "name": "int_btn",
+        "type": "button"
+      },
+      {
+        "args": [
+          "rst"
+        ],
+        "level": 0,
+        "name": "rst_btn",
+        "type": "button"
+      }
+    ],
+    "outputs": [
+      {
+        "args": [
+          "port_o_0"
+        ],
+        "name": "led_0",
+        "type": "led"
+      },
+      {
+        "args": [
+          "port_o_1"
+        ],
+        "name": "led_1",
+        "type": "led"
+      },
+      {
+        "args": [
+          "port_o_2"
+        ],
+        "name": "led_2",
+        "type": "led"
+      },
+      {
+        "args": [
+          "port_o_3"
+        ],
+        "name": "led_3",
+        "type": "led"
+      }
+    ]
+  },
+  "wire_db": [
+    {
+      "level": 0,
+      "name": "m_clk"
+    },
+    {
+      "level": 1,
+      "name": "rst"
+    },
+    {
+      "level": 1,
+      "name": "interr"
+    },
+    {
+      "level": 2,
+      "name": "active"
+    },
+    {
+      "level": 2,
+      "name": "rw"
+    },
+    {
+      "level": 5,
+      "name": "ready"
+    },
+    {
+      "level": 3,
+      "name": "rst_mem"
+    },
+    {
+      "level": 2,
+      "name": "data_mosi_0"
+    },
+    {
+      "level": 2,
+      "name": "data_mosi_1"
+    },
+    {
+      "level": 2,
+      "name": "data_mosi_2"
+    },
+    {
+      "level": 2,
+      "name": "data_mosi_3"
+    },
+    {
+      "level": 5,
+      "name": "data_miso_0"
+    },
+    {
+      "level": 5,
+      "name": "data_miso_1"
+    },
+    {
+      "level": 5,
+      "name": "data_miso_2"
+    },
+    {
+      "level": 5,
+      "name": "data_miso_3"
+    },
+    {
+      "level": 2,
+      "name": "addr_0"
+    },
+    {
+      "level": 2,
+      "name": "addr_1"
+    },
+    {
+      "level": 2,
+      "name": "addr_2"
+    },
+    {
+      "level": 2,
+      "name": "addr_3"
+    },
+    {
+      "level": 1,
+      "name": "port_i_0"
+    },
+    {
+      "level": 1,
+      "name": "port_i_1"
+    },
+    {
+      "level": 1,
+      "name": "port_i_2"
+    },
+    {
+      "level": 1,
+      "name": "port_i_3"
+    },
+    {
+      "level": 2,
+      "name": "port_o_0"
+    },
+    {
+      "level": 2,
+      "name": "port_o_1"
+    },
+    {
+      "level": 2,
+      "name": "port_o_2"
+    },
+    {
+      "level": 2,
+      "name": "port_o_3"
+    }
+  ]
+}

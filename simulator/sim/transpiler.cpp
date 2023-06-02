@@ -1,5 +1,6 @@
 #include <set>
 #include <queue>
+#include <stack>
 #include "transpiler.h"
 #include "level_promise.h"
 
@@ -180,7 +181,7 @@ namespace sim{
         }
         ret = fin;
         std::cout << "dbs setup:\n";
-        std::cout << ret.dump(2);
+        std::cout << ret.dump(2) << "\n";
     }
 
     std::pair<std::string,unsigned int> transpiler::resolve_access(nlohmann::json &dbs, nlohmann::json &lookup) {
@@ -225,131 +226,118 @@ namespace sim{
                 {"tiny_mem",{true,true,false,true,true,false,true,true}},
                 {"button",{false}}
         };
+        std::cout << "running graph analysis:\n";
 
         //build all nodes
         std::map<std::string, node*> nodes;
 
+        std::cout << "building wires....\n";
         //wires
         for(auto wire : ret["wire_db"]){
             nodes[wire["name"]] = new node(wire["name"],"wire");
-            nodes[wire["name"]]->driven_when = node::REACTIVE;
+            nodes[wire["name"]]->driven = node::REACTIVE;
         }
 
+        std::cout << "building components....\n";
         //components
         for(auto component : ret["component_db"]){
-            auto tmp = nodes[component["name"]] = new node(component["name"], component["type"]);
+            auto tmp = new node(component["name"], component["type"]);
+            nodes[component["name"]] = tmp;
             for(const auto& arg : component["args"])
                 tmp->arguments.push_back(arg);
             if(positive_driven.count(component["type"])){
-                tmp->driven_when = node::POSITIVE;
                 tmp->drive(node::POSITIVE);
             } else if(negative_driven.count(component["type"])){
-                tmp->driven_when = node::NEGATIVE;
                 tmp->drive(node::NEGATIVE);
             } else if(always_driven.count(component["type"])){
-                tmp->driven_when = node::BOTH;
                 tmp->drive(node::BOTH);
             } else if(reactive_driven.count(component["type"])){
-                tmp->driven_when = node::REACTIVE;
+                tmp->drive(node::REACTIVE);
             }
             tmp->level.op = level_promise::MAX_INC;
         }
 
+        std::cout << "building inputs....\n";
         //input components
         for(auto input : ret["io_db"]["inputs"]){
-            auto tmp = nodes[input["name"]] = new node(input["name"],input["type"]);
-            nodes[input["name"]]->level.op = level_promise::BASE;
-            nodes[input["name"]]->drive(node::NEGATIVE);
+            auto tmp = new node(input["name"],input["type"]);
+            nodes[input["name"]] = tmp;
+            tmp->level.op = level_promise::BASE;
+            tmp->drive(node::NEGATIVE);
             for(const auto& arg : input["args"])
                 tmp->arguments.push_back(arg);
         }
 
+        std::cout << "setting up the master clock....\n";
         //master clk, if available
         if(ret["config_db"].contains("master_clk")) {
             nodes[ret["config_db"]["master_clk"]]->level.op = level_promise::BASE;
             nodes[ret["config_db"]["master_clk"]]->drive(node::BOTH);
         }
 
-        //set up the dependencies
-        for(const auto& kvp  : nodes){
+        std::cout << "connecting the nodes....\n";
+        //set up the graph connections
+        for(const auto& kvp : nodes){
             auto _node = kvp.second;
             // take each argument, and each wire in it if it is the case
-            for(unsigned int i = 0; i < read_args[_node->n_type].size();i++) {
+            auto &read = read_args[_node->n_type];
+            for(unsigned int i = 0; i < read.size();i++) {
                 auto &arg = _node->arguments[i];
                 auto arg_wires = get_wires_from_argument(ret, arg);
-                if(read_args[_node->n_type][i]){ // if the argument is read
-                    ///tbd for the read arguments
-                    for(const auto& arg_wire : arg_wires) {
-                        _node->add_dependency(nodes[arg_wire]);
-                    }
-                } else {
-                    //for all written wires, add the current module as a dependency and make it be driven the same as the module
-                    for (const auto &arg_wire: arg_wires) {
-                        nodes[arg_wire]->level.op = level_promise::INCREMENT;
-                        nodes[arg_wire]->add_dependency(_node);
-                        nodes[arg_wire]->drive(_node->driven_when);
+                for(const auto& arg_wire : arg_wires) {
+                    if(read[i]){ // if the argument is read
+                        _node->connect_incoming(nodes[arg_wire]);
+                    } else {
+                        _node->connect_outgoing(nodes[arg_wire]);
                     }
                 }
             }
         }
-        std::queue<node*> traversal;
-        for(const auto& nd : nodes)
-            if(!nd.second->only_critical_dependencies())
-                traversal.push(nd.second);
+        try {
+            std::cout << "pruning connections....\n";
+            prune_connections(nodes);
 
-        for(const auto& n : nodes){
-            std::cout << *(n.second) << '\n';
-        }
-        node* last_unchanged = nullptr;
-        node* current;
-        bool detected_change = false;
-        while(!traversal.empty() && last_unchanged != (current = traversal.front())){
-            std::cout << "Checking " << current->name << " for changes in dependencies:\n";
-            traversal.pop();
-            if(!current->detect_dependency_changes()){
-                std::cout << "\tdid not detect a change\n";
-            } else {
-                std::cout << "\tdetected change\n";
-                detected_change = true;
-            }
-            if(detected_change){
-                last_unchanged = traversal.front();
-                detected_change = false;
-            }
-            current->make_unreactive();
-            if(!current->only_critical_dependencies()) {
-                traversal.push(current);
-            } else {
-                std::cout << "\tnow it only has critical dependencies. removing from queue\n";
-            }
-        }
-        if(!traversal.empty()){
-            std::string circular = "Error - circular dependency: ";
-            auto f = traversal.front();
-
-            std::cout << "\n\n\n\nTHE FULL RESULT OF THE DEPENDENCY PRUNING:\n\n\n\n";
-            for(const auto& n : nodes){
+            std::cout << "\n\n\n\nTHE FULL RESULT OF THE GRAPH PRUNING:\n\n";
+            for (const auto &n: nodes) {
                 std::cout << *(n.second) << '\n';
             }
 
-            std::cout << "queue not empty. contents: \n\n";
-            while(!traversal.empty()){
-                auto a = traversal.front();
-                std::cout << *a << '\n';
-                traversal.pop();
-                circular += (a->name + " -> ");
+            std::cout << "finding cycles in the pruned graph....\n";
+            detect_cycles(nodes);
+
+            std::cout << "determining levels....\n";
+            determine_levels(nodes);
+
+
+            std::cout << "\n\n\nALL OF THE LEVELS:\n\n";
+            for (const auto &n: nodes) {
+                std::cout << n.second->name << ": " << n.second->level.value << '\n';
             }
-            circular += f->name;
-            throw std::runtime_error(circular);
+        } catch(std::runtime_error& error) {
+            graph_cleanup(nodes);
+            throw error;
         }
 
-        for(const auto& n : nodes){
-            std::cout << *(n.second) << '\n';
+        for(const auto& kvp : nodes){
+            auto node_ = kvp.second;
+            if(node_->n_type == "wire"){
+                for(int i = 0;i < ret["wire_db"].size(); i++){
+                    if(ret["wire_db"][i]["name"] == node_->name){
+                        ret["wire_db"][i]["level"] = node_->level.value;
+                        continue;
+                    }
+                }
+            } else {
+                for(int i = 0;i < ret["component_db"].size(); i++){
+                    if(ret["component_db"][i]["name"] == node_->name){
+                        ret["component_db"][i]["level"] = node_->level.value;
+                        continue;
+                    }
+                }
+            }
         }
 
-        std::map<std::string, level_promise*> levels;
-        level_promise* last_undetermined = nullptr;
-        std::queue<level_promise*> to_determine;
+        graph_cleanup(nodes);
     }
 
     std::list<std::string> transpiler::get_wires_from_argument(nlohmann::json& dbs, const std::string& lookup) {
@@ -368,4 +356,101 @@ namespace sim{
         throw std::runtime_error("Invalid lookup for graph analysis. No wire or array called \"" + lookup + "\"");
     }
 
+    void transpiler::prune_connections(std::map<std::string,node *> &graph) {
+        bool change = true;
+        while(change){
+            change = false;
+            for(const auto& kvp : graph){
+                auto _node = kvp.second;
+                change = _node->make_unreactive();
+                std::list<node*> marked;
+                for(const auto& inc : _node->incoming){
+                    if(_node->is_prunable(inc)){
+                        change = true;
+                        marked.push_back(inc);
+                    }
+                }
+                for(auto m : marked)
+                    _node->prune(m);
+            }
+        }
+    }
+
+    void transpiler::process_dfs_tree (std::map<node*,int> &visited, std::stack<node*> &stack){
+        auto check = stack.top();
+        auto print_stack = [](std::stack<node*> stack_){
+            std::string circle = stack_.top()->name;
+            stack_.pop();
+            while(!stack_.empty()){
+                circle = stack_.top()->name + " -> " + circle;
+                stack_.pop();
+            }
+            return circle;
+        };
+        std::cout << print_stack(stack) << "\n";
+        for(auto adj : check->outgoing){
+            if(visited[adj] == 1){
+                std::string err = "Found circular dependency:\n";
+                err += check->name + print_stack(stack);
+                throw std::runtime_error(err);
+            } else if(visited[adj] == 0) {
+                stack.push(adj);
+                visited[adj] = 1;
+                process_dfs_tree(visited,stack);
+            }
+        }
+        visited[check] = 2;
+        stack.pop();
+    }
+
+    void transpiler::detect_cycles(std::map<std::string, node *> &graph) {
+        // 0 - not visited
+        // 1 - visited, in stack
+        // 2 - visited, done
+        std::map<node*,int> visited;
+        std::stack<node*> stack;
+
+        for(const auto& kvp : graph){
+            visited[kvp.second] = 0;
+        }
+        for(auto kvp : visited){
+            if(kvp.second != 0)
+                continue;
+            stack.push(kvp.first);
+            visited[kvp.first] = 1;
+            process_dfs_tree(visited,stack);
+        }
+    }
+
+    void transpiler::determine_levels(std::map<std::string, node *> &graph) {
+        for(const auto& kvp : graph){
+            auto _node = kvp.second;
+            if(_node->driven == node::NONE || _node->incoming.empty()){
+                _node->level.op = level_promise::BASE;
+                continue;
+            }
+            for(auto dpd : _node->incoming){
+                _node->level.add_dependency(&dpd->level);
+                if(_node->n_type == "wire")
+                    _node->level.op = level_promise::INCREMENT;
+                else
+                    _node->level.op = level_promise::MAX_INC;
+            }
+        }
+        bool all_determined = false;
+        while(!all_determined){
+            all_determined = true;
+            std::cout << "determining...";
+            for(const auto& kvp : graph){
+                auto& lvl = kvp.second->level;
+                lvl.determine();
+                all_determined &= lvl.determined;
+            }
+        }
+    }
+
+    void transpiler::graph_cleanup(const std::map<std::string, node *>& graph) {
+        for(const auto& kvp : graph)
+            delete kvp.second;
+    }
 }

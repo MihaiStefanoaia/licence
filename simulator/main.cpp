@@ -12,11 +12,13 @@
 #include <QPushButton>
 #include <QGridLayout>
 #include <QCheckBox>
+#include <fstream>
 
 ///demo sim for ((a&b)&c)
 
 int main(int argc, char** argv){
-    sim::transpiler::transpile("tiny_playground.ndl");
+    std::ofstream f("ret.json");
+    f << sim::transpiler::transpile("tiny_playground.ndl").dump(2);
     QApplication app(argc,argv);
 
     auto *window = new QWidget();

@@ -43,5 +43,5 @@ class node:
                 new_drive = BOTH
             else
                 new_drive = inc.driven
-        this.driven == new_drive
+        this.driven = new_drive
         return true

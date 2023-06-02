@@ -7,6 +7,7 @@
 #include <list>
 #include <set>
 #include <map>
+#include <stack>
 #include <utility>
 #include "parser.hh"
 #include "level_promise.h"
@@ -42,95 +43,78 @@ namespace sim{
 
         class node{
         public:
-            std::string name;
-            std::string n_type;
-            level_promise level = level_promise(level_promise::NONE,{});
-            std::vector<std::string> arguments;
-            std::map<node*,bool> dependencies; // the value at the map is whether the dependency is critical
-
             enum drive_type {NONE, NEGATIVE, POSITIVE, BOTH, REACTIVE};
 
-            drive_type driven_when = NONE;
+            std::string name;
+            std::string n_type;
+            drive_type driven = REACTIVE;
+            std::set<node*> incoming;
+            std::set<node*> outgoing;
+            level_promise level = level_promise(level_promise::NONE,{});
 
-            struct drive_struct {
-                bool at_neg = false;
-                bool at_pos = false;
-            } driven;
+            std::vector<std::string> arguments;
+
+
             bool visited = false;
             node(std::string name, std::string n_type){
                 this->name = std::move(name);
                 this->n_type = std::move(n_type);
             };
             void drive(drive_type on_what) {
-                if(driven.at_pos || driven.at_neg) //wires can only be driven by one module
-                    throw std::runtime_error("Failed: wire " + name + " is being driven by multiple objects");
-                driven.at_neg = (on_what == NEGATIVE) || (on_what == BOTH);
-                driven.at_pos = (on_what == POSITIVE) || (on_what == BOTH);
+                driven = on_what;
             }
-            void add_dependency(node* dpd){
-                if(!dependencies.count(dpd))
-                    dependencies[dpd] = true;
+            void connect_incoming(node* other){
+                if(n_type == "wire" && !(incoming.empty() || incoming.count(other)))
+                    throw std::runtime_error("wires cannot be driven by more than one source");
+                incoming.insert(other);
+                other->outgoing.insert(this);
             }
-            bool is_driven() const{
-                return driven.at_pos || driven.at_neg;
+
+            void connect_outgoing(node* other){
+                if(other->n_type == "wire" && !(other->incoming.empty() || other->incoming.count(this)))
+                    throw std::runtime_error("wires cannot be driven by more than one source");
+                outgoing.insert(other);
+                other->incoming.insert(this);
             }
-            bool filter_dependency(node* dpd){ // returns the status of the dependency after the process
-                if(!dependencies.count(dpd))
-                    throw std::runtime_error("dependency "+ dpd->name + " is not found in module " + name);
-                if(!dpd->is_driven())
+
+            bool is_prunable(node* other) const{
+                if( (driven == NEGATIVE && other->driven == POSITIVE) ||
+                    (driven == POSITIVE && other->driven == NEGATIVE) ||
+                    other->driven == NONE)
                     return true;
-                if(!dependencies[dpd])
-                    return false;
-                switch (driven_when) {
-                    case POSITIVE:
-                        if(dpd->driven.at_pos)
-                            return true;
-                        dependencies[dpd] = false;
-                        return false;
-                    case NEGATIVE:
-                        if(dpd->driven.at_neg)
-                            return true;
-                        dependencies[dpd] = false;
-                        return false;
-                    case BOTH:
-                    case REACTIVE:
-                    case NONE:
-                        return true;
-                }
-            }
-            bool detect_dependency_changes(){
-                for(auto& dep : dependencies){
-                    if(dep.second && !filter_dependency(dep.first))
-                        return true;
-                }
                 return false;
             }
 
-            bool only_critical_dependencies(){
-                if(dependencies.empty())
-                    return true;
-                if(driven_when == REACTIVE)
-                    return true;
-                bool ret_ = true;
-                for(auto& dep : dependencies){
-                    ret_ &= !dep.second;
+            void prune(node* other){
+                if(incoming.count(other)){
+                    incoming.erase(other);
+                    other->outgoing.erase(this);
                 }
-                return ret_;
+                if(outgoing.count(other)){
+                    outgoing.erase(other);
+                    other->incoming.erase(this);
+                }
             }
 
-            void make_unreactive(){
-                if(driven_when == REACTIVE && only_critical_dependencies()){
-                    auto new_drive = REACTIVE;
-                    for(auto dpd : dependencies){
-                        if( (new_drive == POSITIVE && dpd.first->driven_when == NEGATIVE) ||
-                            (new_drive == NEGATIVE && dpd.first->driven_when == POSITIVE) ||
-                            dpd.first->driven_when == BOTH)
-                            new_drive = BOTH;
-                        else
-                            new_drive = dpd.first->driven_when;
-                    }
-                    driven_when = new_drive;
+            bool make_unreactive(){
+                if(driven != REACTIVE)
+                    return false;
+
+                auto new_drive = NONE;
+                for(auto inc : incoming){
+                    if(inc->driven == REACTIVE)
+                        return false;
+                    if(inc->driven == NONE)
+                        continue;
+                    if((new_drive == POSITIVE && inc->driven == NEGATIVE) ||
+                       (new_drive == NEGATIVE && inc->driven == POSITIVE) ||
+                        new_drive == BOTH || inc->driven == BOTH)
+                        new_drive = BOTH;
+                    else
+                        new_drive = inc->driven;
                 }
+                driven = new_drive;
+                return true;
             }
 
             friend std::ostream& operator<<(std::ostream& o, node& n){
@@ -138,7 +122,7 @@ namespace sim{
                 o << "Name: " << n.name << '\n';
                 o << "Type: " << n.n_type << '\n';
                 o << "Driven on: ";
-                switch (n.driven_when) {
+                switch (n.driven) {
 
                     case NONE:
                         o << "none\n";
@@ -161,15 +145,26 @@ namespace sim{
                     o << arg << ' ';
                 }
                 o << "]\n";
-                o << "Critical dependencies: [";
-                for(const auto& arg : n.dependencies){
-                    if(arg.second)
-                        o << arg.first->name << ' ';
+                o << "Incoming connections: [";
+                for(const auto& inc : n.incoming){
+                    o << inc->name << ' ';
+                }
+                o << "]\n";
+                o << "Outgoing connections: [";
+                for(const auto& otg : n.outgoing){
+                    o << otg->name << ' ';
                 }
                 o << "]\n";
                 return o;
             }
         };
+
+        static void prune_connections(std::map<std::string,node*> &graph);
+        static void detect_cycles    (std::map<std::string,node*> &graph);
+        static void determine_levels (std::map<std::string,node*> &graph);
+        static void process_dfs_tree (std::map<node*,int> &visited, std::stack<node*> &stack);
+        static void graph_cleanup(const std::map<std::string,node*>& graph);
+
     public:
         yy::location location;
         static nlohmann::json transpile(const std::string&);

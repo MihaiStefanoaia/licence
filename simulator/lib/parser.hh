@@ -733,9 +733,9 @@ switch (yytype)
 
     /// Type for debugging levels.
     typedef int debug_level_type;
-    /// The current debugging level.
+    /// The current debugging value.
     debug_level_type debug_level () const YY_ATTRIBUTE_PURE;
-    /// Set the current debugging level.
+    /// Set the current debugging value.
     void set_debug_level (debug_level_type l);
 #endif
 
@@ -1073,7 +1073,7 @@ switch (yytype)
     /// Print the state stack on the debug stream.
     virtual void yystack_print_ ();
 
-    /// Debugging level.
+    /// Debugging value.
     int yydebug_;
     /// Debug stream.
     std::ostream* yycdebug_;

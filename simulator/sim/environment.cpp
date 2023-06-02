@@ -36,9 +36,9 @@ namespace sim {
     void environment::build_wire_phase() {
         std::cout << "\ngenerating wires:\n";
         for(auto& wire : topology["wire_db"]){
-            std::cout << "wire " << wire["name"] << "; level "<< wire["level"] <<'\n';
+            std::cout << "wire " << wire["name"] << "; value "<< wire["value"] <<'\n';
             auto* tmp = new objs::bit();
-            tmp->set_expected_level(wire["level"]);
+            tmp->set_expected_level(wire["value"]);
             wire_db[wire["name"]] = tmp;
         }
         wire_db["nil"] = &nil;
@@ -58,19 +58,19 @@ namespace sim {
         for(auto& component : topology["component_db"]){
             evaluable* tmp;
             if(component["type"] == "and_module"){
-                std::cout << "and_module " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ", "<< component["args"][2] << ")" << "; level "<< component["level"] <<'\n';
+                std::cout << "and_module " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ", "<< component["args"][2] << ")" << "; value "<< component["value"] <<'\n';
                 auto* a = wire_db[component["args"][0]];
                 auto* b = wire_db[component["args"][1]];
                 auto* o = wire_db[component["args"][2]];
                 tmp = new objs::and_module(*a,*b,*o, false);
             } else if(component["type"] == "not_module"){
-                std::cout << "not_module " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ")" << "; level "<< component["level"] <<'\n';
+                std::cout << "not_module " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ")" << "; value "<< component["value"] <<'\n';
                 auto* i = wire_db[component["args"][0]];
                 auto* o = wire_db[component["args"][1]];
                 tmp = new objs::not_module(*i, *o);
             } else if(component["type"] == "tiny_cpu") {
                 auto& args = component["args"];
-                std::cout << "tiny_cpu " << component["name"] << "(" << args.dump() << "); level " << component["level"] << '\n';
+                std::cout << "tiny_cpu " << component["name"] << "(" << args.dump() << "); value " << component["value"] << '\n';
 
                 auto* addr_o = array_db[args[0]];
                 auto* data_i = array_db[args[1]];
@@ -90,7 +90,7 @@ namespace sim {
                 tmp = new objs::tiny_cpu(*addr_o,*data_i,*data_o,*active,*rw,*ready,*port_i,*port_o,*interr,*CLK,*RST);
             } else if(component["type"] == "tiny_mem") {
                 auto& args = component["args"];
-                std::cout << "tiny_mem " << component["name"] << "(" << args.dump() << "); level " << component["level"] << '\n';
+                std::cout << "tiny_mem " << component["name"] << "(" << args.dump() << "); value " << component["value"] << '\n';
 
                 auto* addr_i = array_db[args[0]];
                 auto* data_i = array_db[args[1]];
@@ -104,7 +104,7 @@ namespace sim {
 
                 tmp = new objs::tiny_mem(*addr_i,*data_i,*data_o,*active,*rw,*ready,*CLK,*RST);
             } else if(component["type"] == "mux2x1") {
-                std::cout << "mux2x1 " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ", "<< component["args"][2] << ", "<< component["args"][3] << ", " << ")" << "; level "<< component["level"] <<'\n';
+                std::cout << "mux2x1 " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ", "<< component["args"][2] << ", "<< component["args"][3] << ", " << ")" << "; value "<< component["value"] <<'\n';
                 auto* a = wire_db[component["args"][0]];
                 auto* b = wire_db[component["args"][1]];
                 auto* s = wire_db[component["args"][2]];
@@ -113,7 +113,7 @@ namespace sim {
             } else {
                 throw std::runtime_error("invalid type. how did you manage to pass all the fail safes?");
             }
-            tmp->set_expected_level(component["level"]);
+            tmp->set_expected_level(component["value"]);
             component_db[component["name"]] = tmp;
         }
     }
@@ -148,11 +148,11 @@ namespace sim {
             master_clk = wire_db[configs["master_clk"]];
 
         for (auto const &kvp: wire_db) {
-            std::cout << "adding wire " << kvp.first << " at level " << kvp.second->get_expected_level() << '\n';
+            std::cout << "adding wire " << kvp.first << " at value " << kvp.second->get_expected_level() << '\n';
             evl.add_on_expected_level(kvp.second);
         }
         for(auto const& kvp : component_db){
-            std::cout << "adding component " << kvp.first << " at level " << kvp.second->get_expected_level() << '\n';
+            std::cout << "adding component " << kvp.first << " at value " << kvp.second->get_expected_level() << '\n';
             evl.add_on_expected_level(kvp.second);
         }
     }
