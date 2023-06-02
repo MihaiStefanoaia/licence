@@ -15,6 +15,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-Os")
 include_directories(sim)
 include_directories(sim/objs)
 include_directories(sim/test)
+include_directories(sim/gui)
 include_directories(lib)
 
 add_executable(simulator
@@ -45,6 +46,6 @@ add_executable(simulator
         sim/evaluation_list.h
         sim/triggering.cpp
         sim/triggering.h
-        main.cpp sim/objs/bit_array.cpp sim/objs/bit_array.h sim/objs/or_module.cpp sim/objs/or_module.h sim/objs/not_module.cpp sim/objs/not_module.h sim/test/memory_test.cpp sim/test/memory_test.h sim/environment.cpp sim/environment.h sim/objs/button.cpp sim/objs/button.h sim/objs/byte.cpp sim/objs/byte.h sim/objs/word.cpp sim/objs/word.h sim/objs/memory.cpp sim/basic_output.cpp sim/basic_input.cpp sim/environment_generator.cpp sim/transpiler.cpp sim/transpiler.h lib/parser.hh lib/parser.cc lib/scanner.cc sim/objs/none.h sim/objs/tiny_cpu.cpp sim/objs/tiny_cpu.h sim/objs/tiny_mem.cpp sim/objs/tiny_mem.h sim/level_promise.cpp sim/level_promise.h sim/objs/led.cpp)
+        main.cpp sim/objs/bit_array.cpp sim/objs/bit_array.h sim/objs/or_module.cpp sim/objs/or_module.h sim/objs/not_module.cpp sim/objs/not_module.h sim/test/memory_test.cpp sim/test/memory_test.h sim/environment.cpp sim/environment.h sim/objs/button.cpp sim/objs/button.h sim/objs/byte.cpp sim/objs/byte.h sim/objs/word.cpp sim/objs/word.h sim/objs/memory.cpp sim/basic_output.cpp sim/basic_input.cpp sim/environment_generator.cpp sim/transpiler.cpp sim/transpiler.h lib/parser.hh lib/parser.cc lib/scanner.cc sim/objs/none.h sim/objs/tiny_cpu.cpp sim/objs/tiny_cpu.h sim/objs/tiny_mem.cpp sim/objs/tiny_mem.h sim/level_promise.cpp sim/level_promise.h sim/objs/led.cpp sim/gui/sim_monitor.cpp sim/gui/sim_monitor.h)
 
 target_link_libraries(simulator Qt5::Widgets)

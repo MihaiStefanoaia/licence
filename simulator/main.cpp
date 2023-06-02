@@ -21,10 +21,11 @@
 int main(int argc, char** argv){
     QApplication app(argc,argv);
 
-    auto bit = new sim::objs::bit();
-    auto btn = new sim::objs::button("the button",*bit);
-    auto led = new sim::objs::led("the_led",*bit);
-    btn->get_window()->show();
-    led->get_window()->show();
+    auto run = [](){
+        sim::environment env;
+        env.start("tiny_playground.ndl");
+    };
+    std::thread th(run);
+    th.detach();
     return app.exec();
 }

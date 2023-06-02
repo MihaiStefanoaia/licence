@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <thread>
+#include <sys/time.h>
+#include <unistd.h>
 #include "environment.h"
 #include "and_module.h"
 #include "mux2x1.h"
@@ -12,6 +14,7 @@
 #include "not_module.h"
 #include "tiny_cpu.h"
 #include "tiny_mem.h"
+
 
 namespace sim {
     void environment::start(const std::string& path) {
@@ -46,6 +49,7 @@ namespace sim {
 
     void environment::build_array_phase() {
         for(auto& array : topology["array_db"]){
+            std::cout << "generating array " << array["name"] << "<"<< array["size"]<<">\n";
             auto* tmp = new objs::bit_array(array["size"]);
             for(int i = 0; i < tmp->get_size(); i++)
                 tmp->connect(*wire_db[array["args"][i]], i);
@@ -137,15 +141,19 @@ namespace sim {
         auto const& configs = topology["config_db"];
         if(configs.contains("sim_frequency_min")){
             sim_frequency_min = configs["sim_frequency_min"];
-        } else if(configs.contains("sim_frequency_max")){
+        }
+        if(configs.contains("sim_frequency_max")){
             sim_frequency_max = configs["sim_frequency_max"];
-        } else if(configs.contains("frame_rate_cap")){
+        }
+        if(configs.contains("frame_rate_cap")){
             frame_rate_cap = configs["frame_rate_cap"];
-        } else if(configs.contains("reactive_only")){
+        }
+        if(configs.contains("reactive_only")){
             reactive_only = configs["reactive_only"];
         }
-        if(!reactive_only)
+        if(configs.contains("master_clk")){
             master_clk = wire_db[configs["master_clk"]];
+        }
 
         // set up the evaluation lists here
         for (auto const &kvp: wire_db) {
@@ -159,6 +167,44 @@ namespace sim {
     }
     void environment::run_phase() {
         //beginning of the overhauling.....
+        auto millis = [](){
+            timeval curTime{};
+            gettimeofday(&curTime, nullptr);
+            return (unsigned long)curTime.tv_usec / 1000;
+        };
+
+        for(auto input : input_db)
+            input.second->get_window()->show();
+        for(auto output : output_db)
+            output.second->get_window()->show();
+
+        unsigned long frame_start;
+        unsigned long delta;
+
+        unsigned int iterations;
+        std::cout << wire_db["m_clk"] << " " << master_clk << "\n";
+        while(!exit_flag){
+            iterations = 0;
+            frame_start = millis();
+            delta = frame_start;
+
+            while(iterations < sim_frequency_max && (delta - frame_start < 1000.0f / (float)frame_rate_cap || iterations < sim_frequency_min)){
+                master_clk->set_content(!master_clk->get_content());
+                evl.eval();
+                iterations++;
+                for(auto input : input_db)
+                    input.second->update();
+                for(auto output : output_db)
+                    output.second->update();
+                delta = millis();
+            }
+
+            long sleep_time = (1000.0f / frame_rate_cap) - (delta - frame_start);
+            sleep_time = std::max(sleep_time,0l);
+            usleep(1000 * sleep_time);
+            for(const auto& output : output_db)
+                output.second->render();
+        }
         clean_exit = true;
     }
 
