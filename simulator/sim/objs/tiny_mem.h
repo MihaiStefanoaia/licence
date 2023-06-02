@@ -6,6 +6,7 @@
 #define SIMULATOR_TINY_MEM_H
 
 #include "bit_array.h"
+#include "basic_io.h"
 
 namespace sim {
     namespace objs {

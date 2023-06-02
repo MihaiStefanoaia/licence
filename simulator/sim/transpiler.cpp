@@ -321,17 +321,15 @@ namespace sim{
         for(const auto& kvp : nodes){
             auto node_ = kvp.second;
             if(node_->n_type == "wire"){
-                for(int i = 0;i < ret["wire_db"].size(); i++){
-                    if(ret["wire_db"][i]["name"] == node_->name){
-                        ret["wire_db"][i]["level"] = node_->level.value;
-                        continue;
+                for(auto& wire : ret["wire_db"]){
+                    if(wire["name"] == node_->name){
+                        wire["level"] = node_->level.value;
                     }
                 }
             } else {
-                for(int i = 0;i < ret["component_db"].size(); i++){
-                    if(ret["component_db"][i]["name"] == node_->name){
-                        ret["component_db"][i]["level"] = node_->level.value;
-                        continue;
+                for(auto& component : ret["component_db"]){
+                    if(component["name"] == node_->name){
+                        component["level"] = node_->level.value;
                     }
                 }
             }

@@ -12,12 +12,9 @@ namespace sim {
 
     class basic_output : public basic_io{
     public:
-        objs::bit& input;
-        bool render_value = false;
-        explicit basic_output(objs::bit &input);
-        virtual ~basic_output() = default;
+        ~basic_output() override = default;
         void update() override;
-        virtual void render() const;
+        virtual void render() = 0;
     };
 
 } // sim

@@ -25,8 +25,8 @@ namespace sim {
         std::map<std::string,objs::bit*> wire_db;
         std::map<std::string,objs::bit_array*> array_db;
         std::map<std::string,evaluable*> component_db;
-        std::map<std::string,basic_input*> input_db;
-        std::map<std::string,basic_output*> output_db;
+        std::map<std::string,basic_io*> input_db;
+        std::map<std::string,basic_io*> output_db;
         std::map<std::string,int> config_db;
         std::mutex run_lock;
         std::mutex io_lock;
@@ -55,7 +55,6 @@ namespace sim {
         void operator()(const std::string& s = "example"){
             start(s);
         }
-        inline void change_input(const std::string&,bool);
     };
 
 } // sim

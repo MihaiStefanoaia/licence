@@ -9,10 +9,15 @@
 
 namespace sim {
     namespace objs {
-
         class led : public basic_output{
+            QWidget* light;
+            bit& input;
+            int active_cycles;
+            int all_cycles;
         public:
-            explicit led(bit& a) : basic_output(a){};
+            explicit led(std::string s, bit& a);
+            void update() override;
+            void render() override;
         };
 
     } // sim

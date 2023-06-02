@@ -29,29 +29,29 @@ namespace sim {
 //        ret["has_master_clock"] = false;
 
         ret["wire_db"][0]["name"] = "wire_a";
-        ret["wire_db"][0]["value"] = 0;
+        ret["wire_db"][0]["level"] = 0;
 
         ret["wire_db"][1]["name"] = "wire_b";
-        ret["wire_db"][1]["value"] = 0;
+        ret["wire_db"][1]["level"] = 0;
 
         ret["wire_db"][2]["name"] = "wire_c";
-        ret["wire_db"][2]["value"] = 0;
+        ret["wire_db"][2]["level"] = 0;
 
         ret["wire_db"][3]["name"] = "output0";
-        ret["wire_db"][3]["value"] = 2;
+        ret["wire_db"][3]["level"] = 2;
 
         ret["wire_db"][4]["name"] = "output1";
-        ret["wire_db"][4]["value"] = 4;
+        ret["wire_db"][4]["level"] = 4;
 
 
         ret["component_db"][0]["type"] = "and_module";
         ret["component_db"][0]["name"] = "and_mod0";
-        ret["component_db"][0]["value"] = 1;
+        ret["component_db"][0]["level"] = 1;
         ret["component_db"][0]["args"] = {"wire_a", "wire_b", "output0"};
 
         ret["component_db"][1]["type"] = "and_module";
         ret["component_db"][1]["name"] = "and_mod1";
-        ret["component_db"][1]["value"] = 3;
+        ret["component_db"][1]["level"] = 3;
         ret["component_db"][1]["args"] = {"output0", "wire_c", "output1"};
 
 
@@ -85,68 +85,68 @@ namespace sim {
         // wire db:
 
         ret["wire_db"][0]["name"] = "m_clk";
-        ret["wire_db"][0]["value"] = 0;
+        ret["wire_db"][0]["level"] = 0;
 
         ret["wire_db"][1]["name"] = "data_miso_0";
-        ret["wire_db"][1]["value"] = 4;
+        ret["wire_db"][1]["level"] = 4;
         ret["wire_db"][2]["name"] = "data_miso_1";
-        ret["wire_db"][2]["value"] = 4;
+        ret["wire_db"][2]["level"] = 4;
         ret["wire_db"][3]["name"] = "data_miso_2";
-        ret["wire_db"][3]["value"] = 4;
+        ret["wire_db"][3]["level"] = 4;
         ret["wire_db"][4]["name"] = "data_miso_3";
-        ret["wire_db"][4]["value"] = 4;
+        ret["wire_db"][4]["level"] = 4;
 
         ret["wire_db"][5]["name"] = "data_mosi_0";
-        ret["wire_db"][5]["value"] = 2;
+        ret["wire_db"][5]["level"] = 2;
         ret["wire_db"][6]["name"] = "data_mosi_1";
-        ret["wire_db"][6]["value"] = 2;
+        ret["wire_db"][6]["level"] = 2;
         ret["wire_db"][7]["name"] = "data_mosi_2";
-        ret["wire_db"][7]["value"] = 2;
+        ret["wire_db"][7]["level"] = 2;
         ret["wire_db"][8]["name"] = "data_mosi_3";
-        ret["wire_db"][8]["value"] = 2;
+        ret["wire_db"][8]["level"] = 2;
 
         ret["wire_db"][9]["name"]  = "addr_0";
-        ret["wire_db"][9]["value"]  = 2;
+        ret["wire_db"][9]["level"]  = 2;
         ret["wire_db"][10]["name"] = "addr_1";
-        ret["wire_db"][10]["value"] = 2;
+        ret["wire_db"][10]["level"] = 2;
         ret["wire_db"][11]["name"] = "addr_2";
-        ret["wire_db"][11]["value"] = 2;
+        ret["wire_db"][11]["level"] = 2;
         ret["wire_db"][12]["name"] = "addr_3";
-        ret["wire_db"][12]["value"] = 2;
+        ret["wire_db"][12]["level"] = 2;
 
         ret["wire_db"][13]["name"] = "port_i_0";
-        ret["wire_db"][13]["value"] = 0;
+        ret["wire_db"][13]["level"] = 0;
         ret["wire_db"][14]["name"] = "port_i_1";
-        ret["wire_db"][14]["value"] = 0;
+        ret["wire_db"][14]["level"] = 0;
         ret["wire_db"][15]["name"] = "port_i_2";
-        ret["wire_db"][15]["value"] = 0;
+        ret["wire_db"][15]["level"] = 0;
         ret["wire_db"][16]["name"] = "port_i_3";
-        ret["wire_db"][16]["value"] = 0;
+        ret["wire_db"][16]["level"] = 0;
 
         ret["wire_db"][17]["name"] = "port_o_0";
-        ret["wire_db"][17]["value"] = 2;
+        ret["wire_db"][17]["level"] = 2;
         ret["wire_db"][18]["name"] = "port_o_1";
-        ret["wire_db"][18]["value"] = 2;
+        ret["wire_db"][18]["level"] = 2;
         ret["wire_db"][19]["name"] = "port_o_2";
-        ret["wire_db"][19]["value"] = 2;
+        ret["wire_db"][19]["level"] = 2;
         ret["wire_db"][20]["name"] = "port_o_3";
-        ret["wire_db"][20]["value"] = 2;
+        ret["wire_db"][20]["level"] = 2;
 
         ret["wire_db"][21]["name"] = "active";
-        ret["wire_db"][21]["value"] = 2;
+        ret["wire_db"][21]["level"] = 2;
         ret["wire_db"][22]["name"] = "rw";
-        ret["wire_db"][22]["value"] = 2;
+        ret["wire_db"][22]["level"] = 2;
         ret["wire_db"][23]["name"] = "ready";
-        ret["wire_db"][23]["value"] = 4;
+        ret["wire_db"][23]["level"] = 4;
 
         ret["wire_db"][24]["name"] = "rst";
-        ret["wire_db"][24]["value"] = 0;
+        ret["wire_db"][24]["level"] = 0;
 
         ret["wire_db"][25]["name"] = "rst_mem";
-        ret["wire_db"][25]["value"] = 2;
+        ret["wire_db"][25]["level"] = 2;
 
         ret["wire_db"][26]["name"] = "interr";
-        ret["wire_db"][26]["value"] = 0;
+        ret["wire_db"][26]["level"] = 0;
 
         // array db:
 
@@ -173,17 +173,17 @@ namespace sim {
         // component_db:
         ret["component_db"][0]["type"] = "tiny_cpu";
         ret["component_db"][0]["name"] = "processor";
-        ret["component_db"][0]["value"] = 1;
+        ret["component_db"][0]["level"] = 1;
         ret["component_db"][0]["args"] = {"addr","data_miso","data_mosi","active","rw","ready","port_i","port_o","interr","m_clk","rst"};
 
         ret["component_db"][1]["type"] = "tiny_mem";
         ret["component_db"][1]["name"] = "mem";
-        ret["component_db"][1]["value"] = 3;
+        ret["component_db"][1]["level"] = 3;
         ret["component_db"][1]["args"] = {"addr","data_mosi","data_miso","active","rw","ready","m_clk","rst_mem"};
 
         ret["component_db"][2]["type"] = "not_module";
         ret["component_db"][2]["name"] = "rst_neg";
-        ret["component_db"][2]["value"] = 1;
+        ret["component_db"][2]["level"] = 1;
         ret["component_db"][2]["args"] = {"rst","rst_mem"};
 
         // inputs:

@@ -20,7 +20,7 @@ namespace sim {
 //            std::cout << kv.first << std::endl;
             for(auto el : kv.second) {
                 if (el->is_flagged()) {
-                    std::cout<<"evaluating at value " << kv.first <<"...\n";
+                    std::cout<<"evaluating at level " << kv.first <<"...\n";
                     el->eval();
                 }
             }
