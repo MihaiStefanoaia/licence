@@ -1,0 +1,15 @@
+func prune_nodes(node[] graph):
+    change = true
+    while(change == true):
+        change = false
+        foreach(_node in graph):
+            change = _node.make_unreactive()
+            foreach(inc in _node.incoming):
+                if(node.is_prunable(inc)):
+                    node.prune(inc)
+                    change = true
+    if(detect_cycles(graph))
+        throw error("circular dependency found")
+
+
+func 

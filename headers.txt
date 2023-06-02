@@ -1,0 +1,24 @@
+module tiny_cpu (
+    output addr_o,
+    input  data_i,
+    output data_o,
+    output active,
+    output rw,
+    input  ready,
+    input  port_i,
+    output port_o,
+    input  interr,
+    input  CLK,
+    input  RST
+)
+
+module tiny_mem (
+    input  addr_i,
+    input  data_i,
+    output data_o,
+    input  active,
+    input  rw,
+    output ready,
+    input  CLK,
+    input  RST
+)

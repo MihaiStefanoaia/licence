@@ -1,0 +1,47 @@
+class node:
+    enum drive_type {NONE, NEGATIVE, POSITIVE, BOTH, REACTIVE};
+    string name // name of the node
+    string type // wire or module
+    drive_type driven = REACTIVE // the type of driving
+    set<node> incoming // set of nodes connected to the node
+    set<node> outgoing // set of nodes this node connects to
+    int level // the level at which the node will end up when running the simulation
+
+    func connect_incoming(node other):
+        if(type == wire && incoming.size() != 0)
+            throw error("wires cannot be driven by multiple sources")
+        incoming.add(other)
+        other.outgoing.add(this)
+    
+    func connect_outgoing(node other):
+        outgoing.add(other)
+        other.incoming.add(this)
+
+    func is_prunable(node other):
+        if( (this.driven == NEGATIVE && other.driven == POSITIVE) || 
+            (this.driven == POSITIVE && other.driven == NEGATIVE)):
+            return true
+        else:
+            return false
+
+    func prune(node other):
+        incoming.remove(other)
+        other.outgoing.remove(this)
+
+    func make_unreactive():
+        if(this.driven != REACTIVE):
+            return false
+        new_drive = NONE
+        foreach(inc in incoming):
+            if(inc.driven == REACTIVE):
+                return false
+            if(inc.driven == NONE):
+                continue
+            if( new_drive == BOTH ||
+                (new_drive == POSITIVE && inc.driven == NEGATIVE) ||
+                (new_drive == NEGATIVE && inc.driven == POSITIVE)):
+                new_drive = BOTH
+            else
+                new_drive = inc.driven
+        this.driven == new_drive
+        return true

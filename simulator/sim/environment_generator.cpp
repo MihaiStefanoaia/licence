@@ -229,7 +229,6 @@ namespace sim {
         // configs (frequency is per frame):
 
         ret["config_db"]["master_clk"] = "m_clk";
-        ret["config_db"]["reactive_only"] = 0;
         ret["config_db"]["sim_frequency_min"] = 2;
         ret["config_db"]["sim_frequency_max"] = 2;
         ret["config_db"]["frame_rate_cap"] = 60;

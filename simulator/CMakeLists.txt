@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 project(simulator)
 
-set(CMAKE_PREFIX_PATH "/home/mihai-laptop/Qt5.12.12/5.12.12/gcc_64")
+set(CMAKE_PREFIX_PATH "/home/mihai-pc/Qt5.12.12/5.12.12/gcc_64")
 find_package(Qt5Widgets REQUIRED)
 
 set(CMAKE_AUTOMOC ON)

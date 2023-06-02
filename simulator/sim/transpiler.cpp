@@ -221,50 +221,138 @@ namespace sim{
         std::map<std::string,std::vector<bool>> read_args = { // true is an input (read) argument, false is an output (written) argument
                 {"and_module",{true,true,false}},
                 {"not_module",{true,false}},
-                {"tiny_cpu",{false,true,false,true,true,false,true,true,false,true,true}}, //not sure, will have to double-check
+                {"tiny_cpu",{false,true,false,false,false,true,true,false,true,true,true}},
                 {"tiny_mem",{true,true,false,true,true,false,true,true}},
                 {"button",{false}}
         };
 
+        //build all nodes
         std::map<std::string, node*> nodes;
+
+        //wires
         for(auto wire : ret["wire_db"]){
             nodes[wire["name"]] = new node(wire["name"],"wire");
             nodes[wire["name"]]->driven_when = node::REACTIVE;
         }
-        for(auto component : ret["component_db"]){
-            nodes[component["name"]] = new node(component["name"], component["type"]);
-        }
-        for(auto input : ret["io_db"]["inputs"]){
-            nodes[input["name"]] = new node(input["name"],input["type"]);
-            nodes[input["name"]]->level.op = level_promise::BASE;
-            nodes[input["name"]]->drive(1);
 
-            // THIS ASSUMES ALL INPUTS ARE ONLY WRITTEN TO
-            for(const auto& arg : input["args"]) {
-                auto arg_wires = get_wires_from_argument(ret,arg);
-                for(const auto& arg_wire : arg_wires){
-                    nodes[arg_wire]->level.op = level_promise::INHERIT;
-                    nodes[arg_wire]->level.add_dependency(&nodes[input["args"]]->level);
-                    nodes[arg_wire]->drive(1);
+        //components
+        for(auto component : ret["component_db"]){
+            auto tmp = nodes[component["name"]] = new node(component["name"], component["type"]);
+            for(const auto& arg : component["args"])
+                tmp->arguments.push_back(arg);
+            if(positive_driven.count(component["type"])){
+                tmp->driven_when = node::POSITIVE;
+                tmp->drive(node::POSITIVE);
+            } else if(negative_driven.count(component["type"])){
+                tmp->driven_when = node::NEGATIVE;
+                tmp->drive(node::NEGATIVE);
+            } else if(always_driven.count(component["type"])){
+                tmp->driven_when = node::BOTH;
+                tmp->drive(node::BOTH);
+            } else if(reactive_driven.count(component["type"])){
+                tmp->driven_when = node::REACTIVE;
+            }
+            tmp->level.op = level_promise::MAX_INC;
+        }
+
+        //input components
+        for(auto input : ret["io_db"]["inputs"]){
+            auto tmp = nodes[input["name"]] = new node(input["name"],input["type"]);
+            nodes[input["name"]]->level.op = level_promise::BASE;
+            nodes[input["name"]]->drive(node::NEGATIVE);
+            for(const auto& arg : input["args"])
+                tmp->arguments.push_back(arg);
+        }
+
+        //master clk, if available
+        if(ret["config_db"].contains("master_clk")) {
+            nodes[ret["config_db"]["master_clk"]]->level.op = level_promise::BASE;
+            nodes[ret["config_db"]["master_clk"]]->drive(node::BOTH);
+        }
+
+        //set up the dependencies
+        for(const auto& kvp  : nodes){
+            auto _node = kvp.second;
+            // take each argument, and each wire in it if it is the case
+            for(unsigned int i = 0; i < read_args[_node->n_type].size();i++) {
+                auto &arg = _node->arguments[i];
+                auto arg_wires = get_wires_from_argument(ret, arg);
+                if(read_args[_node->n_type][i]){ // if the argument is read
+                    ///tbd for the read arguments
+                    for(const auto& arg_wire : arg_wires) {
+                        _node->add_dependency(nodes[arg_wire]);
+                    }
+                } else {
+                    //for all written wires, add the current module as a dependency and make it be driven the same as the module
+                    for (const auto &arg_wire: arg_wires) {
+                        nodes[arg_wire]->level.op = level_promise::INCREMENT;
+                        nodes[arg_wire]->add_dependency(_node);
+                        nodes[arg_wire]->drive(_node->driven_when);
+                    }
                 }
             }
         }
-        for(auto output : ret["io_db"]["outputs"]){
-            nodes[output["name"]] = new node(output["name"], output["type"]);
+        std::queue<node*> traversal;
+        for(const auto& nd : nodes)
+            if(!nd.second->only_critical_dependencies())
+                traversal.push(nd.second);
+
+        for(const auto& n : nodes){
+            std::cout << *(n.second) << '\n';
         }
-        if(ret["config_db"].contains("master_clk")) {
-            nodes[ret["config_db"]["master_clk"]]->level.op = level_promise::BASE;
-            nodes[ret["config_db"]["master_clk"]]->drive(3);
+        node* last_unchanged = nullptr;
+        node* current;
+        bool detected_change = false;
+        while(!traversal.empty() && last_unchanged != (current = traversal.front())){
+            std::cout << "Checking " << current->name << " for changes in dependencies:\n";
+            traversal.pop();
+            if(!current->detect_dependency_changes()){
+                std::cout << "\tdid not detect a change\n";
+            } else {
+                std::cout << "\tdetected change\n";
+                detected_change = true;
+            }
+            if(detected_change){
+                last_unchanged = traversal.front();
+                detected_change = false;
+            }
+            current->make_unreactive();
+            if(!current->only_critical_dependencies()) {
+                traversal.push(current);
+            } else {
+                std::cout << "\tnow it only has critical dependencies. removing from queue\n";
+            }
+        }
+        if(!traversal.empty()){
+            std::string circular = "Error - circular dependency: ";
+            auto f = traversal.front();
+
+            std::cout << "\n\n\n\nTHE FULL RESULT OF THE DEPENDENCY PRUNING:\n\n\n\n";
+            for(const auto& n : nodes){
+                std::cout << *(n.second) << '\n';
+            }
+
+            std::cout << "queue not empty. contents: \n\n";
+            while(!traversal.empty()){
+                auto a = traversal.front();
+                std::cout << *a << '\n';
+                traversal.pop();
+                circular += (a->name + " -> ");
+            }
+            circular += f->name;
+            throw std::runtime_error(circular);
         }
 
-        std::queue<node*> traversal;
+        for(const auto& n : nodes){
+            std::cout << *(n.second) << '\n';
+        }
 
         std::map<std::string, level_promise*> levels;
         level_promise* last_undetermined = nullptr;
         std::queue<level_promise*> to_determine;
     }
 
-    std::list<std::string> transpiler::get_wires_from_argument(nlohmann::json &dbs, const std::string& lookup) {
+    std::list<std::string> transpiler::get_wires_from_argument(nlohmann::json& dbs, const std::string& lookup) {
         for(auto wire : dbs["wire_db"]){
             if(lookup == wire["name"])
                 return {lookup};
