@@ -12,6 +12,7 @@ namespace sim {
     class basic_io {
     protected:
         QWidget* window = nullptr;
+        bool in_another_layout = false;
         bool flagged = false;
     public:
         virtual ~basic_io() = default;

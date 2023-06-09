@@ -167,10 +167,10 @@ namespace sim {
     }
     void environment::run_phase() {
         //beginning of the overhauling.....
-        auto millis = [](){
+        auto micros = [](){
             timeval curTime{};
             gettimeofday(&curTime, nullptr);
-            return (unsigned long)curTime.tv_usec / 1000;
+            return curTime.tv_usec;
         };
 
         for(auto input : input_db)
@@ -185,10 +185,11 @@ namespace sim {
         std::cout << wire_db["m_clk"] << " " << master_clk << "\n";
         while(!exit_flag){
             iterations = 0;
-            frame_start = millis();
+            frame_start = micros();
             delta = frame_start;
+            unsigned max_frame_time = 9.0e5f / (float)frame_rate_cap; // 90% of the frame is reserved for
 
-            while(iterations < sim_frequency_max && (delta - frame_start < 1000.0f / (float)frame_rate_cap || iterations < sim_frequency_min)){
+            while(iterations < sim_frequency_max && (delta - frame_start < max_frame_time || iterations < sim_frequency_min)){
                 master_clk->set_content(!master_clk->get_content());
                 evl.eval();
                 iterations++;
@@ -196,14 +197,14 @@ namespace sim {
                     input.second->update();
                 for(auto output : output_db)
                     output.second->update();
-                delta = millis();
+                delta = micros();
             }
 
-            long sleep_time = (1000.0f / frame_rate_cap) - (delta - frame_start);
-            sleep_time = std::max(sleep_time,0l);
-            usleep(1000 * sleep_time);
             for(const auto& output : output_db)
                 output.second->render();
+            long sleep_time = max_frame_time - (delta - frame_start);
+            sleep_time = std::max(sleep_time,0l);
+            usleep(sleep_time);
         }
         clean_exit = true;
     }
@@ -236,5 +237,37 @@ namespace sim {
         output_db.clear();
 
         topology.clear();
+    }
+
+    unsigned int environment::get_sim_frequency_min() const {
+        return sim_frequency_min;
+    }
+
+    void environment::set_sim_frequency_min(unsigned int _sim_frequency_min) {
+        this->sim_frequency_min = _sim_frequency_min;
+    }
+
+    unsigned int environment::get_sim_frequency_max() const {
+        return sim_frequency_max;
+    }
+
+    void environment::set_sim_frequency_max(unsigned int _sim_frequency_max) {
+        this->sim_frequency_max = _sim_frequency_max;
+    }
+
+    unsigned int environment::get_frame_rate_cap() const {
+        return frame_rate_cap;
+    }
+
+    void environment::set_frame_rate_cap(unsigned int _frame_rate_cap) {
+        this->frame_rate_cap = _frame_rate_cap;
+    }
+
+    bool environment::get_exit_flag() const {
+        return exit_flag;
+    }
+
+    void environment::set_exit_flag(bool _exit_flag) {
+        this->exit_flag = _exit_flag;
     }
 } // sim

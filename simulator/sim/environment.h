@@ -37,6 +37,24 @@ namespace sim {
         std::string topology_file = "example";
         unsigned int sim_frequency_min = 1;
         unsigned int sim_frequency_max = 1000;
+    public:
+        unsigned int get_sim_frequency_min() const;
+
+        void set_sim_frequency_min(unsigned int sim_frequency_min);
+
+        unsigned int get_sim_frequency_max() const;
+
+        void set_sim_frequency_max(unsigned int _sim_frequency_max);
+
+        unsigned int get_frame_rate_cap() const;
+
+        void set_frame_rate_cap(unsigned int _frame_rate_cap);
+
+        bool get_exit_flag() const;
+
+        void set_exit_flag(bool _exit_flag);
+
+    protected:
         unsigned int reactive_only = 0;
         unsigned int frame_rate_cap = -1;
         bool clean_exit = false;
@@ -57,6 +75,7 @@ namespace sim {
         void operator()(const std::string& s = "example"){
             start(s);
         }
+        friend class gui::sim_monitor;
     };
 
 } // sim
