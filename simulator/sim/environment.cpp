@@ -193,6 +193,9 @@ namespace sim {
                 master_clk->set_content(!master_clk->get_content());
                 evl.eval();
                 iterations++;
+                master_clk->set_content(!master_clk->get_content());
+                evl.eval();
+                iterations++;
                 for(auto input : input_db)
                     input.second->update();
                 for(auto output : output_db)
