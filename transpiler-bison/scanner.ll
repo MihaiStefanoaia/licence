@@ -100,6 +100,7 @@ comment (<<-).*(->>)
 \n+        loc.lines (yyleng); loc.step ();
 {comment}+ loc.step ();
 
+"layout"    return yy::parser::make_LAYOUT (loc);
 "wire"      return yy::parser::make_WIRE   (loc);
 "array"     return yy::parser::make_ARRAY  (loc);
 "__autogen" return yy::parser::make_AUTOGEN(loc);

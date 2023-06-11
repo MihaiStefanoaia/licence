@@ -23,6 +23,9 @@ namespace sim {
             out.set_content(a.get_content() && b.get_content());
         }
 
+        void and_module::init_class() {
+        }
+
         and_module::~and_module() = default;
     } // sim
 } // objs

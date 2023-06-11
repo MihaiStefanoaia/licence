@@ -14,14 +14,12 @@
 #include "basic_output.h"
 #include "bit_array.h"
 #include "none.h"
-#include "sim_monitor.h"
 #include <mutex>
 
 namespace sim {
 
     class environment {
     protected:
-        gui::sim_monitor* monitor;
         nlohmann::json topology;
         objs::none nil = objs::none();
         std::map<std::string,objs::bit*> wire_db;
@@ -75,7 +73,6 @@ namespace sim {
         void operator()(const std::string& s = "example"){
             start(s);
         }
-        friend class gui::sim_monitor;
     };
 
 } // sim

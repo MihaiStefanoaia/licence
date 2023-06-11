@@ -37,19 +37,19 @@ button int_btn(interr);
 button rst_btn(rst);
 
 layout l[
-    (0,0) -> led_0 centered
-    (0,1) -> led_1 centered
-    (0,2) -> led_2 centered
-    (0,3) -> led_3 centered
-    (1,0) -> btn_0 centered
-    (1,1) -> btn_1 centered
-    (1,2) -> btn_2 centered
-    (1,3) -> btn_3 centered
-]
+    (0,0) : led_0,
+    (0,1) : led_1,
+    (0,2) : led_2,
+    (0,3) : led_3,
+    (1,0) : btn_0,
+    (1,1) : btn_1,
+    (1,2) : btn_2,
+    (1,3) : btn_3
+];
 
 layout win[
-    (0,0) -> l centered
-    (0,1) -> sim_monitor centered
-    (0,2) -> mem centered
-    (0,3) -> processor centered
-]
+    (0,0) : l,
+    (0,1) : sim_monitor,
+    (0,2) : mem,
+    (0,3) : processor
+];

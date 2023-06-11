@@ -5,6 +5,124 @@
 #include "level_promise.h"
 
 namespace sim{
+    class transpiler::node{
+    public:
+        enum drive_type {NONE, NEGATIVE, POSITIVE, BOTH, REACTIVE};
+
+        std::string name;
+        std::string n_type;
+        drive_type driven = REACTIVE;
+        std::set<node*> incoming;
+        std::set<node*> outgoing;
+        level_promise level = level_promise(level_promise::NONE,{});
+
+        std::vector<std::string> arguments;
+
+
+        bool visited = false;
+        node(std::string name, std::string n_type){
+            this->name = std::move(name);
+            this->n_type = std::move(n_type);
+        };
+        void drive(drive_type on_what) {
+            driven = on_what;
+        }
+        void connect_incoming(node* other){
+            if(n_type == "wire" && !(incoming.empty() || incoming.count(other)))
+                throw std::runtime_error("wires cannot be driven by more than one source");
+            incoming.insert(other);
+            other->outgoing.insert(this);
+        }
+
+        void connect_outgoing(node* other){
+            if(other->n_type == "wire" && !(other->incoming.empty() || other->incoming.count(this)))
+                throw std::runtime_error("wires cannot be driven by more than one source");
+            outgoing.insert(other);
+            other->incoming.insert(this);
+        }
+
+        bool is_prunable(node* other) const{
+            if( (driven == NEGATIVE && other->driven == POSITIVE) ||
+                (driven == POSITIVE && other->driven == NEGATIVE) ||
+                other->driven == NONE)
+                return true;
+            return false;
+        }
+
+        void prune(node* other){
+            if(incoming.count(other)){
+                incoming.erase(other);
+                other->outgoing.erase(this);
+            }
+            if(outgoing.count(other)){
+                outgoing.erase(other);
+                other->incoming.erase(this);
+            }
+        }
+
+        bool make_unreactive(){
+            if(driven != REACTIVE)
+                return false;
+
+            auto new_drive = NONE;
+            for(auto inc : incoming){
+                if(inc->driven == REACTIVE)
+                    return false;
+                if(inc->driven == NONE)
+                    continue;
+                if((new_drive == POSITIVE && inc->driven == NEGATIVE) ||
+                   (new_drive == NEGATIVE && inc->driven == POSITIVE) ||
+                   new_drive == BOTH || inc->driven == BOTH)
+                    new_drive = BOTH;
+                else
+                    new_drive = inc->driven;
+            }
+            driven = new_drive;
+            return true;
+        }
+
+        friend std::ostream& operator<<(std::ostream& o, node& n){
+            o << "Node:\n";
+            o << "Name: " << n.name << '\n';
+            o << "Type: " << n.n_type << '\n';
+            o << "Driven on: ";
+            switch (n.driven) {
+
+                case NONE:
+                    o << "none\n";
+                    break;
+                case NEGATIVE:
+                    o << "negative\n";
+                    break;
+                case POSITIVE:
+                    o << "positive\n";
+                    break;
+                case BOTH:
+                    o << "both\n";
+                    break;
+                case REACTIVE:
+                    o << "reactive\n";
+                    break;
+            }
+            o << "Arguments: [";
+            for(const auto& arg : n.arguments){
+                o << arg << ' ';
+            }
+            o << "]\n";
+            o << "Incoming connections: [";
+            for(const auto& inc : n.incoming){
+                o << inc->name << ' ';
+            }
+            o << "]\n";
+            o << "Outgoing connections: [";
+            for(const auto& otg : n.outgoing){
+                o << otg->name << ' ';
+            }
+            o << "]\n";
+            return o;
+        }
+    };
+
     transpiler::transpiler() : trace_scanning(false), trace_parsing(false){
         result = 0;
     }
@@ -23,6 +141,7 @@ namespace sim{
 
     nlohmann::json transpiler::transpile(const std::string &path) {
         transpiler instance;
+        instance.transpiler_init();
         int parse_res = instance.parse(path);
         if(parse_res){
             std::string str = "Parser exited with status " + std::to_string(parse_res);
@@ -43,6 +162,7 @@ namespace sim{
         fin["component_db"] = nlohmann::json::array();
         fin["io_db"]["inputs"] = nlohmann::json::array();
         fin["io_db"]["outputs"] = nlohmann::json::array();
+        fin["window_db"] = nlohmann::json::array();
 
         for(auto& stmt : ret){
             if(!stmt.contains("stmt_type")){
@@ -172,6 +292,16 @@ namespace sim{
                 else
                     fin["io_db"]["outputs"] += tmp;
 
+            } else if(stmt["stmt_type"] == "layout_decl"){
+                nlohmann::json tmp;
+                tmp["name"] = stmt["name"];
+                tmp["args"] = stmt["args"];
+                for(auto arg : stmt["args"]){
+                    if(!is_monitored(fin,arg["content"])){
+                        throw std::runtime_error("argument " + std::string(arg["content"]) + " is not a monitored element");
+                    }
+                }
+                fin["window_db"] += tmp;
             } else {
                 err = "Invalid type \"";
                 err += stmt["type"];
@@ -451,4 +581,30 @@ namespace sim{
         for(const auto& kvp : graph)
             delete kvp.second;
     }
+
+    bool transpiler::is_monitored(nlohmann::json &dbs, const std::string &lookup) {
+        if(lookup == "sim_monitor"){
+            return true;
+        }
+        for(auto window : dbs["window_db"]){
+            if(window["name"] == lookup)
+                return true;
+        }
+
+        for(auto input : dbs["io_db"]["inputs"]){
+            if(input["name"] == lookup)
+                return true;
+        }
+        for(auto output : dbs["io_db"]["outputs"]){
+            if(output["name"] == lookup)
+                return true;
+        }
+
+        for(auto md : dbs["component_db"]){
+            if(md["name"] == lookup && monitored.count(md["type"]))
+                return true;
+        }
+        return false;
+    }
+
 }

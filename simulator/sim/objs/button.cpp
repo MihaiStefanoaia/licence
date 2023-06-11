@@ -11,7 +11,7 @@ namespace sim {
         button::button(const std::string& s, bit &a) : output(a){
             window = new QWidget();
             main_grid = new QGridLayout();
-            btn = new QPushButton();
+            btn = new QPushButton(s.c_str());
             hold_grid = new QGridLayout();
             hold = new QCheckBox();
             hold_lbl = new QLabel("hold");

@@ -6,15 +6,16 @@
 #define SIMULATOR_BASIC_IO_H
 
 #include <QWidget>
+#include "monitored.h"
 
 namespace sim {
 
-    class basic_io {
+    class basic_io : protected monitored{
     protected:
-        QWidget* window = nullptr;
         bool in_another_layout = false;
         bool flagged = false;
     public:
+        basic_io() : monitored() {};
         virtual ~basic_io() = default;
         virtual void update() = 0;
         friend class evaluation_list;

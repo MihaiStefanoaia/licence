@@ -42,6 +42,7 @@
   LT      "<"
   GT      ">"
   AUTOGEN "__autogen"
+  LAYOUT "layout"
 ;
 
 %token <std::string> IDENTIFIER
@@ -51,6 +52,9 @@
 %nterm <nlohmann::json> wire_decl
 %nterm <nlohmann::json> array_decl
 %nterm <nlohmann::json> module_decl
+%nterm <nlohmann::json> layout_decl
+%nterm <nlohmann::json> layout_args
+%nterm <nlohmann::json> l_arg
 %nterm <nlohmann::json> args
 %nterm <nlohmann::json> access
 
@@ -69,6 +73,7 @@ stmt:
 | module_decl {$$ = $1;}
 | wire_decl {$$ = $1;}
 | array_decl {$$ = $1;};
+| layout_decl {$$ = $1;};
 ;
 
 sys_cmd:
@@ -106,6 +111,32 @@ module_decl:
     $$["name"] = $2;
     $$["args"] = $4;
   };
+
+layout_decl:
+  LAYOUT IDENTIFIER ACC_B layout_args ACC_E{
+    $$["stmt_type"] = "layout_decl";
+    $$["name"] = $2;
+    $$["args"] = $4;
+  }
+;
+
+layout_args:
+  layout_args COMMA l_arg{
+    $$ = $1;
+    $$ += $3;
+  }
+| l_arg{
+  $$ = {$1};
+  }
+;
+
+l_arg:
+  ARGS_B NUMBER COMMA NUMBER ARGS_E COLON IDENTIFIER{
+    $$["x"] = $2;
+    $$["y"] = $4;
+    $$["content"] = $7;
+  }
+;
 
 args:
   args COMMA access{

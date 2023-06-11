@@ -21,12 +21,12 @@
 int main(int argc, char** argv){
     QApplication app(argc,argv);
 
-//    auto run = [](){
-//        sim::environment env;
-//        env.start("tiny_playground.ndl");
-//    };
-//    std::thread th(run);
-//    th.detach();
-    auto moni = new sim::gui::sim_monitor();
+//    sim::transpiler::transpile("tiny_playground.ndl");
+    auto run = [](){
+        sim::environment env;
+        env.start("tiny_playground.ndl");
+    };
+    std::thread th(run);
+    th.detach();
     return app.exec();
 }

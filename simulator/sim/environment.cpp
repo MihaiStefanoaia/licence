@@ -172,12 +172,14 @@ namespace sim {
             gettimeofday(&curTime, nullptr);
             return curTime.tv_usec;
         };
-
+        std::cout << "showing the windows\n";
         for(auto input : input_db)
             input.second->get_window()->show();
         for(auto output : output_db)
             output.second->get_window()->show();
 
+
+        std::cout << "firing up the simulation\n";
         unsigned long frame_start;
         unsigned long delta;
 
