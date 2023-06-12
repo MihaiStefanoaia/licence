@@ -2,6 +2,7 @@
 // Created by mihai-laptop on 5/9/23.
 //
 
+#include <iostream>
 #include "tiny_cpu.h"
 
 namespace sim {
@@ -29,6 +30,7 @@ namespace sim {
             }
             switch(state){
                 case POLL:
+//                    std::cout << "state : poll\n";
                     if(interr.get_content()) {
                         state = READ_MEM;
                         reg = 0;
@@ -41,6 +43,7 @@ namespace sim {
                         state = POLL;
                     break;
                 case READ_MEM:
+                    std::cout << "reading mem\n";
                     next_state = WRITE_PORT;
                     state = WAIT_FOR_MEMORY;
                     rw.set_content(false);
@@ -50,6 +53,7 @@ namespace sim {
                     }
                     break;
                 case WRITE_MEM:
+                    std::cout << "writing mem\n";
                     next_state = POLL;
                     state = WAIT_FOR_MEMORY;
                     rw.set_content(true);

@@ -21,12 +21,17 @@
 int main(int argc, char** argv){
     QApplication app(argc,argv);
 
-//    sim::transpiler::transpile("tiny_playground.ndl");
+    sim::transpiler::transpile("tiny_playground.ndl");
     auto run = [](){
         sim::environment env;
         env.start("tiny_playground.ndl");
     };
     std::thread th(run);
     th.detach();
+//    auto b = new sim::objs::bit();
+//    auto a = new sim::objs::button("bruh",*b);
+//    a->get_window()->show();
+//    auto s = new sim::objs::button("come on",*b);
+//    s->get_window()->show();
     return app.exec();
 }

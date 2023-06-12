@@ -61,7 +61,7 @@ namespace sim {
             btn->setAutoFillBackground(true);
             pal.setColor(QPalette::Button,Qt::green);
             btn->setPalette(pal);
-            std::cout << "NOW PRESSED\n";
+            std::cout << btn->text().toStdString() << "NOW PRESSED\n";
             buffer = true;
         }
 
@@ -70,7 +70,7 @@ namespace sim {
             btn->setAutoFillBackground(true);
             pal.setColor(QPalette::Button,Qt::white);
             btn->setPalette(pal);
-            std::cout << "NOW RELEASED\n";
+            std::cout << btn->text().toStdString() << "NOW RELEASED\n";
             buffer = false;
         }
 
@@ -84,6 +84,10 @@ namespace sim {
             delete hold_grid;
             delete main_grid;
             delete window;
+        }
+
+        void button::hold_fun() {
+
         }
 
     } // sim

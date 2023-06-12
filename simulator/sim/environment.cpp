@@ -212,7 +212,6 @@ namespace sim {
             while(iterations < sim_frequency_max && (delta - frame_start < max_frame_time || iterations < sim_frequency_min)){
                 master_clk->set_content(!master_clk->get_content());
                 evl.eval();
-                iterations++;
                 master_clk->set_content(!master_clk->get_content());
                 evl.eval();
                 iterations++;

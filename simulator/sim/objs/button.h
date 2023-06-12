@@ -29,6 +29,7 @@ namespace sim {
             void press();
             void release();
             void update() override;
+            void hold_fun();
         };
     } // sim
 } // objs
