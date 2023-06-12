@@ -9,6 +9,7 @@ namespace sim {
     namespace objs {
 
         button::button(const std::string& s, bit &a) : output(a){
+            std::cout << "BUILDING BUTTON " << s << "\n";
             window = new QWidget();
             main_grid = new QGridLayout();
             btn = new QPushButton(s.c_str());
@@ -61,7 +62,7 @@ namespace sim {
             btn->setAutoFillBackground(true);
             pal.setColor(QPalette::Button,Qt::green);
             btn->setPalette(pal);
-            std::cout << btn->text().toStdString() << "NOW PRESSED\n";
+            std::cout << btn->text().toStdString() << " NOW PRESSED\n";
             buffer = true;
         }
 
@@ -70,7 +71,7 @@ namespace sim {
             btn->setAutoFillBackground(true);
             pal.setColor(QPalette::Button,Qt::white);
             btn->setPalette(pal);
-            std::cout << btn->text().toStdString() << "NOW RELEASED\n";
+            std::cout << btn->text().toStdString() << " NOW RELEASED\n";
             buffer = false;
         }
 

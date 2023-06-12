@@ -133,9 +133,9 @@ namespace sim {
         std::cout << "\ngenerating leds:\n";
         for(auto& output : topology["io_db"]["outputs"]){
             std::cout << "led " << output["name"] << "(" << output["args"][0] << ")" <<'\n';
-            auto* btn =  new objs::led(output["name"],*wire_db[output["args"][0]]);
-            window_db[output["name"]] = btn->get_window();
-            output_db[output["name"]] = btn;
+            auto* led =  new objs::led(output["name"], *wire_db[output["args"][0]]);
+            window_db[output["name"]] = led->get_window();
+            output_db[output["name"]] = led;
         }
 
         for(auto& window : topology["window_db"]){
