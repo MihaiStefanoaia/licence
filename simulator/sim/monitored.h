@@ -12,6 +12,10 @@ namespace sim {
     class monitored {
     protected:
         QWidget* window;
+    public:
+        QWidget* get_window(){
+            return window;
+        };
     };
 
 } // sim

@@ -27,6 +27,7 @@ namespace sim {
         std::map<std::string,evaluable*> component_db;
         std::map<std::string,basic_io*> input_db;
         std::map<std::string,basic_output*> output_db;
+        std::map<std::string,QWidget*> window_db;
         std::map<std::string,int> config_db;
         std::mutex run_lock;
         std::mutex io_lock;

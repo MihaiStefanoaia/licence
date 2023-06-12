@@ -127,13 +127,30 @@ namespace sim {
         for(auto& input : topology["io_db"]["inputs"]){
             std::cout << "button " << input["name"] << "(" << input["args"][0] << ")" <<'\n';
             auto* btn =  new objs::button(input["name"],*wire_db[input["args"][0]]);
+            window_db[input["name"]] = btn->get_window();
             input_db[input["name"]] = btn;
         }
         std::cout << "\ngenerating leds:\n";
         for(auto& output : topology["io_db"]["outputs"]){
             std::cout << "led " << output["name"] << "(" << output["args"][0] << ")" <<'\n';
             auto* btn =  new objs::led(output["name"],*wire_db[output["args"][0]]);
+            window_db[output["name"]] = btn->get_window();
             output_db[output["name"]] = btn;
+        }
+
+        for(auto& window : topology["window_db"]){
+            auto* tmp = new QWidget();
+            auto* grid = new QGridLayout();
+            for(auto& arg : window["args"]){
+                int row = arg["x"];
+                int col = arg["y"];
+                grid->addWidget(window_db[arg["content"]],row,col,Qt::AlignCenter);
+                window_db[arg["content"]]->setParent(tmp);
+                window_db.erase(arg["content"]);
+
+            }
+            window_db[window["name"]] = tmp;
+            tmp->setLayout(grid);
         }
     }
 
@@ -173,11 +190,12 @@ namespace sim {
             return curTime.tv_usec;
         };
         std::cout << "showing the windows\n";
-        for(auto input : input_db)
-            input.second->get_window()->show();
-        for(auto output : output_db)
-            output.second->get_window()->show();
-
+//        for(auto input : input_db)
+//            input.second->get_window()->show();
+//        for(auto output : output_db)
+//            output.second->get_window()->show();
+        for(auto win : window_db)
+            win.second->show();
 
         std::cout << "firing up the simulation\n";
         unsigned long frame_start;

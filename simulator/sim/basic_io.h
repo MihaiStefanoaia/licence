@@ -10,7 +10,7 @@
 
 namespace sim {
 
-    class basic_io : protected monitored{
+    class basic_io : public monitored{
     protected:
         bool in_another_layout = false;
         bool flagged = false;
@@ -19,9 +19,6 @@ namespace sim {
         virtual ~basic_io() = default;
         virtual void update() = 0;
         friend class evaluation_list;
-        QWidget* get_window(){
-            return window;
-        };
     };
 
 
