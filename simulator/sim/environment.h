@@ -70,9 +70,10 @@ namespace sim {
         void run_phase();
         void cleanup_phase();
     public:
-        void start(const std::string& = "example");
-        void operator()(const std::string& s = "example"){
-            start(s);
+        void setup(const std::string& = "example");
+        void start();
+        void operator()(){
+            start();
         }
     };
 

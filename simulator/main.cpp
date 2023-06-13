@@ -15,19 +15,22 @@
 #include <QGridLayout>
 #include <QCheckBox>
 #include <fstream>
+#include <QThread>
 
 ///demo sim for ((a&b)&c)
 
 int main(int argc, char** argv){
     QApplication app(argc,argv);
 
-    sim::transpiler::transpile("tiny_playground.ndl");
-    auto run = [](){
-        sim::environment env;
-        env.start("tiny_playground.ndl");
+    QThread* thr;
+    sim::environment env;
+    env.setup("tiny_playground.ndl");
+    auto run = [&env](){
+        env.start();
     };
-    std::thread th(run);
-    th.detach();
+
+    thr = QThread::create(run);
+    thr->start();
 //    auto b = new sim::objs::bit();
 //    auto a = new sim::objs::button("bruh",*b);
 //    a->get_window()->show();

@@ -17,18 +17,19 @@
 
 
 namespace sim {
-    void environment::start(const std::string& path) {
-        do {
-            topology_file = path;
-            parse_phase();
-            build_wire_phase();
-            build_array_phase();
-            build_component_phase();
-            build_io_phase();
-            config_phase();
-            run_phase();
-            cleanup_phase();
-        } while(!clean_exit);
+    void environment::setup(const std::string &path) {
+        topology_file = path;
+        parse_phase();
+        build_wire_phase();
+        build_array_phase();
+        build_component_phase();
+        build_io_phase();
+        config_phase();
+    }
+
+    void environment::start() {
+        run_phase();
+        cleanup_phase();
         std::cout << "exiting cleanly\n";
     }
 
@@ -292,4 +293,5 @@ namespace sim {
     void environment::set_exit_flag(bool _exit_flag) {
         this->exit_flag = _exit_flag;
     }
+
 } // sim
