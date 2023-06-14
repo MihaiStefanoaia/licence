@@ -153,7 +153,7 @@ namespace sim{
     }
 
     void transpiler::setup_dbs() {
-        std::set<std::string> identifiers = {"nil"};
+        std::set<std::string> identifiers = {"nil", "sim_monitor"};
 
         nlohmann::json fin;
         std::string err;

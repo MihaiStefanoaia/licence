@@ -11,13 +11,10 @@
 namespace sim {
 
     class basic_input : public basic_io{
-        objs::bit& output;
-        bool buffer = false;
     public:
-        explicit basic_input(objs::bit &output);
-        virtual ~basic_input() = default;
-        void update() override;
-        void set_value(bool);
+        basic_input() = default;
+        ~basic_input() override = default;
+        void update() override = 0;
         friend class environment;
     };
 

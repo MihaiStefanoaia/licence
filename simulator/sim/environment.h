@@ -59,6 +59,8 @@ namespace sim {
         bool clean_exit = false;
         bool has_master_clk = false;
         bool exit_flag = false;
+        bool run_flag = true;
+        bool step_flag = false;
 
 
         void parse_phase();

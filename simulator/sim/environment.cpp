@@ -208,19 +208,21 @@ namespace sim {
             iterations = 0;
             frame_start = micros();
             delta = frame_start;
-            unsigned max_frame_time = 9.0e5f / (float)frame_rate_cap; // 90% of the frame is reserved for
-
-            while(iterations < sim_frequency_max && (delta - frame_start < max_frame_time || iterations < sim_frequency_min)){
-                master_clk->set_content(!master_clk->get_content());
-                evl.eval();
-                master_clk->set_content(!master_clk->get_content());
-                evl.eval();
-                iterations++;
+            unsigned max_frame_time = 9.0e5f / (float)frame_rate_cap; // 90% of the frame time is reserved for the simulation
+            while((run_flag || step_flag) && iterations < sim_frequency_max && (delta - frame_start < max_frame_time || iterations < sim_frequency_min)){
                 for(auto input : input_db)
                     input.second->update();
+                master_clk->set_content(false);
+                evl.eval();
+
+                master_clk->set_content(true);
+                evl.eval();
                 for(auto output : output_db)
                     output.second->update();
+
+                iterations++;
                 delta = micros();
+                step_flag = false;
             }
 
             for(const auto& output : output_db)
