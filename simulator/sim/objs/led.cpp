@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <cmath>
 #include "led.h"
 
 namespace sim {
@@ -28,6 +29,7 @@ namespace sim {
         void led::render() {
 //            std::cout << "led rendering with " << active_cycles << " of " << all_cycles << " cycles\n";
             float render_val = (float)active_cycles / (float)all_cycles;
+            render_val = std::isnormal(render_val) ? render_val : 0;
             int r,g,b;
             r = g = b = (int)(255.0f * render_val);
             auto pal = QPalette();

@@ -7,6 +7,7 @@
 #include "cpu.h"
 #include "button.h"
 #include "led.h"
+#include "sim_monitor.h"
 
 #include <QMainWindow>
 #include <QApplication>
@@ -31,6 +32,7 @@ int main(int argc, char** argv){
 
     thr = QThread::create(run);
     thr->start();
+
 //    auto b = new sim::objs::bit();
 //    auto a = new sim::objs::button("bruh",*b);
 //    a->get_window()->show();

@@ -125,6 +125,9 @@ namespace sim {
 
     void environment::build_io_phase() {
         std::cout << "\ngenerating buttons:\n";
+        moni = new gui::sim_monitor(this);
+        window_db["sim_monitor"] = moni->get_window();
+        output_db["sim_monitor"] = moni;
         for(auto& input : topology["io_db"]["inputs"]){
             std::cout << "button " << input["name"] << "(" << input["args"][0] << ")" <<'\n';
             auto* btn =  new objs::button(input["name"],*wire_db[input["args"][0]]);
@@ -138,7 +141,7 @@ namespace sim {
             window_db[output["name"]] = led->get_window();
             output_db[output["name"]] = led;
         }
-
+        std::cout << "packing the sub-windows\n";
         for(auto& window : topology["window_db"]){
             auto* tmp = new QWidget();
             auto* grid = new QGridLayout();
@@ -202,12 +205,12 @@ namespace sim {
         unsigned long frame_start;
         unsigned long delta;
 
-        unsigned int iterations;
         std::cout << wire_db["m_clk"] << " " << master_clk << "\n";
         while(!exit_flag){
             iterations = 0;
             frame_start = micros();
             delta = frame_start;
+            moni->update();
             unsigned max_frame_time = 9.0e5f / (float)frame_rate_cap; // 90% of the frame time is reserved for the simulation
             while((run_flag || step_flag) && iterations < sim_frequency_max && (delta - frame_start < max_frame_time || iterations < sim_frequency_min)){
                 for(auto input : input_db)
@@ -224,17 +227,25 @@ namespace sim {
                 delta = micros();
                 step_flag = false;
             }
+            delta = micros();
+
+            frame_time = delta - frame_start;
 
             for(const auto& output : output_db)
                 output.second->render();
-            long sleep_time = max_frame_time - (delta - frame_start);
+            long sleep_time = (1.0e6f / (float)frame_rate_cap) - frame_time;
             sleep_time = std::max(sleep_time,0l);
             usleep(sleep_time);
         }
+        exit(0);
+        std::cout << "simulation finished\n";
         clean_exit = true;
     }
 
     void environment::cleanup_phase() {
+        for(auto const& kvp : window_db){
+            kvp.second->close();
+        }
         wire_db.erase("nil");
         for(auto const& kvp : wire_db){
             delete kvp.second;
@@ -294,6 +305,22 @@ namespace sim {
 
     void environment::set_exit_flag(bool _exit_flag) {
         this->exit_flag = _exit_flag;
+    }
+
+    long environment::get_frame_time() const {
+        return frame_time;
+    }
+
+    void environment::set_run_flag(bool _run_flag) {
+        environment::run_flag = _run_flag;
+    }
+
+    void environment::set_step_flag(bool _step_flag) {
+        environment::step_flag = _step_flag;
+    }
+
+    unsigned int environment::get_iterations() const {
+        return iterations;
     }
 
 } // sim

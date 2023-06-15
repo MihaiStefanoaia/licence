@@ -14,9 +14,14 @@
 #include "basic_output.h"
 #include "bit_array.h"
 #include "none.h"
+#include "sim_monitor.h"
 #include <mutex>
 
 namespace sim {
+
+    namespace gui{
+        class sim_monitor;
+    }
 
     class environment {
     protected:
@@ -29,14 +34,20 @@ namespace sim {
         std::map<std::string,basic_output*> output_db;
         std::map<std::string,QWidget*> window_db;
         std::map<std::string,int> config_db;
-        std::mutex run_lock;
-        std::mutex io_lock;
         objs::bit* master_clk;
         evaluation_list evl;
         std::string topology_file = "example";
+        gui::sim_monitor* moni;
         unsigned int sim_frequency_min = 1;
         unsigned int sim_frequency_max = 1000;
+        long frame_time = 0;
+        unsigned int iterations;
     public:
+        unsigned int get_iterations() const;
+
+    public:
+        long get_frame_time() const;
+
         unsigned int get_sim_frequency_min() const;
 
         void set_sim_frequency_min(unsigned int sim_frequency_min);
@@ -60,6 +71,12 @@ namespace sim {
         bool has_master_clk = false;
         bool exit_flag = false;
         bool run_flag = true;
+    public:
+        void set_run_flag(bool run_flag);
+
+        void set_step_flag(bool step_flag);
+
+    protected:
         bool step_flag = false;
 
 

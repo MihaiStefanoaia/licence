@@ -55,5 +55,6 @@ layout btns[
 
 layout win[
     (0,0) : leds,
-    (0,1) : btns
+    (0,1) : btns,
+    (0,2) : sim_monitor
 ];

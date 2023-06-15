@@ -8,9 +8,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread")
-set(CMAKE_CXX_FLAGS_DEBUG "-Os")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0")
 
 include_directories(sim)
 include_directories(sim/objs)

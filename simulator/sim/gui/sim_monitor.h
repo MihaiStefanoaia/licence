@@ -14,14 +14,14 @@
 #include "environment.h"
 
 namespace sim {
+    class environment;
     namespace gui {
 
-        class sim_monitor : public basic_input, public basic_output{
+        class sim_monitor : public basic_output{
             sim::environment* env;
             QGridLayout* full_layout;
 
-            QWidget* configs;
-            QGridLayout* config_grid;
+            QGridLayout* configs;
 
             QGridLayout* config_spb_grid;
             QLabel*   min_itr_lbl;
@@ -35,20 +35,31 @@ namespace sim {
             QPushButton* reload;
             QPushButton* submit;
 
-            QWidget* perf;
-            QGridLayout* perf_grid;
+            QGridLayout* perf;
 
+            QGridLayout* perf_lbl_grid;
             QLabel* fps_lbl;
             QLabel* fps_val;
             QLabel* prc_lbl;
             QLabel* prc_val;
 
+
+            QGridLayout* ctrl_btn_grid;
             QPushButton* pause;
             QPushButton* step;
             QPushButton* run;
             QPushButton* exit;
+
+            bool load_flag;
+            bool submit_flag;
+            bool pause_flag;
+            bool step_flag;
+            bool exit_flag;
+            bool run_flag;
         public:
-            sim_monitor(sim::environment*);
+            explicit sim_monitor(sim::environment*);
+            void update() override;
+            void render() override;
         };
 
     } // sim
