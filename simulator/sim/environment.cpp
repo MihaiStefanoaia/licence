@@ -185,6 +185,8 @@ namespace sim {
             std::cout << "adding component " << kvp.first << " at level " << kvp.second->get_expected_level() << '\n';
             evl.add_on_expected_level(kvp.second);
         }
+
+        evl.commit();
     }
     void environment::run_phase() {
         //beginning of the overhauling.....

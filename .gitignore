@@ -6,6 +6,7 @@
 experimentation/*
 simulator/.idea/*
 simulator/cmake-build-debug/*
+simulator/cmake-build-release/*
 # CMakeLists.txt
 another_arch_cpu.txt
 *.dia

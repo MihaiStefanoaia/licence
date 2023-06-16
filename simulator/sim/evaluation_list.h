@@ -14,9 +14,13 @@ namespace sim {
     class evaluation_list : public evaluable{
     private:
         std::map<int,std::list<evaluable*>> lst;
+        evaluable** cmt;
+        int size;
+        bool committed;
     public:
         evaluation_list();
-        ~evaluation_list();
+        ~evaluation_list() override;
+        void commit();
         void add_on_level(int, evaluable*);
         void add_on_expected_level(evaluable*);
         void eval() override;

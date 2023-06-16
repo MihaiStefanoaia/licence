@@ -16,12 +16,18 @@ namespace sim {
     }
 
     void evaluation_list::eval() {
-        for(const auto& kv : lst){
-//            std::cout << kv.first << std::endl;
-            for(auto el : kv.second) {
-                if (el->is_flagged()) {
-                    el->eval();
+        if(!committed){
+            for(const auto& kv : lst){
+//                std::cout << kv.first << std::endl;
+                for(auto el : kv.second) {
+                    if (el->is_flagged()) {
+                        el->eval();
+                    }
                 }
+            }
+        } else {
+            for(int i = 0; i < size; i++){
+                cmt[i]->eval();
             }
         }
     }
@@ -29,9 +35,30 @@ namespace sim {
     evaluation_list::evaluation_list() : evaluable() {
     }
 
-    evaluation_list::~evaluation_list() = default;
+    evaluation_list::~evaluation_list(){
+        if(committed)
+            delete cmt;
+    };
 
     void evaluation_list::add_on_expected_level(evaluable* e) {
         this->add_on_level(e->get_expected_level(),e);
+    }
+
+    void evaluation_list::commit() {
+        if(committed)
+            return;
+        committed = true;
+        size = 0;
+        for(const auto& kvp : lst){
+            size += kvp.second.size();
+        }
+        cmt = new sim::evaluable * [size];
+        int i = 0;
+        for(const auto& kvp : lst){
+            for(const auto& ev : kvp.second){
+                cmt[i] = ev;
+                i++;
+            }
+        }
     }
 } // sim
