@@ -76,7 +76,7 @@ namespace sim {
         }
 
         void button::update() {
-            std::cout << "UPDATE CALLED ON BUTTON " << btn->text().toStdString()<<" - initial value: "<< output.get_content() << ", new value: " << buffer << "\n";
+//            std::cout << "UPDATE CALLED ON BUTTON " << btn->text().toStdString()<<" - initial value: "<< output.get_content() << ", new value: " << buffer << "\n";
             output.set_content(buffer);
         }
 

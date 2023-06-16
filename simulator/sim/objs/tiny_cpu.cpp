@@ -30,7 +30,7 @@ namespace sim {
             }
             switch(state){
                 case POLL:
-                    std::cout << "cpu: polling\n";
+//                    std::cout << "cpu: polling\n";
                     if(interr.get_content()) {
                         state = READ_MEM;
                         reg = 0;

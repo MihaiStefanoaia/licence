@@ -16,7 +16,7 @@ namespace sim {
             }
             switch (state) {
                 case IDLE:
-                    std::cout << "mem: waiting\n";
+//                    std::cout << "mem: waiting\n";
                     ready.set_content(false);
                     if(active.get_content()){
                         state = rw.get_content() ? WRITE_START : READ_START;
