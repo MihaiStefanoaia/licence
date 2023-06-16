@@ -31,9 +31,9 @@ namespace sim {
             float render_val = (float)active_cycles / (float)all_cycles;
             render_val = std::isnormal(render_val) ? render_val : 0;
             int r,g,b;
-            r = g = b = (int)(255.0f * render_val);
+            r = g = b = (int)(255.0f * gamma_adjust(render_val));
             auto pal = QPalette();
-            pal.setColor(QPalette::Window,QColor(r,g,b));
+            pal.setColor(QPalette::Window,QColor(r,0,0));
             light->setPalette(pal);
             all_cycles = 0;
             active_cycles = 0;

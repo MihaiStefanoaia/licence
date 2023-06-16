@@ -24,6 +24,7 @@ namespace sim {
         void add_on_level(int, evaluable*);
         void add_on_expected_level(evaluable*);
         void eval() override;
+        void full_eval();
     };
 
 } // sim

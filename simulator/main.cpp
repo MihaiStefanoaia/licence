@@ -28,11 +28,11 @@ int main(int argc, char** argv){
     env.setup("tiny_playground.ndl");
     auto run = [&env](){
         env.start();
+        env.cleanup();
     };
 
     thr = QThread::create(run);
     thr->start();
-
 //    auto b = new sim::objs::bit();
 //    auto a = new sim::objs::button("bruh",*b);
 //    a->get_window()->show();

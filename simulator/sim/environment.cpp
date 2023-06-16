@@ -29,8 +29,6 @@ namespace sim {
 
     void environment::start() {
         run_phase();
-        cleanup_phase();
-        std::cout << "exiting cleanly\n";
     }
 
     void environment::parse_phase() {
@@ -207,7 +205,7 @@ namespace sim {
         unsigned long frame_start;
         unsigned long delta;
 
-        std::cout << wire_db["m_clk"] << " " << master_clk << "\n";
+        evl.full_eval();
         while(!exit_flag){
             iterations = 0;
             frame_start = micros();
@@ -222,6 +220,7 @@ namespace sim {
 
                 master_clk->set_content(true);
                 evl.eval();
+
                 for(auto output : output_db)
                     output.second->update();
 
@@ -323,6 +322,10 @@ namespace sim {
 
     unsigned int environment::get_iterations() const {
         return iterations;
+    }
+
+    void environment::cleanup() {
+        cleanup_phase();
     }
 
 } // sim

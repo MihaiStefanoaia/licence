@@ -27,7 +27,8 @@ namespace sim {
             }
         } else {
             for(int i = 0; i < size; i++){
-                cmt[i]->eval();
+                if(cmt[i]->is_flagged())
+                    cmt[i]->eval();
             }
         }
     }
@@ -37,7 +38,7 @@ namespace sim {
 
     evaluation_list::~evaluation_list(){
         if(committed)
-            delete cmt;
+            delete[] cmt;
     };
 
     void evaluation_list::add_on_expected_level(evaluable* e) {
@@ -58,6 +59,24 @@ namespace sim {
             for(const auto& ev : kvp.second){
                 cmt[i] = ev;
                 i++;
+            }
+        }
+    }
+
+    void evaluation_list::full_eval() {
+        if(!committed){
+            for(const auto& kv : lst){
+//                std::cout << kv.first << std::endl;
+                for(auto el : kv.second) {
+                    if (el->is_flagged()) {
+                        el->eval();
+                    }
+                }
+            }
+        } else {
+            for(int i = 0; i < size; i++){
+                if(cmt[i]->is_flagged())
+                    cmt[i]->eval();
             }
         }
     }

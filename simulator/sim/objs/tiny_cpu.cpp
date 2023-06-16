@@ -30,7 +30,7 @@ namespace sim {
             }
             switch(state){
                 case POLL:
-//                    std::cout << "state : poll\n";
+                    std::cout << "cpu: polling\n";
                     if(interr.get_content()) {
                         state = READ_MEM;
                         reg = 0;
@@ -43,7 +43,7 @@ namespace sim {
                         state = POLL;
                     break;
                 case READ_MEM:
-                    std::cout << "reading mem\n";
+                    std::cout << "cpu: reading mem\n";
                     next_state = WRITE_PORT;
                     state = WAIT_FOR_MEMORY;
                     rw.set_content(false);
@@ -53,7 +53,7 @@ namespace sim {
                     }
                     break;
                 case WRITE_MEM:
-                    std::cout << "writing mem\n";
+                    std::cout << "cpu: writing mem\n";
                     next_state = POLL;
                     state = WAIT_FOR_MEMORY;
                     rw.set_content(true);
@@ -63,10 +63,12 @@ namespace sim {
                     }
                     break;
                 case WAIT_FOR_MEMORY:
+                    std::cout << "cpu: waiting for memory\n";
                     state = (ready.get_content()) ? next_state : state;
                     active.set_content(!ready.get_content());
                     break;
                 case WRITE_PORT:
+                    std::cout << "cpu: writing to the port\n";
                     reg++;
                     for(int i = 0; i < 4; i++){
                         port_o[i].set_content(reg & (1<<i));
@@ -74,6 +76,7 @@ namespace sim {
                     state = WRITE_MEM;
                     break;
             }
+            flag = nullptr;
         }
 
         void tiny_cpu::flag_for_eval(sim::triggering *ev) {

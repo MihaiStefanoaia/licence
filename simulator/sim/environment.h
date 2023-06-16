@@ -91,9 +91,7 @@ namespace sim {
     public:
         void setup(const std::string& = "example");
         void start();
-        void operator()(){
-            start();
-        }
+        void cleanup();
     };
 
 } // sim
