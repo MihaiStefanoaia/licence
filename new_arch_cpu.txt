@@ -252,9 +252,8 @@ pop_frame       // return
 ROM LAYOUT
 ======================================================================
 
-0x0000 - 0x007F : startup sector - the cpu starts executing indiscriminately from address 0
-0x0080 - 0x00EF : reserved for future use
-0x00F0 - 0x00FF : interrupt table (2 bytes / interrupt source)
+0x0000 - 0x00F7 : reserved
+0x00F8 - 0x00FF : interrupt table (2 bytes / interrupt source)
 everything else : instruction, heap, stack memory
 
 the CPU needs some sort of bootloader to put everything from rom into memory
@@ -264,9 +263,12 @@ the CPU needs some sort of bootloader to put everything from rom into memory
 MEMORY LAYOUT
 ======================================================================
 
-same as ROM.
-stack starts at 0xFFFF and grows down.
+The memory is organized in 256 byte long "lines". 
+The first line is mapped to info about the memory controller and other things read at startup.
 
+0x0000 - 0x00F6 : reserved
+0x00F7          : amount of general purpose memory lines
+0x00F8 - 0x00FF : interrupt table
 
 Note that all memory can be accessed and modified, but obviously it is dangerous.
 
