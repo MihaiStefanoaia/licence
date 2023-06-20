@@ -8,6 +8,7 @@
 #include "button.h"
 #include "led.h"
 #include "sim_monitor.h"
+#include "seven_seg.h"
 
 #include <QMainWindow>
 #include <QApplication>
@@ -23,20 +24,27 @@
 int main(int argc, char** argv){
     QApplication app(argc,argv);
 
-    QThread* thr;
-    sim::environment env;
-    env.setup("tiny_playground.ndl");
-    auto run = [&env](){
-        env.start();
-        env.cleanup();
-    };
+//    QThread* thr;
+//    sim::environment env;
+//    env.setup("tiny_playground.ndl");
+//    auto run = [&env](){
+//        env.start();
+//        env.cleanup();
+//    };
+//
+//    thr = QThread::create(run);
+//    thr->start();
 
-    thr = QThread::create(run);
-    thr->start();
-//    auto b = new sim::objs::bit();
-//    auto a = new sim::objs::button("bruh",*b);
-//    a->get_window()->show();
-//    auto s = new sim::objs::button("come on",*b);
-//    s->get_window()->show();
+    sim::objs::bit en;
+    sim::objs::bit_array con(8);
+    for(int i = 0; i < 8; i++)
+        con.connect(en,i);
+
+    sim::objs::seven_seg ssd(con,en);
+
+    ssd.get_window()->show();
+
+    ssd.render();
+
     return app.exec();
 }
