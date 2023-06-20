@@ -9,6 +9,8 @@
 #include "bit_array.h"
 #include <sys/types.h>
 
+#define ARGS_SIZES_TINY_CPU {"tiny_cpu",{4,4,4,1,1,1,4,4,1,1,1}
+
 namespace sim {
     namespace objs {
 

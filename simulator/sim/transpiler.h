@@ -37,6 +37,19 @@ namespace sim{
         std::set<std::string> valid_configs;
         std::set<std::string> monitored;
 
+        // databases of the read and written arguments of each
+        std::set<std::string> positive_driven = {"tiny_cpu"};
+        std::set<std::string> negative_driven = {"tiny_mem","button"};
+        std::set<std::string> always_driven = {};
+        std::set<std::string> reactive_driven = {"and_module","not_module"};
+        std::map<std::string,std::vector<bool>> read_args = { // true is an input (read) argument, false is an output (written) argument
+                {"and_module",{true,true,false}},
+                {"not_module",{true,false}},
+                {"tiny_cpu",{false,true,false,false,false,true,true,false,true,true,true}},
+                {"tiny_mem",{true,true,false,true,true,false,true,true}},
+                {"button",{false}}
+        };
+
     private:
         void setup_dbs();
         void graph_analysis();

@@ -266,8 +266,9 @@ MEMORY LAYOUT
 The memory is organized in 256 byte long "lines". 
 The first line is mapped to info about the memory controller and other things read at startup.
 
-0x0000 - 0x00F6 : reserved
-0x00F7          : amount of general purpose memory lines
+0x0000 - 0x00F4 : reserved
+0x00F5          : amount of general purpose memory lines
+0x00F6,  0x00F7 : initalization for the instuction pointer
 0x00F8 - 0x00FF : interrupt table
 
 Note that all memory can be accessed and modified, but obviously it is dangerous.

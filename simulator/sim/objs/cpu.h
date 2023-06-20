@@ -10,7 +10,9 @@
 #include "word.h"
 #include <sys/types.h>
 
-#define ARGS_SIZES_CPU {"cpu",{8,8,8,8,8,4,1,1,1,1,8,8,8,8,16,8,1,1}}
+#define NAME_CPU "cpu"
+#define ARGS_SIZES_CPU {NAME_CPU,{8   ,8   ,8   ,8   ,8   ,4   ,1   ,1   ,1   ,1   ,8    ,8    ,8    ,8    ,16   ,8    ,1    ,1}}
+#define ARGS_DIR_CPU   {NAME_CPU,{true,true,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false}}
 
 #define NOP   0x0
 #define MOV   0x1
@@ -105,14 +107,14 @@ namespace sim {
                 INIT_GET_INT_VEC_5,
                 INIT_GET_INT_VEC_6,
                 INIT_GET_INT_VEC_7,
+                INIT_GET_RPX_LO,
+                INIT_GET_RPX_HI,
                 WAITING_FOR_MEM,
                 FETCH_0,
-                FETCH_0_DONE,
-                FETCH_1,
-                FETCH_1_DONE,
-                FETCH_2,
                 DECODE_0,
+                FETCH_1,
                 DECODE_1,
+                FETCH_2,
                 EXECUTE,
                 ARTIFICIAL_DELAY, // for calculations to take more time
                 ERROR

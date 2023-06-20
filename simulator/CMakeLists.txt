@@ -11,7 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -pthread")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -D_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O0")
 
 include_directories(sim)
