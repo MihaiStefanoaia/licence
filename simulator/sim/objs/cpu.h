@@ -41,7 +41,6 @@ namespace sim {
             bit_array P2_i;
             bit_array P3_i;
             bit_array mem_val_i;
-            bit_array interr;
             bit& mem_ready;
             bit& CLK;
             bit& RST;
@@ -123,14 +122,12 @@ namespace sim {
             state_enum next  = state;
             u_int8_t delay = 0;
             u_int16_t max_addr = 0;
-            u_int16_t interr_table[4] = {0};
-
         private:
             u_int8_t read_byte(bit_array &arr);
             void write_byte(bit_array &arr, u_int8_t val, u_int8_t mask = 0xFF);
         public:
             cpu(const bit_array &p_0_i, const bit_array &p_1_i, const bit_array &p_2_i, const bit_array &p_3_i,
-                const bit_array &mem_val_i, const bit_array &interr, bit &mem_ready, bit &clk, bit &rst, bit &ce,
+                const bit_array &mem_val_i, bit &mem_ready, bit &clk, bit &rst, bit &ce,
                 const bit_array &p_0_o, const bit_array &p_1_o, const bit_array &p_2_o, const bit_array &p_3_o,
                 const bit_array &mem_addr_o, const bit_array &mem_val_o, bit &mem_enable, bit &mem_rw);
             void eval() override;

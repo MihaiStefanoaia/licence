@@ -9,6 +9,7 @@
 #include "evaluable.h"
 #include "bit_array.h"
 #include "basic_output.h"
+#include "ssd_monitor.h"
 
 #define SEG_A 0
 #define SEG_B 1
@@ -19,6 +20,10 @@
 #define SEG_G 6
 #define SEG_H 7
 
+#define NAME_SSD "ssd"
+#define ARGS_SIZES_SSD {NAME_SSD, {8   ,1}}
+#define ARGS_DIR_SSD   {NAME_SSD, {true,true}}
+
 
 namespace sim {
     namespace objs {
@@ -26,12 +31,9 @@ namespace sim {
         class seven_seg : public basic_output{
             bit_array input;
             bit& enable;
-            int active[8];
-            int total[8];
-            QPolygon segments[8];
-
-            QGraphicsScene* graphics_scene;
-            QGraphicsView* view;
+            int active[8] = {0};
+            int total[8] = {0};
+            gui::ssd_monitor* monitor;
         public:
             explicit seven_seg(const bit_array&, bit&);
             void update() override;

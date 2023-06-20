@@ -184,7 +184,7 @@ namespace sim {
             evl.add_on_expected_level(kvp.second);
         }
 
-        evl.commit();
+//        evl.commit();
     }
     void environment::run_phase() {
         //beginning of the overhauling.....
