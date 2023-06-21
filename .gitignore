@@ -3,6 +3,7 @@
 *.bin
 .*/
 .vscode/*
+waves/*
 experimentation/*
 simulator/.idea/*
 simulator/cmake-build-debug/*

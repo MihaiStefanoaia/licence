@@ -13,7 +13,6 @@ FEATURES
 8 bit value bus
 16 bit address bounds
 4 general purpose RW ports
-4 interrupt sources
 
 ======================================================================
 REGISTERS
@@ -45,11 +44,6 @@ rgf - flags register (bitwise, low to high)
     sign change
     unused (negation in conditions, always 1)
 
-int - interrupt mask register (bitwise, low to high)
-
-    external sources 0-3
-    unused x3
-    global interrupt disable
 
 rcd - 8 bit call depth register. breaks at overflow/underflow (too many subroutine calls or a ret instruction is executed without a paired call)
 
@@ -69,7 +63,7 @@ jfg                 | 0x3       | conditional jump with flags. jumps to the inpu
 inc                 | 0x4       | increment the selected operand
 dec                 | 0x5       | decrement the selected operand
 rot                 | 0x6       | bitwise rotate the selected operand
-nor                 | 0x7       | bitwise nor on the selected operand
+nor                 | 0x7       | bitwise nor on the selected operands
 and                 | 0x8       | bitwise and. saves result into the left operand
 adc                 | 0x9       | add with carry. saves result into the left operand 
 mul                 | 0xA       | multiply rga by rgb. saves result into rga and rgb using rgb as the high byte and rga as the low byte
@@ -103,10 +97,7 @@ spc instructions meaning:
     0x6 : read port 3
     0x7 : write to port 3
 
-    0x8-0xD : reserved for future use
-    
-    0xE : unset the high bits from the interrupt mask
-    0xF : set the high bits from the interrupt mask
+    0x8-0xF : reserved  
 
 ------ details in instructions.xslx ------ 
 
@@ -269,7 +260,7 @@ The first line is mapped to info about the memory controller and other things re
 0x0000 - 0x00F4 : reserved
 0x00F5          : amount of general purpose memory lines
 0x00F6,  0x00F7 : initalization for the instuction pointer
-0x00F8 - 0x00FF : interrupt table
+0x00F8 - 0x00FF : reserved for the interrupt table - not available in the current version
 
 Note that all memory can be accessed and modified, but obviously it is dangerous.
 
