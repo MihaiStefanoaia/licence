@@ -129,15 +129,20 @@ namespace sim {
     }
 
     void environment::build_io_phase() {
-        std::cout << "\ngenerating buttons:\n";
+        std::cout << "\ngenerating inputs:\n";
         moni = new gui::sim_monitor(this);
         window_db["sim_monitor"] = moni->get_window();
         output_db["sim_monitor"] = moni;
         for(auto& input : topology["io_db"]["inputs"]){
-            std::cout << "button " << input["name"] << "(" << input["args"][0] << ")" <<'\n';
-            auto* btn =  new objs::button(input["name"],*wire_db[input["args"][0]]);
-            window_db[input["name"]] = btn->get_window();
-            input_db[input["name"]] = btn;
+            basic_io* inp;
+            if(input["type"] == "button"){
+                std::cout << "button " << input["name"] << "(" << input["args"][0] << ")" <<'\n';
+                inp =  new objs::button(input["name"],*wire_db[input["args"][0]]);
+            } else {
+                throw std::runtime_error("invalid type \"" + std::string(input["type"]) + "\". how did you manage to pass all the fail safes?");
+            }
+            window_db[input["name"]] = inp->get_window();
+            input_db[input["name"]] = inp;
         }
         std::cout << "\ngenerating outputs:\n";
         for(auto& output : topology["io_db"]["outputs"]){
