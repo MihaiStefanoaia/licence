@@ -36,6 +36,12 @@ button btn_3(port_i[3]);
 button int_btn(interr);
 button rst_btn(rst);
 
+array<8> ssd_test(__autogen);
+wire ssd_en;
+
+ssd test_disp(ssd_test,ssd_en);
+
+
 layout leds[
     (0,0) : led_0,
     (1,0) : led_1,

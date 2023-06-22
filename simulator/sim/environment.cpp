@@ -14,6 +14,9 @@
 #include "not_module.h"
 #include "tiny_cpu.h"
 #include "tiny_mem.h"
+#include "cpu.h"
+#include "memory.h"
+#include "seven_seg.h"
 
 
 namespace sim {
@@ -113,8 +116,12 @@ namespace sim {
                 auto* s = wire_db[component["args"][2]];
                 auto* o = wire_db[component["args"][3]];
                 tmp = new objs::mux2x1(*a,*b,*s,*o);
+            }else if(component["type"] == NAME_CPU){
+                tmp = objs::cpu::instantiate(wire_db,array_db,component);
+            }else if(component["type"] == NAME_MEMORY){
+                tmp = objs::memory::instantiate(wire_db,array_db,component);
             } else {
-                throw std::runtime_error("invalid type. how did you manage to pass all the fail safes?");
+                throw std::runtime_error("invalid type \"" + std::string(component["type"]) + "\". how did you manage to pass all the fail safes?");
             }
             tmp->set_expected_level(component["level"]);
             component_db[component["name"]] = tmp;
@@ -132,12 +139,19 @@ namespace sim {
             window_db[input["name"]] = btn->get_window();
             input_db[input["name"]] = btn;
         }
-        std::cout << "\ngenerating leds:\n";
+        std::cout << "\ngenerating outputs:\n";
         for(auto& output : topology["io_db"]["outputs"]){
-            std::cout << "led " << output["name"] << "(" << output["args"][0] << ")" <<'\n';
-            auto* led =  new objs::led(output["name"], *wire_db[output["args"][0]]);
-            window_db[output["name"]] = led->get_window();
-            output_db[output["name"]] = led;
+            basic_output* out;
+            if(output["type"] == "led"){
+                std::cout << "led " << output["name"] << "(" << output["args"][0] << ")" <<'\n';
+                out = new objs::led(output["name"], *wire_db[output["args"][0]]);
+            } else if(output["type"] == NAME_SSD){
+                out = new objs::seven_seg(*array_db[output["args"][0]],*wire_db[output["args"][1]]);
+            } else {
+                throw std::runtime_error("invalid type \"" + std::string(output["type"]) + "\". how did you manage to pass all the fail safes?");
+            }
+            output_db[output["name"]] = out;
+            window_db[output["name"]] = out->get_window();
         }
         std::cout << "packing the sub-windows\n";
         for(auto& window : topology["window_db"]){

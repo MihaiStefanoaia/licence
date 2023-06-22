@@ -11,6 +11,9 @@
 #include <utility>
 #include "parser.hh"
 #include "level_promise.h"
+#include "cpu.h"
+#include "memory.h"
+#include "seven_seg.h"
 
 // Give Flex the prototype of yylex we want ...
 # define YY_DECL yy::parser::symbol_type yylex (sim::transpiler& trp)
@@ -38,7 +41,7 @@ namespace sim{
         std::set<std::string> monitored;
 
         // databases of the read and written arguments of each
-        std::set<std::string> positive_driven = {"tiny_cpu"};
+        std::set<std::string> positive_driven = {"tiny_cpu", NAME_CPU};
         std::set<std::string> negative_driven = {"tiny_mem","button"};
         std::set<std::string> always_driven = {};
         std::set<std::string> reactive_driven = {"and_module","not_module"};
@@ -47,7 +50,10 @@ namespace sim{
                 {"not_module",{true,false}},
                 {"tiny_cpu",{false,true,false,false,false,true,true,false,true,true,true}},
                 {"tiny_mem",{true,true,false,true,true,false,true,true}},
-                {"button",{false}}
+                {"button",{false}},
+                ARGS_DIR_CPU,
+                ARGS_DIR_MEMORY,
+                ARGS_DIR_SSD
         };
 
     private:
@@ -70,9 +76,15 @@ namespace sim{
         static nlohmann::json transpile(const std::string&);
         friend class yy::parser;
         void transpiler_init(){
-            valid_modules = {{"and_module",{1,1,1}},{"master_clk",{1}},{"not_module",{1,1}},{"tiny_cpu",{4,4,4,1,1,1,4,4,1,1,1}},{"tiny_mem",{4,4,4,1,1,1,1,1}}};
+            valid_modules = {{"and_module",{1,1,1}},
+                             {"master_clk",{1}},
+                             {"not_module",{1,1}},
+                             {"tiny_cpu",{4,4,4,1,1,1,4,4,1,1,1}},
+                             {"tiny_mem",{4,4,4,1,1,1,1,1}},
+                             ARGS_SIZES_CPU,
+                             ARGS_SIZES_MEMORY};
             valid_inputs  = {{"button",{1}}};
-            valid_outputs = {{"led",{1}}};
+            valid_outputs = {{"led",{1}}, ARGS_SIZES_SSD};
             valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap"};
             monitored = {"tiny_mem","tiny_cpu"};
         }

@@ -8,11 +8,13 @@
 #include "bit.h"
 #include "byte.h"
 #include "word.h"
+#include "environment.h"
+#include "json.hpp"
 #include <sys/types.h>
 
 #define NAME_CPU "cpu"
-#define ARGS_SIZES_CPU {NAME_CPU,{8   ,8   ,8   ,8   ,8   ,4   ,1   ,1   ,1   ,1   ,8    ,8    ,8    ,8    ,16   ,8    ,1    ,1}}
-#define ARGS_DIR_CPU   {NAME_CPU,{true,true,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false}}
+#define ARGS_SIZES_CPU {NAME_CPU,{8   ,8   ,8   ,8   ,8   ,1   ,1   ,1   ,1   ,8    ,8    ,8    ,8    ,16   ,8    ,1    ,1}}
+#define ARGS_DIR_CPU   {NAME_CPU,{true,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false}}
 
 #define NOP   0x0
 #define MOV   0x1
@@ -33,7 +35,7 @@
 
 namespace sim {
     namespace objs {
-        class cpu : protected evaluable{
+        class cpu : public evaluable{
         protected:
             //inputs
             bit_array P0_i;
@@ -131,7 +133,8 @@ namespace sim {
                 const bit_array &p_0_o, const bit_array &p_1_o, const bit_array &p_2_o, const bit_array &p_3_o,
                 const bit_array &mem_addr_o, const bit_array &mem_val_o, bit &mem_enable, bit &mem_rw);
             void eval() override;
-
+            static cpu *instantiate(std::map<std::string, bit *> &wire_db, std::map<std::string, bit_array *> &array_db,
+                             nlohmann::json entry);
         };
 
     } // sim

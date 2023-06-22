@@ -51,5 +51,30 @@ namespace sim {
                  P3_o(p_3_o), mem_addr_o(mem_addr_o),mem_val_o(mem_val_o),mem_enable(mem_enable),mem_rw(mem_rw) {
             CLK.add_trigger(this,triggering::POSITIVE);
         }
+
+        cpu *cpu::instantiate(std::map<std::string, bit*> &wire_db, std::map<std::string, bit_array*> &array_db, nlohmann::json entry) {
+            auto& p_0_i = *array_db[entry["args"][0]];
+            auto& p_1_i = *array_db[entry["args"][1]];
+            auto& p_2_i = *array_db[entry["args"][2]];
+            auto& p_3_i = *array_db[entry["args"][3]];
+
+            auto& mem_val_i = *array_db[entry["args"][4]];
+
+            auto& mem_ready = *wire_db[entry["args"][5]];
+            auto& clk = *wire_db[entry["args"][6]];
+            auto& rst = *wire_db[entry["args"][7]];
+            auto& ce = *wire_db[entry["args"][8]];
+
+            auto& p_0_o = *array_db[entry["args"][9]];
+            auto& p_1_o = *array_db[entry["args"][10]];
+            auto& p_2_o = *array_db[entry["args"][11]];
+            auto& p_3_o = *array_db[entry["args"][12]];
+
+            auto& mem_addr_o = *array_db[entry["args"][13]];
+            auto& mem_val_o = *array_db[entry["args"][14]];
+            auto& mem_enable = *wire_db[entry["args"][15]];
+            auto& mem_rw = *wire_db[entry["args"][16]];
+            return new cpu(p_0_i,p_1_i,p_2_i,p_3_i,mem_val_i, mem_ready, clk,rst,ce,p_0_o,p_1_o,p_2_o,p_3_o,mem_addr_o,mem_val_o,mem_enable,mem_rw);
+        }
     } // sim
 } // objs
