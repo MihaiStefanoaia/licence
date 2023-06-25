@@ -16,7 +16,7 @@ namespace sim {
         void seven_seg::update() {
             for(int i = 0; i < 8; i++){
                 total[i]++;
-                if(input[i].get_content())
+                if(enable.get_content() && input[i].get_content())
                     active[i]++;
             }
         }

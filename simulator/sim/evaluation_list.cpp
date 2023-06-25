@@ -39,7 +39,7 @@ namespace sim {
     evaluation_list::~evaluation_list(){
         if(committed)
             delete[] cmt;
-    };
+    }
 
     void evaluation_list::add_on_expected_level(evaluable* e) {
         this->add_on_level(e->get_expected_level(),e);

@@ -16,7 +16,7 @@ namespace sim {
         std::map<int,std::list<evaluable*>> lst;
         evaluable** cmt;
         int size;
-        bool committed;
+        bool committed = false;
     public:
         evaluation_list();
         ~evaluation_list() override;

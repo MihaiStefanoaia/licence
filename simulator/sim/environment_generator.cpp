@@ -17,8 +17,7 @@ namespace sim {
         } catch(std::runtime_error& err) {
             std::cout << "Generation failed:\n";
             std::cout << err.what() << "\n";
-            std::cout << "loading example...\n";
-            return example();
+            exit(-1);
         }
     }
 

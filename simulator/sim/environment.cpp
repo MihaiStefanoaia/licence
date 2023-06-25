@@ -17,6 +17,7 @@
 #include "cpu.h"
 #include "memory.h"
 #include "seven_seg.h"
+#include "spinbox_adc.h"
 
 
 namespace sim {
@@ -138,6 +139,8 @@ namespace sim {
             if(input["type"] == "button"){
                 std::cout << "button " << input["name"] << "(" << input["args"][0] << ")" <<'\n';
                 inp =  new objs::button(input["name"],*wire_db[input["args"][0]]);
+            } else if(input["type"] == NAME_SPINBOX_ADC){
+                inp = objs::spinbox_adc::instantiate(wire_db,array_db,input);
             } else {
                 throw std::runtime_error("invalid type \"" + std::string(input["type"]) + "\". how did you manage to pass all the fail safes?");
             }
@@ -186,9 +189,6 @@ namespace sim {
         if(configs.contains("frame_rate_cap")){
             frame_rate_cap = configs["frame_rate_cap"];
         }
-        if(configs.contains("reactive_only")){
-            reactive_only = configs["reactive_only"];
-        }
         if(configs.contains("master_clk")){
             master_clk = wire_db[configs["master_clk"]];
         }
@@ -225,6 +225,10 @@ namespace sim {
         unsigned long delta;
 
         evl.full_eval();
+        if(!master_clk){
+
+            return;
+        }
         while(!exit_flag){
             iterations = 0;
             frame_start = micros();

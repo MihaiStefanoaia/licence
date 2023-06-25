@@ -34,7 +34,7 @@ namespace sim {
         std::map<std::string,basic_output*> output_db;
         std::map<std::string,QWidget*> window_db;
         std::map<std::string,int> config_db;
-        objs::bit* master_clk;
+        objs::bit* master_clk = nullptr;
         evaluation_list evl;
         std::string topology_file = "example";
         gui::sim_monitor* moni;
@@ -65,8 +65,7 @@ namespace sim {
         void set_exit_flag(bool _exit_flag);
 
     protected:
-        unsigned int reactive_only = 0;
-        unsigned int frame_rate_cap = -1;
+        unsigned int frame_rate_cap = 60;
         bool clean_exit = false;
         bool has_master_clk = false;
         bool exit_flag = false;

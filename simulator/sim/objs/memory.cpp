@@ -12,12 +12,12 @@ namespace sim{
         }
 
         void memory::eval() {
+            flag = nullptr;
             if(!req_enable.get_content()){
                 ready.set_content(false);
                 for(int i = 0; i < 8; i++){
                     data_o[i].set_content(false);
                 }
-                flag = nullptr;
                 return;
             }
 
@@ -54,7 +54,6 @@ namespace sim{
                 }
                 break;
             }
-            flag = nullptr;
         }
 
         memory::memory(const bit_array &addr_i, const bit_array &data_i, bit &rw, bit &req_enable, bit &clk,

@@ -14,6 +14,8 @@
 #include "cpu.h"
 #include "memory.h"
 #include "seven_seg.h"
+#include "spinbox_adc.h"
+#include "mux2x1.h"
 
 // Give Flex the prototype of yylex we want ...
 # define YY_DECL yy::parser::symbol_type yylex (sim::transpiler& trp)
@@ -42,9 +44,9 @@ namespace sim{
 
         // databases of the read and written arguments of each
         std::set<std::string> positive_driven = {"tiny_cpu", NAME_CPU};
-        std::set<std::string> negative_driven = {"tiny_mem","button"};
+        std::set<std::string> negative_driven = {"tiny_mem","button", NAME_SSD, NAME_MEMORY, NAME_SPINBOX_ADC};
         std::set<std::string> always_driven = {};
-        std::set<std::string> reactive_driven = {"and_module","not_module"};
+        std::set<std::string> reactive_driven = {"and_module","not_module",NAME_MUX_2x1};
         std::map<std::string,std::vector<bool>> read_args = { // true is an input (read) argument, false is an output (written) argument
                 {"and_module",{true,true,false}},
                 {"not_module",{true,false}},
@@ -53,7 +55,8 @@ namespace sim{
                 {"button",{false}},
                 ARGS_DIR_CPU,
                 ARGS_DIR_MEMORY,
-                ARGS_DIR_SSD
+                ARGS_DIR_SSD,
+                ARGS_DIR_SPINBOX_ADC
         };
 
     private:
@@ -82,9 +85,12 @@ namespace sim{
                              {"tiny_cpu",{4,4,4,1,1,1,4,4,1,1,1}},
                              {"tiny_mem",{4,4,4,1,1,1,1,1}},
                              ARGS_SIZES_CPU,
-                             ARGS_SIZES_MEMORY};
-            valid_inputs  = {{"button",{1}}};
-            valid_outputs = {{"led",{1}}, ARGS_SIZES_SSD};
+                             ARGS_SIZES_MEMORY,
+                             ARGS_SIZES_MUX_2x1};
+            valid_inputs  = {{"button",{1}},
+                             ARGS_SIZES_SPINBOX_ADC};
+            valid_outputs = {{"led",{1}},
+                             ARGS_SIZES_SSD};
             valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap"};
             monitored = {"tiny_mem","tiny_cpu"};
         }
