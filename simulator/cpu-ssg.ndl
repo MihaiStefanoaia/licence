@@ -1,0 +1,75 @@
+$sim_frequency_min(2);
+$sim_frequency_max(10);
+$frame_rate_cap(60);
+
+wire m_clk;
+wire rst;
+wire enable;
+
+button btn_rst(rst);
+button btn_en(enable);
+
+array<8>  empty_byte(nil);
+
+array<16> mem_addr(__autogen);
+array<8> data_mosi(__autogen);
+array<8> data_miso(__autogen);
+
+array<8> port_0_o(__autogen);
+array<8> port_1_o(__autogen);
+array<8> port_1_i(__autogen);
+
+
+
+
+
+wire mem_active;
+wire mem_rw;
+wire mem_ready;
+
+
+master_clk m(m_clk);
+
+cpu proc(empty_byte,port_1_i,empty_byte,empty_byte,
+        data_miso, mem_ready, m_clk,rst,enable,
+        port_0_o,port_1_o,empty_byte,empty_byte,
+        mem_addr,data_mosi,mem_active,mem_rw);
+
+memory mem( mem_addr, data_mosi, mem_rw, mem_active, m_clk,
+            data_miso, mem_ready);
+
+button btn_minus(port_1_i[2]);
+button btn_plus (port_1_i[3]);
+
+array<2> dcd_in(port_1_o[0], port_1_o[1]);
+array<4> dcd_out(__autogen);
+decoder dcd(dcd_in,dcd_out);
+
+ssd seg_0(port_0_o,dcd_out[0]);
+ssd seg_1(port_0_o,dcd_out[1]);
+ssd seg_2(port_0_o,dcd_out[2]);
+
+layout segments[
+    (0,0) : seg_0,
+    (0,1) : seg_1,
+    (0,2) : seg_2
+];
+
+layout buttons[
+    (0,0) : btn_minus,
+    (0,1) : btn_plus,
+    (1,0) : btn_rst,
+    (1,1) : btn_en
+];
+
+layout io_elements[
+    (0,0) : segments,
+    (1,0) : buttons
+];
+
+
+layout main[
+    (0,0) : proc,
+    (0,1) : io_elements,
+    (0,2) : sim_monitor
+];

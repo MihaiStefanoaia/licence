@@ -403,6 +403,8 @@ namespace sim{
                 auto &arg = _node->arguments[i];
                 auto arg_wires = get_wires_from_argument(ret, arg);
                 for(const auto& arg_wire : arg_wires) {
+                    if(arg_wire == "nil")
+                        continue;
                     if(read[i]){ // if the argument is read
                         _node->connect_incoming(nodes[arg_wire]);
                     } else {
@@ -457,6 +459,8 @@ namespace sim{
     }
 
     std::list<std::string> transpiler::get_wires_from_argument(nlohmann::json& dbs, const std::string& lookup) {
+        if(lookup == "nil")
+            return {"nil"};
         for(auto wire : dbs["wire_db"]){
             if(lookup == wire["name"])
                 return {lookup};

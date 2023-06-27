@@ -2,6 +2,7 @@
 // Created by Mihai - PC on 11/24/2022.
 //
 
+#include <iostream>
 #include "cpu.h"
 
 namespace sim {
@@ -14,9 +15,9 @@ namespace sim {
         }
 
         void cpu::write_byte(bit_array &arr, u_int8_t val, u_int8_t mask) {
-            u_int8_t out = val & mask;
             for(int i = 0; i < 8; i++)
-                arr[i].set_content(((out & (1 << i)) != 0));
+                if(mask & (1 << i))
+                    arr[i].set_content(((val & (1 << i)) != 0));
         }
 
         void cpu::eval() {
@@ -26,7 +27,7 @@ namespace sim {
                 write_byte(P1_o,0);
                 write_byte(P2_o,0);
                 write_byte(P3_o,0);
-                write_byte(mem_val_o,0);
+                write_byte(mem_data_o, 0);
                 write_word(mem_addr_o, 0);
                 rga = 0;
                 rgb = 0;
@@ -38,6 +39,7 @@ namespace sim {
                 rpx = 0;
                 rgi = 0;
                 mem_reg = 0;
+                max_addr = 255;
                 return;
             }
 
@@ -47,6 +49,8 @@ namespace sim {
                     break;
                 case INIT_GET_RPL:
                     max_addr |= ((u_int16_t)mem_reg) << 8; // the data from the previous instruction
+                    rbx = max_addr;
+                    rsx = rbx;
 
                     begin_read(0x00F6, INIT_GET_RPH);
                     break;
@@ -61,9 +65,11 @@ namespace sim {
                     state = FETCH_0;
                     break;
                 case WAITING_FOR_MEM:
+                    std::cout << "waiting... " << mem_enable.get_content() << " " << mem_rw.get_content() << "\n";
                     if(mem_ready.get_content()){
+                        std::cout << "mem ready is set\n";
                         if(!mem_rw.get_content())
-                            mem_reg = read_byte(mem_val_i);
+                            mem_reg = read_byte(mem_data_i);
                         mem_enable.set_content(false);
 
                         state = next_state;
@@ -139,10 +145,16 @@ namespace sim {
                     if(instruction_sizes.at(opcode) == 3 ||
                       (instruction_sizes.at(opcode) == 2 && optional_imm.count(opcode) && op2_imm))
                         state = FETCH_2;
-                    else if(op2_mem)
+                    else if(op2_mem){
+                        if(*operand_2_mem > max_addr){
+                            state = ERROR;
+                            err_state = OUT_OF_BOUNDS_MEMORY_ACCESS;
+                            break;
+                        }
                         begin_read(*operand_2_mem,EXECUTE);
-                    else
+                    } else{
                         state = EXECUTE;
+                    }
                     break;
                 case FETCH_2:
                     begin_read(rpx,EXECUTE);
@@ -152,9 +164,6 @@ namespace sim {
                     rgi_arr[2] = mem_reg;
                     compute_assigns();
                     execute();
-                    break;
-                case RETIRE:
-//                    begin_write(rmx,rga,FETCH_0);
                     break;
                 case ERROR:
                     write_byte(P0_o,err_state);
@@ -169,9 +178,9 @@ namespace sim {
                  const bit_array &mem_val_i, bit &mem_ready, bit &clk, bit &rst, bit &ce,
                  const bit_array &p_0_o, const bit_array &p_1_o, const bit_array &p_2_o, const bit_array &p_3_o,
                  const bit_array &mem_addr_o, const bit_array &mem_val_o, bit &mem_enable, bit &mem_rw) :
-                 P0_i(p_0_i), P1_i(p_1_i), P2_i(p_2_i), P3_i(p_3_i), mem_val_i(mem_val_i),
-                 mem_ready(mem_ready), CLK(clk), RST(rst), CE(ce), P0_o(p_0_o), P1_o(p_1_o), P2_o(p_2_o),
-                 P3_o(p_3_o), mem_addr_o(mem_addr_o),mem_val_o(mem_val_o),mem_enable(mem_enable),mem_rw(mem_rw) {
+                P0_i(p_0_i), P1_i(p_1_i), P2_i(p_2_i), P3_i(p_3_i), mem_data_i(mem_val_i),
+                mem_ready(mem_ready), CLK(clk), RST(rst), CE(ce), P0_o(p_0_o), P1_o(p_1_o), P2_o(p_2_o),
+                P3_o(p_3_o), mem_addr_o(mem_addr_o), mem_data_o(mem_val_o), mem_enable(mem_enable), mem_rw(mem_rw) {
             CLK.add_trigger(this,triggering::POSITIVE);
         }
 
@@ -215,7 +224,7 @@ namespace sim {
 
         void cpu::begin_write(u_int16_t addr, u_int8_t val, cpu::state_enum n_state) {
             write_word(mem_addr_o, addr);
-            write_byte(mem_val_o,val);
+            write_byte(mem_data_o, val);
             mem_rw.set_content(true); // write
             mem_enable.set_content(true);
             state = WAITING_FOR_MEM;
@@ -245,6 +254,11 @@ namespace sim {
                     break;
                 case MOV:
                     if(op1_mem){ // memory location
+                        if(*operand_1_mem > max_addr){
+                            state = ERROR;
+                            err_state = OUT_OF_BOUNDS_MEMORY_ACCESS;
+                            break;
+                        }
                         begin_write(*operand_1_mem,*operand_2,FETCH_0);
                     } else {
                         *operand_1 = *operand_2;
@@ -372,9 +386,6 @@ namespace sim {
                     rsx = rbx;
                     rbx = call_arr[call_ptr] & 0xFFFF;
 
-                    call_arr[call_ptr] |= ((int)rpx << 8);
-                    call_arr[call_ptr] |= rbx;
-                    rbx = rsx;
                     break;
                 case MOV16:
                     *operand_1_mem = *operand_2_mem;
@@ -425,24 +436,28 @@ namespace sim {
         void cpu::execute_spc() {
             switch(rgi_7_4){
                 case 0:
+                    write_byte(P0_o,0,rgi_arr[1]);
                     rga = read_byte(P0_i) & rgi_arr[1];
                     break;
                 case 1:
                     write_byte(P0_o,rga,rgi_arr[1]);
                     break;
                 case 2:
+                    write_byte(P1_o,0,rgi_arr[1]);
                     rga = read_byte(P1_i) & rgi_arr[1];
                     break;
                 case 3:
                     write_byte(P1_o,rga,rgi_arr[1]);
                     break;
                 case 4:
+                    write_byte(P2_o,0,rgi_arr[1]);
                     rga = read_byte(P2_i) & rgi_arr[1];
                     break;
                 case 5:
                     write_byte(P2_o,rga,rgi_arr[1]);
                     break;
                 case 6:
+                    write_byte(P3_o,0,rgi_arr[1]);
                     rga = read_byte(P3_i) & rgi_arr[1];
                     break;
                 case 7:

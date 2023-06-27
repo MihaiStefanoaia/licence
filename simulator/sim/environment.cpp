@@ -19,6 +19,7 @@
 #include "seven_seg.h"
 #include "spinbox_adc.h"
 #include "pwm_generator.h"
+#include "decoder.h"
 
 
 namespace sim {
@@ -119,11 +120,17 @@ namespace sim {
                 auto* o = wire_db[component["args"][3]];
                 tmp = new objs::mux2x1(*a,*b,*s,*o);
             } else if(component["type"] == NAME_CPU){
-                tmp = objs::cpu::instantiate(wire_db,array_db,component);
+                auto _tmp = objs::cpu::instantiate(wire_db,array_db,component);
+                auto mon = new gui::cpu_monitor(*_tmp);
+                tmp = _tmp;
+                window_db[component["name"]] = mon->get_window();
+                output_db[component["name"]] = mon;
             } else if(component["type"] == NAME_MEMORY){
                 tmp = objs::memory::instantiate(wire_db,array_db,component);
             } else if(component["type"] == NAME_PWM){
                 tmp = objs::pwm_generator::instantiate(wire_db,array_db,component);
+            } else if(component["type"] == NAME_DECODER){
+                tmp = new objs::decoder(*array_db[component["args"][0]],*array_db[component["args"][1]]);
             } else {
                 throw std::runtime_error("invalid type \"" + std::string(component["type"]) + "\". how did you manage to pass all the fail safes?");
             }

@@ -2,6 +2,7 @@
 // Created by mihai-laptop on 3/28/23.
 //
 
+#include <iostream>
 #include "memory.h"
 
 namespace sim{
@@ -13,21 +14,13 @@ namespace sim{
 
         void memory::eval() {
             flag = nullptr;
-            if(!req_enable.get_content()){
-                ready.set_content(false);
-                for(int i = 0; i < 8; i++){
-                    data_o[i].set_content(false);
-                }
-                return;
-            }
-
             switch(state){
                 case LISTENING: {
                     ready.set_content(false);
                     if(!req_enable.get_content()){
                         break;
                     }
-                    u_int32_t input_addr = 0;
+                    u_int16_t input_addr = 0;
                     for (int i = 0; i < 16; i++) {
                         input_addr *= 2;
                         input_addr |= addr_i[15 - i].get_content();
@@ -56,6 +49,7 @@ namespace sim{
                 }
                     break;
                 case DONE: {
+                    std::cout << "memory done, waiting for the cpu\n";
                     ready.set_content(true);
                     if(!req_enable.get_content())
                         state = LISTENING;
@@ -68,6 +62,7 @@ namespace sim{
                        const bit_array &data_o, bit &ready) : addr_i(addr_i), data_i(data_i), rw(rw), req_enable(req_enable),
                                                    CLK(clk), data_o(data_o), ready(ready) {
             CLK.add_trigger(this,triggering::NEGATIVE);
+            mem[0x00F7] = 2;
         }
 
         memory *memory::instantiate(std::map<std::string, bit *> &wire_db, std::map<std::string, bit_array *> &array_db,

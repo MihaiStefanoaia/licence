@@ -10,6 +10,7 @@
 #include "word.h"
 #include "environment.h"
 #include "json.hpp"
+#include "cpu_monitor.h"
 #include <sys/types.h>
 #include <set>
 
@@ -35,6 +36,9 @@
 #define ADD16 0xF
 
 namespace sim {
+    namespace gui{
+        class cpu_monitor;
+    }
     namespace objs {
         class cpu : public evaluable{
         protected:
@@ -43,7 +47,7 @@ namespace sim {
             bit_array P1_i;
             bit_array P2_i;
             bit_array P3_i;
-            bit_array mem_val_i;
+            bit_array mem_data_i;
             bit& mem_ready;
             bit& CLK;
             bit& RST;
@@ -55,7 +59,7 @@ namespace sim {
             bit_array P2_o;
             bit_array P3_o;
             bit_array mem_addr_o;
-            bit_array mem_val_o;
+            bit_array mem_data_o;
             bit& mem_enable;
             bit& mem_rw;
 
@@ -114,7 +118,6 @@ namespace sim {
                 DECODE_1,
                 FETCH_2,
                 EXECUTE,
-                RETIRE,
                 ERROR
             };
             state_enum state = INIT_GET_MEM_LIMIT;
@@ -172,8 +175,33 @@ namespace sim {
                     {AND,2}, {ADC,2}, {MUL,1}, {DIV,1},
                     {CCS,3}, {RET,1}, {MOV16,1}, {ADD16,2}};
             const std::set<u_int8_t> optional_imm = {MOV,NOR,AND,ADC};
+            const std::map<errors, std::string> err_str = {
+                    {NO_ERROR, "NO_ERROR"},
+                    {CALL_OVERFLOW, "CALL_OVERFLOW"},
+                    {CALL_UNDERFLOW, "CALL_UNDERFLOW"},
+                    {OUT_OF_BOUNDS_MEMORY_ACCESS, "OUT_OF_BOUNDS_MEMORY_ACCESS"},
+                    {INVALID_INSTRUCTION, "INVALID_INSTRUCTION"},
+                    {INVALID_OPERAND, "INVALID_OPERAND"},
+                    {ILLEGAL_OPERAND, "ILLEGAL_OPERAND"}
+            };
+            const std::map<state_enum, std::string> state_str = {
+                    {INIT_GET_MEM_LIMIT,"INIT_GET_MEM_LIMIT"},
+                    {INIT_GET_RPL,"INIT_GET_RPL"},
+                    {INIT_GET_RPH,"INIT_GET_RPH"},
+                    {INIT_DONE,"INIT_DONE"},
+                    {WAITING_FOR_MEM,"WAITING_FOR_MEM"},
+                    {FETCH_0,"FETCH_0"},
+                    {DECODE_0,"DECODE_0"},
+                    {FETCH_1,"FETCH_1"},
+                    {DECODE_1,"DECODE_1"},
+                    {FETCH_2,"FETCH_2"},
+                    {EXECUTE,"EXECUTE"},
+                    {ERROR,"ERROR"}
+            };
+
+            //for monitoring
         private:
-            u_int8_t read_byte(bit_array &arr);
+            static u_int8_t read_byte(bit_array &arr);
             static void write_byte(bit_array &arr, u_int8_t val, u_int8_t mask = 0xFF);
             static void write_word(bit_array &arr, u_int16_t val);
             void begin_read(u_int16_t addr, state_enum n_state);
@@ -192,6 +220,7 @@ namespace sim {
             void setup_operands();
 
             void execute_spc();
+            friend class sim::gui::cpu_monitor;
         };
 
     } // sim
