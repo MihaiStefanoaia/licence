@@ -18,6 +18,7 @@
 #include "memory.h"
 #include "seven_seg.h"
 #include "spinbox_adc.h"
+#include "pwm_generator.h"
 
 
 namespace sim {
@@ -65,19 +66,19 @@ namespace sim {
         for(auto& component : topology["component_db"]){
             evaluable* tmp;
             if(component["type"] == "and_module"){
-                std::cout << "and_module " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ", "<< component["args"][2] << ")" << "; level "<< component["level"] <<'\n';
+//                std::cout << "and_module " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ", "<< component["args"][2] << ")" << "; level "<< component["level"] <<'\n';
                 auto* a = wire_db[component["args"][0]];
                 auto* b = wire_db[component["args"][1]];
                 auto* o = wire_db[component["args"][2]];
                 tmp = new objs::and_module(*a,*b,*o, false);
             } else if(component["type"] == "not_module"){
-                std::cout << "not_module " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ")" << "; level "<< component["level"] <<'\n';
+//                std::cout << "not_module " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ")" << "; level "<< component["level"] <<'\n';
                 auto* i = wire_db[component["args"][0]];
                 auto* o = wire_db[component["args"][1]];
                 tmp = new objs::not_module(*i, *o);
             } else if(component["type"] == "tiny_cpu") {
                 auto& args = component["args"];
-                std::cout << "tiny_cpu " << component["name"] << "(" << args.dump() << "); level " << component["level"] << '\n';
+//                std::cout << "tiny_cpu " << component["name"] << "(" << args.dump() << "); level " << component["level"] << '\n';
 
                 auto* addr_o = array_db[args[0]];
                 auto* data_i = array_db[args[1]];
@@ -97,7 +98,7 @@ namespace sim {
                 tmp = new objs::tiny_cpu(*addr_o,*data_i,*data_o,*active,*rw,*ready,*port_i,*port_o,*interr,*CLK,*RST);
             } else if(component["type"] == "tiny_mem") {
                 auto& args = component["args"];
-                std::cout << "tiny_mem " << component["name"] << "(" << args.dump() << "); level " << component["level"] << '\n';
+//                std::cout << "tiny_mem " << component["name"] << "(" << args.dump() << "); level " << component["level"] << '\n';
 
                 auto* addr_i = array_db[args[0]];
                 auto* data_i = array_db[args[1]];
@@ -111,16 +112,18 @@ namespace sim {
 
                 tmp = new objs::tiny_mem(*addr_i,*data_i,*data_o,*active,*rw,*ready,*CLK,*RST);
             } else if(component["type"] == "mux2x1") {
-                std::cout << "mux2x1 " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ", "<< component["args"][2] << ", "<< component["args"][3] << ", " << ")" << "; level "<< component["level"] <<'\n';
+//                std::cout << "mux2x1 " << component["name"] << "("<< component["args"][0] << ", "<< component["args"][1] << ", "<< component["args"][2] << ", "<< component["args"][3] << ", " << ")" << "; level "<< component["level"] <<'\n';
                 auto* a = wire_db[component["args"][0]];
                 auto* b = wire_db[component["args"][1]];
                 auto* s = wire_db[component["args"][2]];
                 auto* o = wire_db[component["args"][3]];
                 tmp = new objs::mux2x1(*a,*b,*s,*o);
-            }else if(component["type"] == NAME_CPU){
+            } else if(component["type"] == NAME_CPU){
                 tmp = objs::cpu::instantiate(wire_db,array_db,component);
-            }else if(component["type"] == NAME_MEMORY){
+            } else if(component["type"] == NAME_MEMORY){
                 tmp = objs::memory::instantiate(wire_db,array_db,component);
+            } else if(component["type"] == NAME_PWM){
+                tmp = objs::pwm_generator::instantiate(wire_db,array_db,component);
             } else {
                 throw std::runtime_error("invalid type \"" + std::string(component["type"]) + "\". how did you manage to pass all the fail safes?");
             }

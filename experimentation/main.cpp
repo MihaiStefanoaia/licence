@@ -32,16 +32,16 @@ class bruh{
     unsigned long long r[64];
 };
 
-int main(){
-    std::cout << sizeof(bruh) << " " << alignof(bruh) << '\n';
-    std::cout << "my allocator:\n\n";
-    auto& allocator = contiguous_allocator::get_instance();
-    auto* pointer = allocator.create<child>(10,48);
-    non_trivial* test = pointer;
-    allocator.destroy(test);
+#include <bitset>
 
-    std::cout << "\nregular allocator:\n\n";
-    auto* p = new child(10,48);
-    non_trivial* regular = p;
-    delete p;
+int main(){
+
+    auto val = 0b01101010;
+    for(int amount = 0; amount < 8; amount ++){
+        auto hi = val << amount;
+        auto lo = val >> (8 - amount);
+        auto out = hi | lo;
+        std::cout << std::bitset<8>(out) << "\n";
+    }
+
 }

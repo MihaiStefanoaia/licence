@@ -17,7 +17,7 @@ namespace sim {
         void update() override;
         virtual void render() = 0;
         static double gamma_adjust(double value, double gamma = 4){
-            return pow(value,gamma);
+            return pow(value,1/gamma);
         }
     };
 

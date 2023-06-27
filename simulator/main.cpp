@@ -19,6 +19,7 @@
 #include <QCheckBox>
 #include <fstream>
 #include <QThread>
+#include <QFileDialog>
 
 ///demo sim for ((a&b)&c)
 

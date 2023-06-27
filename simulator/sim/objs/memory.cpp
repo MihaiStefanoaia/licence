@@ -30,9 +30,11 @@ namespace sim{
                     u_int32_t input_addr = 0;
                     for (int i = 0; i < 16; i++) {
                         input_addr *= 2;
-                        input_addr &= addr_i[i].get_content();
+                        input_addr |= addr_i[15 - i].get_content();
                     }
                     if (rw.get_content()) { //write
+                        if(input_addr < 0x0100)
+                            return;
                         u_int8_t val_in = 0;
                         for (int i = 0; i < 8; i++) {
                             val_in *= 2;
@@ -40,8 +42,14 @@ namespace sim{
                         }
                         mem[input_addr] = val_in;
                     } else { //read
+                        u_int8_t data;
+                        if(input_addr == 0x00F5){ // memory limit
+                            data = 255;
+                        } else {
+                            data = mem[input_addr];
+                        }
                         for (int i = 0; i < 8; i++) {
-                            data_o[i].set_content((mem[input_addr] >> i) & 1);
+                            data_o[i].set_content((data >> i) & 1);
                         }
                     }
                     state = DONE;

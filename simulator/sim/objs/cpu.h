@@ -11,6 +11,7 @@
 #include "environment.h"
 #include "json.hpp"
 #include <sys/types.h>
+#include <set>
 
 #define NAME_CPU "cpu"
 #define ARGS_SIZES_CPU {NAME_CPU,{8   ,8   ,8   ,8   ,8   ,1   ,1   ,1   ,1   ,8    ,8    ,8    ,8    ,16   ,8    ,1    ,1}}
@@ -81,35 +82,31 @@ namespace sim {
             u_int8_t& rpl = ((u_int8_t*)(&rpx))[0];
             u_int8_t& rph = ((u_int8_t*)(&rpx))[1];
             u_int8_t mem_reg = 0;
-            u_int8_t rgf = 0x0F; // flags
+            u_int8_t rgf = 0b1000; // flags
 
-            u_int8_t *op1 = nullptr;
-            u_int8_t *op2 = nullptr;
+            u_int8_t *operand_1 = nullptr;
+            u_int8_t *operand_2 = nullptr;
+            u_int16_t *operand_1_mem = nullptr;
+            u_int16_t *operand_2_mem = nullptr;
 
             u_int32_t call_arr[256] = {0};
             u_int8_t  call_ptr = 0;
-            u_int8_t  err_state = 0;
-            enum : u_int8_t {
+            enum errors : u_int8_t {
                 NO_ERROR,
                 CALL_OVERFLOW,
                 CALL_UNDERFLOW,
                 OUT_OF_BOUNDS_MEMORY_ACCESS,
                 INVALID_INSTRUCTION,
-                INVALID_OPERAND
+                INVALID_OPERAND,
+                ILLEGAL_OPERAND
             };
+            errors err_state = NO_ERROR;
 
             enum state_enum : u_int8_t {
                 INIT_GET_MEM_LIMIT,
-                INIT_GET_INT_VEC_0,
-                INIT_GET_INT_VEC_1,
-                INIT_GET_INT_VEC_2,
-                INIT_GET_INT_VEC_3,
-                INIT_GET_INT_VEC_4,
-                INIT_GET_INT_VEC_5,
-                INIT_GET_INT_VEC_6,
-                INIT_GET_INT_VEC_7,
-                INIT_GET_RPX_LO,
-                INIT_GET_RPX_HI,
+                INIT_GET_RPL,
+                INIT_GET_RPH,
+                INIT_DONE,
                 WAITING_FOR_MEM,
                 FETCH_0,
                 DECODE_0,
@@ -117,16 +114,72 @@ namespace sim {
                 DECODE_1,
                 FETCH_2,
                 EXECUTE,
-                ARTIFICIAL_DELAY, // for calculations to take more time
+                RETIRE,
                 ERROR
             };
             state_enum state = INIT_GET_MEM_LIMIT;
-            state_enum next  = state;
+            state_enum next_state  = state;
             u_int8_t delay = 0;
-            u_int16_t max_addr = 0;
+            u_int16_t max_addr = 255;
+            u_int8_t sign_change = 0;
+
+
+            //verilog assign-like variables
+            u_int8_t opcode = 0;
+            u_int8_t op1_8b = 0;
+            u_int8_t op2_8b = 0;
+            u_int8_t op1_16b = 0;
+            u_int8_t op2_16b = 0;
+            u_int8_t rgi_7_4 = 0; // used for a lot of things
+            bool op1_reg = false;
+            bool op1_mem = false;
+            bool op1_imm = false;
+            bool op2_reg = false;
+            bool op2_mem = false;
+            bool op2_imm = false;
+            bool flag_pass = false;
+
+            //quick ways to get operands
+            const std::map<u_int8_t,u_int8_t*> operands_reg_binop =
+                    {{0b010001, &rga},
+                     {0b010101, &rgb},
+                     {0b011001, &rgc},
+                     {0b011101, &rgd},
+                     {0b100001, &rmh},
+                     {0b100101, &rml},
+                     {0b101001, &rsh},
+                     {0b101101, &rsl},
+                     {0b110001, &rbh},
+                     {0b110101, &rbl},
+                     {0b111001, &rph},
+                     {0b111101, &rpl}
+                     };
+            const std::map<u_int8_t,u_int16_t*> operands_mem_binop =
+                    {{0b000010, &rmx},
+                     {0b000110, &rsx},
+                     {0b001010, &rbx},
+                     {0b001110, &rpx}
+                    };
+            const std::map<u_int8_t,u_int16_t*> operands_reg_16bit =
+                    {{0b00, &rmx},
+                     {0b01, &rsx},
+                     {0b10, &rbx},
+                     {0b11, &rpx}
+                    };
+            const std::map<u_int8_t,u_int8_t> instruction_sizes = {
+                    {NOP,1}, {MOV,2}, {SPC,2}, {JFG,3},
+                    {INC,1}, {DEC,1}, {ROT,2}, {NOR,2},
+                    {AND,2}, {ADC,2}, {MUL,1}, {DIV,1},
+                    {CCS,3}, {RET,1}, {MOV16,1}, {ADD16,2}};
+            const std::set<u_int8_t> optional_imm = {MOV,NOR,AND,ADC};
         private:
             u_int8_t read_byte(bit_array &arr);
-            void write_byte(bit_array &arr, u_int8_t val, u_int8_t mask = 0xFF);
+            static void write_byte(bit_array &arr, u_int8_t val, u_int8_t mask = 0xFF);
+            static void write_word(bit_array &arr, u_int16_t val);
+            void begin_read(u_int16_t addr, state_enum n_state);
+            void begin_write(u_int16_t addr, u_int8_t val, state_enum n_state);
+            void compute_assigns();
+            void execute();
         public:
             cpu(const bit_array &p_0_i, const bit_array &p_1_i, const bit_array &p_2_i, const bit_array &p_3_i,
                 const bit_array &mem_val_i, bit &mem_ready, bit &clk, bit &rst, bit &ce,
@@ -135,6 +188,10 @@ namespace sim {
             void eval() override;
             static cpu *instantiate(std::map<std::string, bit *> &wire_db, std::map<std::string, bit_array *> &array_db,
                              nlohmann::json entry);
+
+            void setup_operands();
+
+            void execute_spc();
         };
 
     } // sim
