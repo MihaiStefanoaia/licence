@@ -48,11 +48,13 @@ decoder dcd(dcd_in,dcd_out);
 ssd seg_0(port_0_o,dcd_out[0]);
 ssd seg_1(port_0_o,dcd_out[1]);
 ssd seg_2(port_0_o,dcd_out[2]);
+ssd seg_3(port_0_o,dcd_out[3]);
 
 layout segments[
     (0,0) : seg_0,
     (0,1) : seg_1,
-    (0,2) : seg_2
+    (0,2) : seg_2,
+    (0,3) : seg_3
 ];
 
 layout buttons[

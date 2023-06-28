@@ -28,8 +28,8 @@ add_executable(phiarchsim
         sim/objs/bit.h
         sim/objs/bit_array.cpp
         sim/objs/bit_array.h
-        sim/objs/bootloader.cpp
-        sim/objs/bootloader.h
+        sim/gui/bootloader.cpp
+        sim/gui/bootloader.h
         sim/objs/button.cpp
         sim/objs/button.h
         sim/objs/byte.cpp

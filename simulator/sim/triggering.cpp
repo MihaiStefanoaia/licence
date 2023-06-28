@@ -26,13 +26,6 @@ namespace sim {
             for(auto el : this->on_neg){
                 el->flag_for_eval(this);
             }
-        } else if(on_what == trig_type::BOTH){
-            for(auto el : this->on_neg){
-                el->flag_for_eval(this);
-            }
-            for(auto el : this->on_pos){
-                el->flag_for_eval(this);
-            }
         }
     }
 

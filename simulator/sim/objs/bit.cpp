@@ -16,12 +16,12 @@ namespace sim {
 
         void bit::set_content(bool new_content) {
             if(this->content != new_content){
+                this->content = new_content;
                 if(new_content){
                     this->on_value_change(POSITIVE);
                 } else {
                     this->on_value_change(NEGATIVE);
                 }
-                this->content = new_content;
             }
         }
 

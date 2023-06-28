@@ -218,6 +218,7 @@ namespace sim {
                              nlohmann::json entry);
 
             void setup_operands();
+            void flag_for_eval(sim::triggering *ev) override;
 
             void execute_spc();
             friend class sim::gui::cpu_monitor;

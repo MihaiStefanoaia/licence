@@ -10,7 +10,7 @@ namespace sim {
         u_int8_t cpu::read_byte(bit_array &arr) {
             u_int8_t ret = 0;
             for(int i = 0; i < 8; i++)
-                ret = (ret << 1) | (arr[i].get_content() ? 1 : 0);
+                ret = (ret << 1) | (arr[7 - i].get_content() ? 1 : 0);
             return ret;
         }
 
@@ -42,6 +42,9 @@ namespace sim {
                 max_addr = 255;
                 return;
             }
+
+            if(!CE.get_content() || !CLK.get_content())
+                return;
 
             switch(state){
                 case INIT_GET_MEM_LIMIT:
@@ -76,6 +79,7 @@ namespace sim {
                     }
                     break;
                 case FETCH_0:
+                    rgi = 0;
                     begin_read(rpx,DECODE_0);
                     rpx++;
                     break;
@@ -464,6 +468,11 @@ namespace sim {
                     write_byte(P3_o,rga,rgi_arr[1]);
                     break;
             }
+        }
+
+        void cpu::flag_for_eval(sim::triggering *ev) {
+            if(ev == &CLK && CLK.get_content())
+                flag = ev;
         }
     } // sim
 } // objs

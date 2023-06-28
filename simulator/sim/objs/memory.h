@@ -43,6 +43,7 @@ namespace sim {
             memory(const bit_array &addr_i, const bit_array &data_i, bit &rw, bit &req_enable, bit &clk, const bit_array &data_o,bit &ready);
             static memory* instantiate(std::map<std::string, bit *> &wire_db, std::map<std::string, bit_array *> &array_db,
                                        nlohmann::json entry);
+            void bootload(const std::string& path);
         };
 
     } // sim

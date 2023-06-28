@@ -79,6 +79,8 @@ namespace sim {
             layout_main->addWidget(err_lbl,4,0,Qt::AlignLeft);
             layout_main->addWidget(err_val,4,1,Qt::AlignRight);
 
+            state_val->setFixedSize(150,25);
+
             window->setLayout(layout_main);
         }
 
