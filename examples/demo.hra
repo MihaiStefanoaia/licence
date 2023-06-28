@@ -1,0 +1,13 @@
+_main:
+    mov rga 0
+    mov rgb 1
+    mov rgc rgb
+_loop:
+    adc rga rgb
+    adc rga rgc
+    jc _main //jump if carry
+    mov rgc rgb
+    mov rgb rga
+    wrp 0 0xFF
+    mov rga 0
+    jmp _loop

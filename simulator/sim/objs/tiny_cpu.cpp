@@ -19,6 +19,7 @@ namespace sim {
         }
 
         void tiny_cpu::eval() {
+            flag = nullptr;
             if(RST.get_content()){
                 state=POLL;
                 reg = 0;

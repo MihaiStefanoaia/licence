@@ -1,0 +1,134 @@
+.start _main
+
+.data TRANSLATE_7SD [0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xA,0xB,0xC,0xD,0xE,0xF] align 16
+.data DIGIT_BUFFER[4] align 4
+
+
+_render_digit_7sd:
+    push rmh
+    push rml
+    push rga
+
+    and rga 0x0F
+    mov rmh TRANSLATE_7SD_H
+    mov rml TRANSLATE_7SD_L
+
+    add rml rga
+    wrp 0 0xFF
+    
+    pop rga
+    pop rml
+    pop rmh
+    ret
+
+_render:
+    push rga
+    push rgb
+    push rmh
+    push rml
+
+    mov rmh DIGIT_BUFFER_H
+    mov rml DIGIT_BUFFER_L
+    mov rgb 0
+
+    mov rga @rmx
+    wrp 0 0xFF
+    mov rga rgb
+    wrp 1 0b00000011
+    inc rgb
+    add16 rmx 1
+
+    mov rga @rmx
+    wrp 0 0xFF
+    mov rga rgb
+    wrp 1 0b00000011
+    inc rgb
+    add16 rmx 1
+
+    mov rga @rmx
+    wrp 0 0xFF
+    mov rga rgb
+    wrp 1 0b00000011
+    inc rgb
+    add16 rmx 1
+
+    mov rga @rmx
+    wrp 0 0xFF
+    mov rga rgb
+    wrp 1 0b00000011
+
+
+
+    pop rml
+    pop rmh
+    pop rgb
+    pop rga
+    ret
+
+
+_fibb:
+    push rgb
+    push rgc
+    push rgd
+    inc rga
+    mov rgc 1
+    mov rgd 0
+_compute_fibb_core:
+    mov rgb 0
+    adc rgb rgc
+    adc rgb rgd
+    mov rgd rgc
+    mov rgc rgb
+    dec rga
+    jnz _compute_fibb_core
+    mov rga rgb
+    pop rgd
+    pop rgc
+    pop rgb 
+    ret
+
+
+_compute_digits:
+    push rmh
+    push rml
+    push rgb
+    push rga
+
+    mov rmh DIGIT_BUFFER_H
+    mov rml DIGIT_BUFFER_L
+    add16 rmx 3
+
+_cd_core:
+    mov rgb 10
+    div
+    mov @rmx rgb
+    add16 rmx -1
+    and rga rga
+    jnz _cd_core
+
+    pop rga
+    pop rgb
+    pop rml
+    pop rmh
+    ret
+
+_main:
+    mov rga 0
+_main_loop:
+    mov rgd rga
+    call _fibb
+    call _compute_digits
+    mov rga rgd
+
+    mov rgb 13 // rga %= 13
+    inc rga
+    div
+    mov rga rgb
+
+_render_loop:
+    mov rgc 255
+    call _render
+    dec rgc
+    jnz _render_loop
+
+    jmp _main_loop

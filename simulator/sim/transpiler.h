@@ -18,6 +18,7 @@
 #include "mux2x1.h"
 #include "pwm_generator.h"
 #include "decoder.h"
+#include "translator.h"
 
 // Give Flex the prototype of yylex we want ...
 # define YY_DECL yy::parser::symbol_type yylex (sim::transpiler& trp)
@@ -48,7 +49,7 @@ namespace sim{
         std::set<std::string> positive_driven = {"tiny_cpu", NAME_CPU, NAME_PWM};
         std::set<std::string> negative_driven = {"tiny_mem","button", NAME_SSD, NAME_MEMORY, NAME_SPINBOX_ADC};
         std::set<std::string> always_driven = {};
-        std::set<std::string> reactive_driven = {"and_module","not_module",NAME_MUX_2x1,NAME_DECODER};
+        std::set<std::string> reactive_driven = {"and_module","not_module",NAME_MUX_2x1,NAME_DECODER, NAME_TRANSLATOR};
         std::map<std::string,std::vector<bool>> read_args = { // true is an input (read) argument, false is an output (written) argument
                 {"and_module",{true,true,false}},
                 {"not_module",{true,false}},
@@ -61,7 +62,8 @@ namespace sim{
                 ARGS_DIR_SPINBOX_ADC,
                 ARGS_DIR_MUX_2x1,
                 ARGS_DIR_PWM,
-                ARGS_DIR_DECODER
+                ARGS_DIR_DECODER,
+                ARGS_DIR_TRANSLATOR
         };
 
     private:
@@ -93,13 +95,14 @@ namespace sim{
                              ARGS_SIZES_MEMORY,
                              ARGS_SIZES_MUX_2x1,
                              ARGS_SIZES_PWM,
-                             ARGS_SIZES_DECODER};
+                             ARGS_SIZES_DECODER,
+                             ARGS_SIZES_TRANSLATOR};
             valid_inputs  = {{"button",{1}},
                              ARGS_SIZES_SPINBOX_ADC};
             valid_outputs = {{"led",{1}},
                              ARGS_SIZES_SSD};
             valid_configs = {"sim_frequency_min", "sim_frequency_max", "frame_rate_cap"};
-            monitored = {"tiny_mem","tiny_cpu", NAME_CPU};
+            monitored = {"tiny_mem","tiny_cpu", NAME_CPU, NAME_MEMORY};
         }
     };
 }

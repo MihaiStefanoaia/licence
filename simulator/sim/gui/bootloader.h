@@ -11,6 +11,7 @@
 #include <string>
 #include <QPushButton>
 #include <QLabel>
+#include <QGridLayout>
 
 namespace sim {
     namespace gui {
@@ -19,8 +20,10 @@ namespace sim {
             QPushButton* load;
             QLabel* lbl;
             objs::memory& mem;
+            QGridLayout* layout;
         public:
             bootloader(std::string name, objs::memory& mem);
+            void update() override;
         };
 
     } // sim

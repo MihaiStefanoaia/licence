@@ -27,6 +27,8 @@ namespace sim {
             err_lbl = new QLabel("error:");
 
             rga_val = new QLabel("00");
+            rga_val->setFixedWidth(20);
+            rga_val->setAlignment(Qt::AlignRight);
             rgb_val = new QLabel("00");
             rgc_val = new QLabel("00");
             rgd_val = new QLabel("00");
@@ -40,7 +42,9 @@ namespace sim {
             rgi_val = new QLabel("0000_0000");
 
             state_val = new QLabel();
+            state_val->setAlignment(Qt::AlignRight);
             err_val = new QLabel();
+            err_val->setAlignment(Qt::AlignRight);
 
             layout_8b = new QGridLayout(window);
             layout_8b->addWidget(rga_lbl,0,0,Qt::AlignLeft);
@@ -79,7 +83,7 @@ namespace sim {
             layout_main->addWidget(err_lbl,4,0,Qt::AlignLeft);
             layout_main->addWidget(err_val,4,1,Qt::AlignRight);
 
-            state_val->setFixedSize(150,25);
+            state_val->setFixedWidth(150);
 
             window->setLayout(layout_main);
         }

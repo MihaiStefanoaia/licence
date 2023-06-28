@@ -1,0 +1,33 @@
+
+_poll:
+    push rgd
+    push rgc
+    push rgb
+
+    mov rgd rga //save the current value
+
+    rdp 1 0b00001100
+    and rga rga
+    jz _poll_done //if(!p1[2] && !p1[3])
+
+    mov rgb rga
+
+    and rga 0b00001000
+    jz _skip_inc
+    adc rgd -13
+    jz _skip_inc
+    inc rgd
+    adc rgd 13
+    jmp _poll_done
+_skip_inc:
+    and rgb 0b00000100
+    jz _poll_done
+    and rgd rgd
+    jz _poll_done
+    dec rgd
+_poll_done:
+    mov rga rgd
+    pop rgb
+    pop rgc
+    pop rgd
+    ret

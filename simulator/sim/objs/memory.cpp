@@ -26,15 +26,15 @@ namespace sim{
                 data_out = (data_out << 1) | (data_o[7 - i].get_content() ? 1 : 0);
             }
 
-            std::cout << "mem: \n" <<
-            "\taddr_i = " << addr_in << "\n" <<
-            "\tdata_i = " << (int)data_in << "\n" <<
-            "\tdata_o = " << (int)data_out<< "\n" <<
-            "\tready  = " << ready.get_content() << "\n" <<
-            "\tenable = " << req_enable.get_content() << "\n" <<
-            "\tr/w  = " << (rw.get_content() ? "write" : "read") << "\n";
-
+//            std::cout << "mem: \n" <<
+//            "\taddr_i = " << addr_in << "\n" <<
+//            "\tdata_i = " << (int)data_in << "\n" <<
+//            "\tdata_o = " << (int)data_out<< "\n" <<
+//            "\tready  = " << ready.get_content() << "\n" <<
+//            "\tenable = " << req_enable.get_content() << "\n" <<
+//            "\tr/w  = " << (rw.get_content() ? "write" : "read") << "\n";
             flag = nullptr;
+
             switch(state){
                 case LISTENING: {
                     ready.set_content(false);
@@ -68,7 +68,7 @@ namespace sim{
                 }
                     break;
                 case DONE: {
-                    std::cout << "memory done, waiting for the cpu\n";
+//                    std::cout << "memory done, waiting for the cpu\n";
                     ready.set_content(true);
                     if(!req_enable.get_content())
                         state = LISTENING;

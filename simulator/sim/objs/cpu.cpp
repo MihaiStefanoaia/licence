@@ -21,6 +21,7 @@ namespace sim {
         }
 
         void cpu::eval() {
+            flag = nullptr;
             if(RST.get_content()){
                 state = INIT_GET_MEM_LIMIT;
                 write_byte(P0_o,0);
@@ -68,9 +69,9 @@ namespace sim {
                     state = FETCH_0;
                     break;
                 case WAITING_FOR_MEM:
-                    std::cout << "waiting... " << mem_enable.get_content() << " " << mem_rw.get_content() << "\n";
+//                    std::cout << "waiting... " << mem_enable.get_content() << " " << mem_rw.get_content() << "\n";
                     if(mem_ready.get_content()){
-                        std::cout << "mem ready is set\n";
+//                        std::cout << "mem ready is set\n";
                         if(!mem_rw.get_content())
                             mem_reg = read_byte(mem_data_i);
                         mem_enable.set_content(false);
@@ -214,7 +215,7 @@ namespace sim {
         }
 
         void cpu::write_word(bit_array &arr, u_int16_t val) {
-            for(int i = 0; i < 8; i++)
+            for(int i = 0; i < 16; i++)
                 arr[i].set_content(((val & (1 << i)) != 0));
         }
 
@@ -248,7 +249,11 @@ namespace sim {
             op2_reg = op2_16b == 0b01;
             op2_mem = op2_16b == 0b10;
             op2_imm = op2_16b == 0b11;
-            flag_pass = (rgi_7_4 |  ((rgi_7_4 & 0b1000) ? rgf : ~rgf)) == 0xF;
+            if(rgi_7_4 <= 7){
+                flag_pass = (rgi_7_4 |  rgf) == 0xF;
+            } else {
+                flag_pass = (rgi_7_4 | ~rgf) == 0xF;
+            }
         }
 
         void cpu::execute() {
@@ -427,7 +432,7 @@ namespace sim {
                 case INC:
                 case DEC:
                 case ROT:
-                    operand_1 = operands_reg_binop.at((rgi_7_4 << 2) | 0b01);
+                    operand_1 = operands_reg_binop.at(((u_int16_t)rgi_7_4 << 2) | 0b01);
                     break;
                 case MOV16:
                 case ADD16:

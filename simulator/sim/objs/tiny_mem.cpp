@@ -8,6 +8,7 @@
 namespace sim {
     namespace objs {
         void tiny_mem::eval() {
+            flag = nullptr;
             if(!RST.get_content()){
                 std::cout << "mem: resetting\n";
                 for(int i = 0; i < 16; i++)

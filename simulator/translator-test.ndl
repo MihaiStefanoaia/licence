@@ -1,0 +1,40 @@
+$sim_frequency_min(2);
+$sim_frequency_max(10);
+$frame_rate_cap(60);
+
+wire m_clk;
+
+master_clk m(m_clk);
+
+wire en;
+button enable(en);
+
+array<8> arr(__autogen);
+array<4> inp(__autogen);
+
+ssd out(arr, en);
+
+translator_ssd tr(inp,arr);
+
+button btn_0(inp[0]);
+button btn_1(inp[1]);
+button btn_2(inp[2]);
+button btn_3(inp[3]);
+
+layout buttons[
+    (0,0) : btn_0,
+    (0,1) : btn_1,
+    (0,2) : btn_2,
+    (0,3) : btn_3
+];
+
+layout general[
+    (0,0) : buttons,
+    (1,0) : out,
+    (2,0) : enable
+];
+
+layout main[
+    (0,1) : sim_monitor,
+    (0,0) : general
+];

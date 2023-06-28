@@ -20,6 +20,8 @@
 #include "spinbox_adc.h"
 #include "pwm_generator.h"
 #include "decoder.h"
+#include "translator.h"
+#include "bootloader.h"
 
 
 namespace sim {
@@ -126,11 +128,17 @@ namespace sim {
                 window_db[component["name"]] = mon->get_window();
                 output_db[component["name"]] = mon;
             } else if(component["type"] == NAME_MEMORY){
-                tmp = objs::memory::instantiate(wire_db,array_db,component);
+                auto _tmp = objs::memory::instantiate(wire_db,array_db,component);
+                tmp = _tmp;
+                auto mon = new gui::bootloader(component["name"],*_tmp);
+                window_db[component["name"]] = mon->get_window();
+                input_db[component["name"]] = mon;
             } else if(component["type"] == NAME_PWM){
                 tmp = objs::pwm_generator::instantiate(wire_db,array_db,component);
             } else if(component["type"] == NAME_DECODER){
                 tmp = new objs::decoder(*array_db[component["args"][0]],*array_db[component["args"][1]]);
+            } else if(component["type"] == NAME_TRANSLATOR){
+                tmp = new objs::translator(*array_db[component["args"][0]],*array_db[component["args"][1]]);
             } else {
                 throw std::runtime_error("invalid type \"" + std::string(component["type"]) + "\". how did you manage to pass all the fail safes?");
             }
