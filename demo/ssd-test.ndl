@@ -1,0 +1,27 @@
+$sim_frequency_min(2);
+$sim_frequency_max(10);
+$frame_rate_cap(60);
+
+wire m_clk;
+
+master_clk m(m_clk);
+
+wire en;
+button enable(en);
+
+array<8> arr(__autogen);
+
+ssd out(arr, en);
+
+spinbox_adc sbp(arr);
+
+layout general[
+    (0,0) : sbp,
+    (1,0) : out,
+    (2,0) : enable
+];
+
+layout main[
+    (0,1) : sim_monitor,
+    (0,0) : general
+];

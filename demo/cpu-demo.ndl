@@ -1,0 +1,76 @@
+$sim_frequency_min(2);
+$sim_frequency_max(10);
+$frame_rate_cap(60);
+
+wire m_clk;
+wire rst;
+wire enable;
+
+button btn_rst(rst);
+button btn_en(enable);
+
+array<8>  empty_byte(nil);
+
+array<16> mem_addr(__autogen);
+array<8> data_mosi(__autogen);
+array<8> data_miso(__autogen);
+
+array<8> port_0_o(__autogen);
+
+wire mem_active;
+wire mem_rw;
+wire mem_ready;
+
+
+master_clk m(m_clk);
+
+cpu proc(empty_byte,empty_byte,empty_byte,empty_byte,
+        data_miso, mem_ready, m_clk,rst,enable,
+        port_0_o,empty_byte,empty_byte,empty_byte,
+        mem_addr,data_mosi,mem_active,mem_rw);
+
+memory mem( mem_addr, data_mosi, mem_rw, mem_active, m_clk,
+            data_miso, mem_ready);
+
+
+led led_0(port_0_o[0]);
+led led_1(port_0_o[1]);
+led led_2(port_0_o[2]);
+led led_3(port_0_o[3]);
+led led_4(port_0_o[4]);
+led led_5(port_0_o[5]);
+led led_6(port_0_o[6]);
+led led_7(port_0_o[7]);
+
+layout leds[
+    (0,0) : led_0,
+    (0,1) : led_1,
+    (0,2) : led_2,
+    (0,3) : led_3,
+    (0,4) : led_4,
+    (0,5) : led_5,
+    (0,6) : led_6,
+    (0,7) : led_7
+];
+
+layout buttons[
+    (0,0) : btn_rst,
+    (0,1) : btn_en
+];
+
+layout io_elements[
+    (0,0) : leds,
+    (1,0) : buttons
+];
+
+layout cpu_mem[
+    (0,0) : proc,
+    (1,0) : mem
+];
+
+
+layout main[
+    (0,0) : cpu_mem,
+    (0,1) : io_elements,
+    (0,2) : sim_monitor
+];

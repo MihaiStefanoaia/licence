@@ -1,0 +1,66 @@
+$sim_frequency_min(2);
+$sim_frequency_max(10);
+$frame_rate_cap(60);
+
+wire m_clk;
+wire rst;
+wire interr;
+wire active;
+wire rw;
+wire ready;
+wire rst_mem;
+
+
+master_clk m(m_clk);
+
+array<4> data_mosi(__autogen);
+array<4> data_miso(__autogen);
+array<4> addr(__autogen);
+array<4> port_i(__autogen);
+array<4> port_o(__autogen);
+
+tiny_cpu processor(addr,data_miso,data_mosi,active,rw,ready,port_i,port_o,interr,m_clk,rst);
+not_module rst_neg(rst,rst_mem);
+tiny_mem mem(addr,data_mosi,data_miso,active,rw,ready,m_clk,rst_mem);
+
+led led_0(port_o[0]);
+led led_1(port_o[1]);
+led led_2(port_o[2]);
+led led_3(port_o[3]);
+
+button btn_0(port_i[0]);
+button btn_1(port_i[1]);
+button btn_2(port_i[2]);
+button btn_3(port_i[3]);
+
+button int_btn(interr);
+button rst_btn(rst);
+
+array<8> ssd_test(__autogen);
+wire ssd_en;
+
+ssd test_disp(ssd_test,ssd_en);
+
+
+layout leds[
+    (0,0) : led_0,
+    (1,0) : led_1,
+    (2,0) : led_2,
+    (3,0) : led_3
+];
+
+layout btns[
+
+    (0,0) : btn_0,
+    (0,1) : btn_1,
+    (1,0) : btn_2,
+    (1,1) : btn_3,
+    (0,2) : int_btn,
+    (1,2) : rst_btn
+];
+
+layout win[
+    (0,0) : leds,
+    (0,1) : btns,
+    (0,2) : sim_monitor
+];

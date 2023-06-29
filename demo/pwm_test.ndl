@@ -1,0 +1,26 @@
+$sim_frequency_min(1000);
+$sim_frequency_max(2000);
+$frame_rate_cap(60);
+
+wire m_clk;
+
+master_clk m(m_clk);
+
+wire o;
+array<8> arr(__autogen);
+
+spinbox_adc sbp(arr);
+
+pwm_generator pwm(arr,o,m_clk);
+
+led out(o);
+
+layout general[
+    (0,0) : sbp,
+    (1,0) : out
+];
+
+layout main[
+    (0,0) : sim_monitor,
+    (0,1) : general
+];
